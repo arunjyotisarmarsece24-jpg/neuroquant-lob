@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroQuant-LOB | Digital Neuromorphic Spiking Engine</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="brand">
+      <h1>🧠 NeuroQuant-LOB</h1>
+      <span class="badge">DIGITAL NEUROMORPHIC CORE</span>
+      <span class="badge" id="conn-badge" style="background: rgba(0,255,135,0.1); color: var(--accent-green); border-color: rgba(0,255,135,0.3);">● LIVE SSE</span>
+    </div>
+    
+    <div class="header-stats">
+      <div class="stat-item">
+        <span class="stat-label">Mid Price</span>
+        <span class="stat-val" id="hdr-mid">$18,500.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Spread</span>
+        <span class="stat-val" id="hdr-spread">$0.25</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Order Flow Imbalance</span>
+        <span class="stat-val" id="hdr-ofi">0.0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Portfolio PnL</span>
+        <span class="stat-val positive" id="hdr-pnl">+$0.00</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Inventory</span>
+        <span class="stat-val" id="hdr-inv">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Multi-Column Workspace -->
+  <div class="dashboard-grid">
+    
+    <!-- Left Column: Limit Order Book (LOB) Depth Ladder -->
+    <div class="card">
+      <div class="card-header">
+        <span>📊 L2 Order Book Depth</span>
+        <span class="badge" id="last-event-tag">STEADY</span>
+      </div>
+      <div class="card-body">
+        <div class="ladder-container" id="lob-ladder">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Column: Spiking Raster Plot & Oscilloscope -->
+    <div class="center-column">
+      
+      <!-- Spiking Raster Plot -->
+      <div class="card" style="flex: 1.2;">
+        <div class="card-header">
+          <span>⚡ Asynchronous Spiking Raster Plot (N=100 Neurons)</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Sensory(0-31) | Hidden Reservoir(32-95) | Motor(96-99)</span>
+        </div>
+        <div class="card-body" style="padding: 4px;">
+          <canvas id="rasterCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Membrane Potential Oscilloscope -->
+      <div class="card" style="flex: 1;">
+        <div class="card-header">
+          <span>📈 Membrane Potential Oscilloscope (V_m Dynamics)</span>
+          <span style="font-size: 0.75rem; color: var(--accent-yellow);">V_thresh: -55mV | V_rest: -70mV | V_reset: -75mV</span>
+        </div>
+        <div class="card-body" style="padding: 4px;">
+          <canvas id="voltageCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Action Potential Readout -->
+      <div class="signals-grid">
+        <div class="signal-box">
+          <div class="stat-label">Quote Skew</div>
+          <div class="signal-val" id="sig-skew">0.000</div>
+        </div>
+        <div class="signal-box">
+          <div class="stat-label">Institutional Toxicity Alert</div>
+          <div class="signal-val" id="sig-tox">0.0%</div>
+        </div>
+        <div class="signal-box">
+          <div class="stat-label">Volatility Pulse</div>
+          <div class="signal-val" id="sig-vol">0.00</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Quantitative Execution & Interactive Controls -->
+    <div class="right-column">
+      
+      <!-- Quantitative Execution Status -->
+      <div class="card">
+        <div class="card-header">
+          <span>💼 Quantitative Execution</span>
+          <span class="badge" id="quote-status-badge">PASSIVE MM</span>
+        </div>
+        <div class="card-body">
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Quoting Mode:</span>
+            <span id="exec-quote-active" style="font-weight: bold; color: var(--accent-green);">ACTIVE</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Our Bid Quote:</span>
+            <span id="exec-bid" style="font-family: var(--font-mono);">$0.00</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Our Ask Quote:</span>
+            <span id="exec-ask" style="font-family: var(--font-mono);">$0.00</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Mark-to-Market PnL:</span>
+            <span id="exec-pnl" class="positive" style="font-family: var(--font-mono); font-weight: bold;">$0.00</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Net Inventory:</span>
+            <span id="exec-inv" style="font-family: var(--font-mono);">0 / ±50</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Cash Balance:</span>
+            <span id="exec-cash" style="font-family: var(--font-mono);">$1,000,000.00</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Total Trades:</span>
+            <span id="exec-trades" style="font-family: var(--font-mono);">0</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Sweeps Avoided (Neuromorphic):</span>
+            <span id="exec-avoided" class="positive" style="font-family: var(--font-mono); font-weight: bold;">0</span>
+          </div>
+          <div class="metric-row">
+            <span style="color: var(--text-muted);">Toxic Hits Taken:</span>
+            <span id="exec-hits" class="negative" style="font-family: var(--font-mono); font-weight: bold;">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neuromorphic Parameters & Simulation Controls -->
+      <div class="card">
+        <div class="card-header">
+          <span>⚙️ Hardware-Free Neuromorphic Controls</span>
+        </div>
+        <div class="card-body">
+          <div class="control-group">
+            <label>
+              <span>Membrane Constant (τ_m)</span>
+              <span id="lbl-taum">20.0 ms</span>
+            </label>
+            <input type="range" id="slider-taum" min="5" max="50" step="1" value="20">
+          </div>
+
+          <div class="control-group">
+            <label>
+              <span>Simulation Speed (Hz)</span>
+              <span id="lbl-speed">25 Hz</span>
+            </label>
+            <input type="range" id="slider-speed" min="5" max="60" step="1" value="25">
+          </div>
+
+          <div class="btn-group">
+            <button id="btn-pause" class="primary">Pause / Resume</button>
+            <button id="btn-reset">Reset</button>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">Inject Institutional Flow:</div>
+            <div class="btn-group">
+              <button id="btn-sweep-buy" class="danger">⚡ Sweep Buy</button>
+              <button id="btn-sweep-sell" class="danger">⚡ Sweep Sell</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
