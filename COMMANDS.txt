@@ -18,7 +18,14 @@ python run_app.py
 -> Press Ctrl + C in the terminal to stop the server.
 
 
-3. LAUNCH ZERO-OVERHEAD HEADLESS TERMINAL DASHBOARD (CLI):
+3. STREAM REAL-TIME LIVE CRYPTO MARKET TICKS (Zero API Keys):
+------------------------------------------------------------
+python run_live_feed.py
+-> Streams live Bitcoin (BTC/USDT) L2 depth and executed trades from Binance.
+-> Demonstrates real-world asynchronous spikes firing from live financial data.
+
+
+4. LAUNCH ZERO-OVERHEAD HEADLESS TERMINAL DASHBOARD (CLI):
 ---------------------------------------------------------
 python run_cli.py
 -> Renders a real-time 25 FPS ASCII trading desk directly in your terminal.
