@@ -63,26 +63,34 @@ def run_audit(num_ticks: int = 2000):
             my_bid = port.get("my_bid")
             my_ask = port.get("my_ask")
             
-            # Track FIFO queues
+            # Track FIFO queues with asymmetric quote withdrawal safety
             if port.get("quote_active"):
-                if active_bid_queue is None or active_bid_queue.price != my_bid:
-                    vol_ahead = sum([v for p, v in mkt["bids"] if p >= my_bid])
-                    active_bid_queue = FIFOQueueTracker(my_bid, 'BUY', vol_ahead)
+                # Handle Bid Queue
+                if my_bid is not None:
+                    if active_bid_queue is None or active_bid_queue.price != my_bid:
+                        vol_ahead = sum([v for p, v in mkt["bids"] if p >= my_bid])
+                        active_bid_queue = FIFOQueueTracker(my_bid, 'BUY', vol_ahead)
+                else:
+                    active_bid_queue = None
                     
-                if active_ask_queue is None or active_ask_queue.price != my_ask:
-                    vol_ahead = sum([v for p, v in mkt["asks"] if p <= my_ask])
-                    active_ask_queue = FIFOQueueTracker(my_ask, 'SELL', vol_ahead)
+                # Handle Ask Queue
+                if my_ask is not None:
+                    if active_ask_queue is None or active_ask_queue.price != my_ask:
+                        vol_ahead = sum([v for p, v in mkt["asks"] if p <= my_ask])
+                        active_ask_queue = FIFOQueueTracker(my_ask, 'SELL', vol_ahead)
+                else:
+                    active_ask_queue = None
             else:
                 active_bid_queue = None
                 active_ask_queue = None
                 
             # Simulate real fill against FIFO queue
-            if last_trade_side == 'SELL' and active_bid_queue and last_trade_price <= my_bid:
+            if last_trade_side == 'SELL' and my_bid is not None and active_bid_queue and last_trade_price <= my_bid:
                 filled_qty = active_bid_queue.on_trade_at_level(last_trade_size)
                 if filled_qty > 0:
                     auditor.record_fill(curr_time_ms, 'BUY', my_bid, filled_qty, curr_mid)
                     
-            elif last_trade_side == 'BUY' and active_ask_queue and last_trade_price >= my_ask:
+            elif last_trade_side == 'BUY' and my_ask is not None and active_ask_queue and last_trade_price >= my_ask:
                 filled_qty = active_ask_queue.on_trade_at_level(last_trade_size)
                 if filled_qty > 0:
                     auditor.record_fill(curr_time_ms, 'SELL', my_ask, filled_qty, curr_mid)

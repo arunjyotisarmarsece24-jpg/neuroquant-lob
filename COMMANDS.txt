@@ -1,0 +1,51 @@
+================================================================================
+NEUROQUANT-LOB: ESSENTIAL COMMANDS CHEAT SHEET
+================================================================================
+Conversation ID: adcea3f3-7a41-45c0-a7cd-b11cd00a1a84
+Directory: C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project
+================================================================================
+
+1. NAVIGATE TO PROJECT DIRECTORY (PowerShell / Command Prompt):
+--------------------------------------------------------------
+cd "C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project"
+
+
+2. LAUNCH INTERACTIVE WEB APPLICATION (Visual Dashboard):
+--------------------------------------------------------
+python run_app.py
+-> Automatically opens: http://127.0.0.1:5000 in your web browser.
+-> Features: L2 Depth Ladder, Spiking Raster Plot, V_m Oscilloscope, Sweep Injections.
+-> Press Ctrl + C in the terminal to stop the server.
+
+
+3. LAUNCH ZERO-OVERHEAD HEADLESS TERMINAL DASHBOARD (CLI):
+---------------------------------------------------------
+python run_cli.py
+-> Renders a real-time 25 FPS ASCII trading desk directly in your terminal.
+-> Press Ctrl + C to exit.
+
+
+4. RUN INSTITUTIONAL VETERAN AUDIT BENCHMARK:
+---------------------------------------------
+python benchmarks/run_veteran_audit.py
+-> Simulates 1,500 continuous ticks with FIFO queue depletion.
+-> Outputs Post-Trade Markout Curve (0.1ms to 100ms) and Deflated Sharpe Ratio (DSR).
+
+
+5. RUN AUTOMATED TEST SUITE:
+----------------------------
+python -m unittest discover tests
+-> Runs all 12 unit tests verifying LIF decay, action potentials, R-STDP, and inventory risk.
+
+
+6. GIT COMMANDS TO PUSH FUTURE UPDATES TO GITHUB:
+-------------------------------------------------
+git add .
+git commit -m "feat: description of your updates"
+git push origin main
+
+
+7. GITHUB REPOSITORY LINK:
+--------------------------
+https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob
+================================================================================
