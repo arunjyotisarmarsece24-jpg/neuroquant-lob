@@ -1,136 +1,136 @@
 {
-  "timestamp": "2026-10-18 18:54:46",
-  "hardware_cycles_sample": 3831060067330,
+  "timestamp": "2026-10-18 21:09:04",
+  "hardware_cycles_sample": 24873639577829,
   "lif_scaling": {
     "32_neurons": {
       "python": {
         "iterations": 25000,
-        "avg_ns": 69197.28,
-        "p50_ns": 69500.0,
-        "p90_ns": 74900.0,
-        "p99_ns": 98700.0,
-        "p999_ns": 132300.0,
-        "min_ns": 49200.0,
-        "max_ns": 811600.0,
-        "steps_per_sec": 14451.435085309711
+        "avg_ns": 101207.7,
+        "p50_ns": 100500.0,
+        "p90_ns": 132700.0,
+        "p99_ns": 234900.0,
+        "p999_ns": 383300.0,
+        "min_ns": 32000.0,
+        "max_ns": 703500.0,
+        "steps_per_sec": 9880.671134706154
       },
       "cpp": {
         "total_steps": 50000,
-        "total_cycles": 23529538,
-        "min_cycles": 320,
-        "max_cycles": 60932,
-        "p50_cycles": 448.0,
-        "p90_cycles": 508.0,
-        "p99_cycles": 1054.0,
-        "p999_cycles": 1730.0,
-        "avg_nanoseconds": 230.666,
-        "steps_per_second": 4335272.645296663
+        "total_cycles": 23693638,
+        "min_cycles": 452,
+        "max_cycles": 122916,
+        "p50_cycles": 462.0,
+        "p90_cycles": 476.0,
+        "p99_cycles": 504.0,
+        "p999_cycles": 592.0,
+        "avg_nanoseconds": 237.102,
+        "steps_per_second": 4217594.11561269
       },
-      "speedup": 299.99
+      "speedup": 426.85
     },
     "64_neurons": {
       "python": {
         "iterations": 25000,
-        "avg_ns": 75924.524,
-        "p50_ns": 75100.0,
-        "p90_ns": 81600.0,
-        "p99_ns": 107500.0,
-        "p999_ns": 230800.0,
-        "min_ns": 35600.0,
-        "max_ns": 908200.0,
-        "steps_per_sec": 13170.974901337544
+        "avg_ns": 113224.256,
+        "p50_ns": 124200.0,
+        "p90_ns": 140600.0,
+        "p99_ns": 242100.0,
+        "p999_ns": 398600.0,
+        "min_ns": 34800.0,
+        "max_ns": 990100.0,
+        "steps_per_sec": 8832.029772843021
       },
       "cpp": {
         "total_steps": 50000,
-        "total_cycles": 38027984,
-        "min_cycles": 530,
-        "max_cycles": 56768,
-        "p50_cycles": 726.0,
-        "p90_cycles": 828.0,
-        "p99_cycles": 1394.0,
-        "p999_cycles": 2672.0,
-        "avg_nanoseconds": 343.4,
-        "steps_per_second": 2912055.9114735
+        "total_cycles": 39536160,
+        "min_cycles": 754,
+        "max_cycles": 136054,
+        "p50_cycles": 772.0,
+        "p90_cycles": 784.0,
+        "p99_cycles": 808.0,
+        "p999_cycles": 998.0,
+        "avg_nanoseconds": 358.464,
+        "steps_per_second": 2789680.4142117477
       },
-      "speedup": 221.1
+      "speedup": 315.86
     },
     "128_neurons": {
       "python": {
         "iterations": 25000,
-        "avg_ns": 82329.868,
-        "p50_ns": 82300.0,
-        "p90_ns": 91600.0,
-        "p99_ns": 115700.0,
-        "p999_ns": 157800.0,
-        "min_ns": 54600.0,
-        "max_ns": 1069600.0,
-        "steps_per_sec": 12146.260212636318
+        "avg_ns": 111563.352,
+        "p50_ns": 94800.0,
+        "p90_ns": 148300.0,
+        "p99_ns": 254400.0,
+        "p999_ns": 417900.0,
+        "min_ns": 35300.0,
+        "max_ns": 2283600.0,
+        "steps_per_sec": 8963.516980020464
       },
       "cpp": {
         "total_steps": 50000,
-        "total_cycles": 67366280,
-        "min_cycles": 930,
-        "max_cycles": 82768,
-        "p50_cycles": 1274.0,
-        "p90_cycles": 1444.0,
-        "p99_cycles": 2626.0,
-        "p999_cycles": 4626.0,
-        "avg_nanoseconds": 567.388,
-        "steps_per_second": 1762462.37142837
+        "total_cycles": 72476116,
+        "min_cycles": 1368,
+        "max_cycles": 448220,
+        "p50_cycles": 1406.0,
+        "p90_cycles": 1426.0,
+        "p99_cycles": 1468.0,
+        "p999_cycles": 1872.0,
+        "avg_nanoseconds": 609.156,
+        "steps_per_second": 1641615.6124211205
       },
-      "speedup": 145.1
+      "speedup": 183.14
     },
     "256_neurons": {
       "python": {
         "iterations": 25000,
-        "avg_ns": 102998.092,
-        "p50_ns": 101000.0,
-        "p90_ns": 118100.0,
-        "p99_ns": 143400.0,
-        "p999_ns": 277100.0,
-        "min_ns": 60800.0,
-        "max_ns": 779800.0,
-        "steps_per_sec": 9708.917714708734
+        "avg_ns": 137124.072,
+        "p50_ns": 138500.0,
+        "p90_ns": 177400.0,
+        "p99_ns": 289300.0,
+        "p999_ns": 479800.0,
+        "min_ns": 39900.0,
+        "max_ns": 3398600.0,
+        "steps_per_sec": 7292.665579534423
       },
       "cpp": {
         "total_steps": 50000,
-        "total_cycles": 126123550,
-        "min_cycles": 1580,
-        "max_cycles": 871698,
-        "p50_cycles": 2358.0,
-        "p90_cycles": 2608.0,
-        "p99_cycles": 5590.0,
-        "p999_cycles": 41762.0,
-        "avg_nanoseconds": 1018.928,
-        "steps_per_second": 981423.6138372878
+        "total_cycles": 132712733,
+        "min_cycles": 1760,
+        "max_cycles": 310828,
+        "p50_cycles": 2630.0,
+        "p90_cycles": 2674.0,
+        "p99_cycles": 3794.0,
+        "p999_cycles": 7732.0,
+        "avg_nanoseconds": 1079.094,
+        "steps_per_second": 926703.3270502848
       },
-      "speedup": 101.08
+      "speedup": 127.07
     }
   },
   "rsnn_comparison": {
     "python": {
       "iterations": 25000,
-      "avg_ns": 299439.672,
-      "p50_ns": 291400.0,
-      "p90_ns": 328500.0,
-      "p99_ns": 376200.0,
-      "p999_ns": 662500.0,
-      "min_ns": 163900.0,
-      "max_ns": 3088000.0,
-      "steps_per_sec": 3339.570850184474
+      "avg_ns": 456174.036,
+      "p50_ns": 501500.0,
+      "p90_ns": 630400.0,
+      "p99_ns": 770900.0,
+      "p999_ns": 952400.0,
+      "min_ns": 164100.0,
+      "max_ns": 1294800.0,
+      "steps_per_sec": 2192.145806386929
     },
     "cpp": {
       "total_steps": 50000,
-      "total_cycles": 141017752,
-      "min_cycles": 1218,
-      "max_cycles": 112588,
-      "p50_cycles": 2686.0,
-      "p90_cycles": 3568.0,
-      "p99_cycles": 6052.0,
-      "p999_cycles": 9826.0,
-      "avg_nanoseconds": 1139.666,
-      "steps_per_second": 877450.0599298391
+      "total_cycles": 141913551,
+      "min_cycles": 1338,
+      "max_cycles": 218803,
+      "p50_cycles": 2712.0,
+      "p90_cycles": 3616.0,
+      "p99_cycles": 4418.0,
+      "p999_cycles": 6714.0,
+      "avg_nanoseconds": 1153.322,
+      "steps_per_second": 867060.5433695014
     },
-    "speedup": 262.74
+    "speedup": 395.53
   }
 }

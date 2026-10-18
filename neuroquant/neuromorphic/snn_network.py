@@ -71,6 +71,17 @@ class DigitalNeuromorphicCore:
         }
         self.max_raster_length = 150
 
+    def set_weights(self, w_in: np.ndarray, w_rec: np.ndarray, w_motor: np.ndarray):
+        """Directly sets synaptic weight matrices."""
+        self.w_in_hidden = np.ascontiguousarray(w_in, dtype=np.float32)
+        self.w_hidden_hidden = np.ascontiguousarray(w_rec, dtype=np.float32)
+        self.plasticity_motor.weights = np.ascontiguousarray(w_motor, dtype=np.float32)
+
+    def load_weights(self, npz_path: str):
+        """Loads offline BPTT-trained weights from a serialized .npz archive."""
+        data = np.load(npz_path)
+        self.set_weights(data["w_in"], data["w_rec"], data["w_motor"])
+
     def step(self, sensory_spikes: np.ndarray, reward: float = 0.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         Execute one discrete neuromorphic time-step.

@@ -5,9 +5,10 @@ Unified coordinator linking the Hawkes Market Feed, Limit Order Book,
 LOB Spike Encoder, Digital Neuromorphic RSNN, and Execution Engine.
 """
 
+import os
 import time
 import numpy as np
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
 from config import CONFIG_NEURO, CONFIG_MARKET, CONFIG_EXEC, NeuromorphicConfig, MarketConfig, ExecutionConfig
 from neuroquant.neuromorphic import DigitalNeuromorphicCore, LOBSpikeEncoder
 from neuroquant.market import OrderBook, HawkesMarketFeed, ExecutionEngine
@@ -19,7 +20,8 @@ class NeuromorphicAlphaSystem:
     def __init__(self, 
                  neuro_cfg: NeuromorphicConfig = CONFIG_NEURO,
                  mkt_cfg: MarketConfig = CONFIG_MARKET,
-                 exec_cfg: ExecutionConfig = CONFIG_EXEC):
+                 exec_cfg: ExecutionConfig = CONFIG_EXEC,
+                 weights_path: Optional[str] = "weights/rsnn_optimal_weights.npz"):
         self.neuro_cfg = neuro_cfg
         self.mkt_cfg = mkt_cfg
         self.exec_cfg = exec_cfg
@@ -29,6 +31,8 @@ class NeuromorphicAlphaSystem:
         self.feed = HawkesMarketFeed(self.book, mkt_cfg)
         self.encoder = LOBSpikeEncoder(mkt_cfg, neuro_cfg)
         self.brain = DigitalNeuromorphicCore(neuro_cfg)
+        if weights_path and os.path.exists(weights_path):
+            self.brain.load_weights(weights_path)
         self.executor = ExecutionEngine(self.book, exec_cfg, mkt_cfg)
         
         self.sim_step_count = 0

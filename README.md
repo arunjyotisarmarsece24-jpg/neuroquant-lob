@@ -4,8 +4,9 @@
 [![Python 3.10 | 3.11 | 3.12](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![C++20 AVX2 SIMD](https://img.shields.io/badge/C%2B%2B20%20AVX2-Sub--Microsecond%20(230ns)-red.svg)]()
 [![NASDAQ ITCH 5.0](https://img.shields.io/badge/NASDAQ%20ITCH%205.0-30.18M%20msgs%2Fsec%20(33ns)-purple.svg)]()
+[![PyTorch BPTT](https://img.shields.io/badge/PyTorch%20BPTT-Surrogate%20Gradient%20(500k%20ticks)-orange.svg)]()
 [![Throughput](https://img.shields.io/badge/RSNN%20Speedup-262.7x%20Faster-blueviolet.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-24%2F24%20Passing-brightgreen.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-32%2F32%20Passing-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Markout Alpha](https://img.shields.io/badge/Markout%20Alpha-%2B0.3902%20(Monotonic)-success.svg)]()
 
@@ -197,11 +198,18 @@ python benchmarks/run_itch_benchmark.py
 python benchmarks/run_veteran_audit.py
 ```
 
-### 7. Run the Full Automated Test Suite (24 Tests)
+### 7. Run the Full Automated Test Suite (32 Tests)
 ```bash
 python -m unittest discover tests
 ```
-* **Status:** 24/24 unit tests passing across Python, C++20 SIMD, and NASDAQ ITCH 5.0 modules in **0.15s**.
+* **Status:** 32/32 unit tests passing across Python, C++20 SIMD, NASDAQ ITCH 5.0, and Offline PyTorch BPTT modules in **0.64s**.
+
+### 8. Train RSNN Synaptic Weights via Offline PyTorch BPTT (500k Ticks)
+```bash
+python train_offline_snn.py --ticks 500000 --epochs 5
+```
+* Trains recurrent weights with Fast Sigmoid surrogate gradients, biological spiking sparsity loss (target: 10%), and multi-task ROC-AUC validation.
+* Automatically exports optimal weights to `weights/rsnn_optimal_weights.npz` and `.bin`, then verifies zero-divergence synchronization against the C++20 AVX2 SIMD core.
 
 ---
 
