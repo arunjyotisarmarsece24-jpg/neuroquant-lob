@@ -161,9 +161,12 @@ class TorchRSNN(nn.Module):
                      v_hidden: torch.Tensor,
                      s_hidden: torch.Tensor,
                      v_motor: torch.Tensor,
-                     s_motor: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+                     s_motor: torch.Tensor,
+                     refr_hidden: Optional[torch.Tensor] = None,
+                     refr_motor: Optional[torch.Tensor] = None
+                    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
-        Advance RSNN by one discrete time-step dt.
+        Advance RSNN by one discrete time-step dt with exact refractory clamping.
         
         Parameters:
             x_sensory_spikes: [B, num_sensory] binary spike float tensor
@@ -171,10 +174,17 @@ class TorchRSNN(nn.Module):
             s_hidden: [B, num_hidden] previous hidden spike vector
             v_motor: [B, num_motor] previous motor membrane potential
             s_motor: [B, num_motor] previous motor spike vector
+            refr_hidden: [B, num_hidden] remaining hidden refractory steps
+            refr_motor: [B, num_motor] remaining motor refractory steps
             
         Returns:
-            v_hidden_new, s_hidden_new, v_motor_new, s_motor_new
+            v_hidden_new, s_hidden_new, v_motor_new, s_motor_new, refr_hidden_new, refr_motor_new
         """
+        if refr_hidden is None:
+            refr_hidden = torch.zeros_like(v_hidden)
+        if refr_motor is None:
+            refr_motor = torch.zeros_like(v_motor)
+
         w_rec_eff = self.get_effective_w_rec()
 
         # 1. Sensory to Hidden Current
@@ -183,33 +193,46 @@ class TorchRSNN(nn.Module):
         i_from_rec = torch.matmul(s_hidden, w_rec_eff) * self.scale_rec
         i_hidden = i_from_sensory + i_from_rec
 
-        # 2. Hidden LIF Integration
-        # Reset voltage of neurons that spiked in the previous step
-        v_h_prev = v_hidden * (1.0 - s_hidden) + self.v_reset * s_hidden
-        v_h_new = v_h_prev * self.decay + self.v_rest * (1.0 - self.decay) + i_hidden
-        s_h_new = surrogate_spike(v_h_new, self.v_thresh, self.surrogate_type, self.surrogate_beta)
+        # 2. Hidden LIF Integration with Exact Refractory Clamping
+        is_refr_h = refr_hidden > 0
+        refr_h_dec = torch.clamp(refr_hidden - 1, min=0)
+        v_h_int = v_hidden * self.decay + self.v_rest * (1.0 - self.decay) + i_hidden
+        v_h_sub = torch.where(is_refr_h, torch.full_like(v_h_int, self.v_reset), v_h_int)
+
+        s_h_raw = surrogate_spike(v_h_sub, self.v_thresh, self.surrogate_type, self.surrogate_beta)
+        s_h_new = s_h_raw * (~is_refr_h).float()
+
+        v_h_new = torch.where(s_h_new.bool(), torch.full_like(v_h_sub, self.v_reset), v_h_sub)
+        refr_h_new = torch.where(s_h_new.bool(), torch.full_like(refr_h_dec, self.refractory_steps), refr_h_dec)
 
         # 3. Motor Layer Current
         # In C++: I_motor = 15.0 * (S_hidden @ W_motor)
         i_motor = torch.matmul(s_h_new, self.w_motor) * self.scale_motor
 
-        # 4. Motor LIF Integration
-        v_m_prev = v_motor * (1.0 - s_motor) + self.v_reset * s_motor
-        v_m_new = v_m_prev * self.decay + self.v_rest * (1.0 - self.decay) + i_motor
-        s_m_new = surrogate_spike(v_m_new, self.v_thresh, self.surrogate_type, self.surrogate_beta)
+        # 4. Motor LIF Integration with Exact Refractory Clamping
+        is_refr_m = refr_motor > 0
+        refr_m_dec = torch.clamp(refr_motor - 1, min=0)
+        v_m_int = v_motor * self.decay + self.v_rest * (1.0 - self.decay) + i_motor
+        v_m_sub = torch.where(is_refr_m, torch.full_like(v_m_int, self.v_reset), v_m_int)
 
-        return v_h_new, s_h_new, v_m_new, s_m_new
+        s_m_raw = surrogate_spike(v_m_sub, self.v_thresh, self.surrogate_type, self.surrogate_beta)
+        s_m_new = s_m_raw * (~is_refr_m).float()
+
+        v_m_new = torch.where(s_m_new.bool(), torch.full_like(v_m_sub, self.v_reset), v_m_sub)
+        refr_m_new = torch.where(s_m_new.bool(), torch.full_like(refr_m_dec, self.refractory_steps), refr_m_dec)
+
+        return v_h_new, s_h_new, v_m_new, s_m_new, refr_h_new, refr_m_new
 
     def forward(self,
                 x_seq: torch.Tensor,
-                init_state: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]] = None
+                init_state: Optional[Tuple] = None
                ) -> Dict[str, Any]:
         """
         Execute Truncated BPTT forward sequence over T ticks.
         
         Parameters:
             x_seq: [Batch, T, num_sensory] FloatTensor of sensory spikes
-            init_state: Optional initial (v_h, s_h, v_m, s_m) for TBPTT state chaining
+            init_state: Optional initial (v_h, s_h, v_m, s_m, refr_h, refr_m) for TBPTT state chaining
             
         Returns:
             Dict containing:
@@ -218,7 +241,7 @@ class TorchRSNN(nn.Module):
               - 'hidden_spikes': [Batch, T, num_hidden] full hidden spike raster
               - 'motor_spikes': [Batch, T, num_motor] full motor spike raster
               - 'motor_voltages': [Batch, T, num_motor] motor voltage traces
-              - 'final_state': tuple (v_h, s_h, v_m, s_m) for next TBPTT window
+              - 'final_state': tuple for next TBPTT window
               - 'mean_hidden_sparsity': scalar mean firing rate of reservoir
         """
         batch_size, seq_len, _ = x_seq.shape
@@ -226,12 +249,19 @@ class TorchRSNN(nn.Module):
 
         # Initialize membrane potentials and spike histories
         if init_state is not None:
-            v_h, s_h, v_m, s_m = init_state
+            if len(init_state) == 6:
+                v_h, s_h, v_m, s_m, refr_h, refr_m = init_state
+            else:
+                v_h, s_h, v_m, s_m = init_state
+                refr_h = torch.zeros((batch_size, self.num_hidden), device=device)
+                refr_m = torch.zeros((batch_size, self.num_motor), device=device)
         else:
             v_h = torch.full((batch_size, self.num_hidden), self.v_rest, device=device)
             s_h = torch.zeros((batch_size, self.num_hidden), device=device)
             v_m = torch.full((batch_size, self.num_motor), self.v_rest, device=device)
             s_m = torch.zeros((batch_size, self.num_motor), device=device)
+            refr_h = torch.zeros((batch_size, self.num_hidden), device=device)
+            refr_m = torch.zeros((batch_size, self.num_motor), device=device)
 
         hidden_spikes_list = []
         motor_spikes_list = []
@@ -240,7 +270,9 @@ class TorchRSNN(nn.Module):
         # Recurrent BPTT loop across time steps
         for t in range(seq_len):
             x_t = x_seq[:, t, :]
-            v_h, s_h, v_m, s_m = self.forward_step(x_t, v_h, s_h, v_m, s_m)
+            v_h, s_h, v_m, s_m, refr_h, refr_m = self.forward_step(
+                x_t, v_h, s_h, v_m, s_m, refr_h, refr_m
+            )
             hidden_spikes_list.append(s_h)
             motor_spikes_list.append(s_m)
             motor_voltages_list.append(v_m)
@@ -271,7 +303,7 @@ class TorchRSNN(nn.Module):
             "hidden_spikes": all_hidden_spikes,
             "motor_spikes": all_motor_spikes,
             "motor_voltages": all_motor_voltages,
-            "final_state": (v_h.detach(), s_h.detach(), v_m.detach(), s_m.detach()),
+            "final_state": (v_h.detach(), s_h.detach(), v_m.detach(), s_m.detach(), refr_h.detach(), refr_m.detach()),
             "mean_hidden_sparsity": mean_hidden_sparsity
         }
 

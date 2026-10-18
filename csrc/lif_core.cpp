@@ -192,11 +192,10 @@ void RSNNCoreSIMD::step(const uint8_t* __restrict sensory_spikes_in,
                         uint8_t* __restrict out_sensory_spikes,
                         uint8_t* __restrict out_hidden_spikes,
                         uint8_t* __restrict out_motor_spikes) noexcept {
-    // 1. Sensory Input Drive (25.0 mV/spike current)
-    for (size_t i = 0; i < num_sensory; ++i) {
-        current_sensory[i] = sensory_spikes_in[i] ? 25.0f : 0.0f;
+    // 1. Sensory Input Passthrough
+    if (out_sensory_spikes) {
+        std::memcpy(out_sensory_spikes, sensory_spikes_in, num_sensory * sizeof(uint8_t));
     }
-    sensory_pop.step_vectorized(current_sensory, out_sensory_spikes);
 
     // 2. Hidden Layer Synaptic Current Accumulation
     // I_hidden = 12.0f * (S_sensory @ W_in) + 8.0f * (S_hidden_prev @ W_rec)
@@ -209,12 +208,12 @@ void RSNNCoreSIMD::step(const uint8_t* __restrict sensory_spikes_in,
         current_hidden[j] = 0.0f;
     }
 
-    // Sparse feedforward accumulation from sensory spikes (scale = 12.0f)
+    // Sparse feedforward accumulation from incoming sensory spikes (scale = 12.0f)
     const float scale_in = 12.0f;
     const __m256 v_scale_in = _mm256_set1_ps(scale_in);
 
     for (size_t s = 0; s < num_sensory; ++s) {
-        if (sensory_pop.spikes[s]) {
+        if (sensory_spikes_in[s]) {
             const float* __restrict w_row = &w_in_hidden[s * num_hidden];
             size_t j = 0;
             for (; j + 8 <= num_hidden; j += 8) {
