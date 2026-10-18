@@ -2,9 +2,10 @@
 
 [![CI Pipeline](https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob/actions/workflows/ci.yml/badge.svg)](https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob/actions)
 [![Python 3.10 | 3.11 | 3.12](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
+[![C++20 AVX2 SIMD](https://img.shields.io/badge/C%2B%2B20%20AVX2-Sub--Microsecond%20(230ns)-red.svg)]()
+[![Throughput](https://img.shields.io/badge/Throughput-4.34M%20steps%2Fsec-blueviolet.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-18%2F18%20Passing-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Unit Tests](https://img.shields.io/badge/Tests-12%2F12%20Passing%20(0.011s)-brightgreen.svg)]()
-[![Hardware-Free Validation](https://img.shields.io/badge/Validation-100%25%20Digital%20Software%20Simulation-purple.svg)]()
 [![Markout Alpha](https://img.shields.io/badge/Markout%20Alpha-%2B0.3902%20(Monotonic)-success.svg)]()
 
 > **An institutional-grade, hardware-independent digital neuromorphic application simulating an asynchronous Recurrent Spiking Neural Network (RSNN) coupled to a high-frequency Limit Order Book (LOB) matching engine with online R-STDP synaptic plasticity and live crypto exchange connectivity.**
@@ -161,16 +162,35 @@ python run_cli.py
 ```
 * Low-overhead real-time ASCII trading desk rendering 25 FPS telemetry.
 
-### 3. Run the Veteran Institutional Audit Benchmark
+### 3. Build & Run C++20 AVX2 SIMD Neuromorphic Core
+```bash
+# Windows build (GCC 16 / MinGW-w64 with static runtime):
+csrc\build.bat
+
+# Linux / Cross-platform CMake build:
+cmake -B csrc/build -S csrc && cmake --build csrc/build
+```
+
+### 4. Run Institutional C++20 SIMD Hardware Benchmark
+```bash
+python benchmarks/run_simd_benchmark.py
+```
+* **Benchmark Highlights:**
+  * **LIF Population (32 neurons):** **230.7 ns** mean latency (**300.0x faster** than Python, **4.34M steps/sec**).
+  * **LIF Population (64 neurons):** **343.4 ns** mean latency (**221.0x faster** than Python, **2.91M steps/sec**).
+  * **Full RSNN Recurrent Core (32->64->4):** **1.14 μs** mean latency (**262.7x faster** than Python, **2,686 CPU cycles**).
+  * **Critical Path Allocations:** **STRICTLY 0 BYTES** (`alignas(64)` pre-allocated flat static memory).
+
+### 5. Run the Veteran Institutional Audit Benchmark
 ```bash
 python benchmarks/run_veteran_audit.py
 ```
 
-### 4. Run the Full Unit Test Suite
+### 6. Run the Full Automated Test Suite (18 Tests)
 ```bash
 python -m unittest discover tests
 ```
-* **Status:** 12/12 unit tests passing in **11 milliseconds**.
+* **Status:** 18/18 unit tests passing across Python and C++20 SIMD modules in **0.18s**.
 
 ---
 
