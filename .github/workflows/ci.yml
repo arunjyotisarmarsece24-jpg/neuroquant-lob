@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run Unit Tests & SIMD Benchmark Matrix
+    name: Run Unit Tests & SIMD/ITCH Benchmark Matrix
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -29,23 +29,27 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Build C++20 AVX2 Neuromorphic Core (Linux)
+    - name: Build C++20 AVX2 Core & ITCH Parser (Linux)
       if: runner.os == 'Linux'
       run: |
-        g++ -std=c++20 -O3 -mavx2 -mfma -shared -fPIC -DLIF_EXPORTS -o csrc/liblif_core.so csrc/lif_core.cpp
+        g++ -std=c++20 -O3 -mavx2 -mfma -shared -fPIC -DLIF_EXPORTS -o csrc/liblif_core.so csrc/lif_core.cpp csrc/itch_parser.cpp
 
-    - name: Build C++20 AVX2 Neuromorphic Core (Windows)
+    - name: Build C++20 AVX2 Core & ITCH Parser (Windows)
       if: runner.os == 'Windows'
       run: |
-        g++ -std=c++20 -O3 -mavx2 -mfma -shared -static -static-libgcc -static-libstdc++ -fPIC -DLIF_EXPORTS -o csrc/lif_core.dll csrc/lif_core.cpp
+        g++ -std=c++20 -O3 -mavx2 -mfma -shared -static -static-libgcc -static-libstdc++ -fPIC -DLIF_EXPORTS -o csrc/lif_core.dll csrc/lif_core.cpp csrc/itch_parser.cpp
 
-    - name: Run Automated Test Suite (18 Tests)
+    - name: Run Automated Test Suite (24 Tests)
       run: |
         python -m unittest discover tests
 
     - name: Run Institutional C++20 SIMD Benchmark
       run: |
         python benchmarks/run_simd_benchmark.py
+
+    - name: Run NASDAQ ITCH 5.0 High-Throughput Benchmark
+      run: |
+        python benchmarks/run_itch_benchmark.py
 
     - name: Run Institutional Veteran Quant Audit Benchmark
       run: |

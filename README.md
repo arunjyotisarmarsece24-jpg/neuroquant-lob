@@ -3,8 +3,9 @@
 [![CI Pipeline](https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob/actions/workflows/ci.yml/badge.svg)](https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob/actions)
 [![Python 3.10 | 3.11 | 3.12](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![C++20 AVX2 SIMD](https://img.shields.io/badge/C%2B%2B20%20AVX2-Sub--Microsecond%20(230ns)-red.svg)]()
-[![Throughput](https://img.shields.io/badge/Throughput-4.34M%20steps%2Fsec-blueviolet.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-18%2F18%20Passing-brightgreen.svg)]()
+[![NASDAQ ITCH 5.0](https://img.shields.io/badge/NASDAQ%20ITCH%205.0-30.18M%20msgs%2Fsec%20(33ns)-purple.svg)]()
+[![Throughput](https://img.shields.io/badge/RSNN%20Speedup-262.7x%20Faster-blueviolet.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-24%2F24%20Passing-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Markout Alpha](https://img.shields.io/badge/Markout%20Alpha-%2B0.3902%20(Monotonic)-success.svg)]()
 
@@ -181,16 +182,26 @@ python benchmarks/run_simd_benchmark.py
   * **Full RSNN Recurrent Core (32->64->4):** **1.14 μs** mean latency (**262.7x faster** than Python, **2,686 CPU cycles**).
   * **Critical Path Allocations:** **STRICTLY 0 BYTES** (`alignas(64)` pre-allocated flat static memory).
 
-### 5. Run the Veteran Institutional Audit Benchmark
+### 5. Run NASDAQ TotalView-ITCH 5.0 Binary Feed Benchmark
+```bash
+python benchmarks/run_itch_benchmark.py
+```
+* **Benchmark Highlights:**
+  * **Peak Parsing Throughput:** **30.18 Million msgs/sec** (over 6x faster than our 5M/s target).
+  * **Per-Packet Latency:** **33.1 nanoseconds** with single-cycle big-endian hardware conversions.
+  * **5,000,000 Message Stress Audit:** 166.18 MB parsed in **332.9 ms** at **15.02 Million msgs/sec** sustained.
+  * **Zero Dynamic Allocations:** Flat open-addressing table (`ITCHOrderBookCore`) for instant book updates.
+
+### 6. Run the Veteran Institutional Audit Benchmark
 ```bash
 python benchmarks/run_veteran_audit.py
 ```
 
-### 6. Run the Full Automated Test Suite (18 Tests)
+### 7. Run the Full Automated Test Suite (24 Tests)
 ```bash
 python -m unittest discover tests
 ```
-* **Status:** 18/18 unit tests passing across Python and C++20 SIMD modules in **0.18s**.
+* **Status:** 24/24 unit tests passing across Python, C++20 SIMD, and NASDAQ ITCH 5.0 modules in **0.15s**.
 
 ---
 

@@ -8,6 +8,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(lif_core SHARED
     lif_core.cpp
     lif_core.h
+    itch_parser.cpp
+    itch_parser.h
 )
 
 target_compile_definitions(lif_core PRIVATE LIF_EXPORTS)
