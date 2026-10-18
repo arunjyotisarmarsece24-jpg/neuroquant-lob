@@ -372,15 +372,20 @@ class CPURSNNCore:
 
         # Motor Channel Mapping:
         # 0: Upward Skew, 1: Downward Skew, 2: Toxicity Alert, 3: Volatility Burst
-        skew_up = max(0.0, float(self.motor_voltage[0] - self.cfg.v_thresh))
-        skew_down = max(0.0, float(self.motor_voltage[1] - self.cfg.v_thresh))
-        net_skew = (skew_up - skew_down) * 0.1
+        # Normalized membrane activation above resting potential in [0.0, 1.0]
+        v_diff = self.cfg.v_thresh - self.cfg.v_rest
+        activation = np.clip((self.motor_voltage - self.cfg.v_rest) / (v_diff + 1e-5), 0.0, 1.0)
+        
+        # Action potential spike pulse (adds immediate discrete boost on firing ticks)
+        spike_pulse = self.motor_spikes.astype(np.float32) * 0.75
+        effective_signal = np.clip(activation + spike_pulse, 0.0, 2.0)
 
-        toxicity_activation = max(0.0, float(self.motor_voltage[2] - self.cfg.v_thresh))
-        toxicity_prob = 1.0 / (1.0 + np.exp(-toxicity_activation * 0.5)) if toxicity_activation > 0 else 0.0
-
-        vol_activation = max(0.0, float(self.motor_voltage[3] - self.cfg.v_thresh))
-        volatility_boost = 1.0 + float(vol_activation * 0.2)
+        # [0]: Upward Skew, [1]: Downward Skew
+        net_skew = float(effective_signal[0] - effective_signal[1])
+        # [2]: Toxicity Probability in [0.0, 1.0]
+        toxicity_prob = float(np.clip(effective_signal[2] * 0.65, 0.0, 1.0))
+        # [3]: Volatility Multiplier >= 1.0
+        volatility_boost = 1.0 + float(effective_signal[3] * 0.5)
 
         return {
             "skew": float(net_skew),

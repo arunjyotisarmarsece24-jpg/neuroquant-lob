@@ -63,7 +63,7 @@ class ExecutionEngine:
         toxicity_prob = neuro_signals.get("toxicity_prob", 0.0)
         
         # 3. Toxicity Defense: Pull quotes on institutional sweeps
-        if toxicity_prob > 0.70:
+        if toxicity_prob > 0.40:
             self.quote_active = False
             self.my_bid_price = None
             self.my_ask_price = None
