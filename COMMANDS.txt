@@ -54,20 +54,26 @@ python benchmarks/run_veteran_audit.py
 -> Outputs Post-Trade Markout Curve (0.1ms to 100ms) and Deflated Sharpe Ratio (DSR).
 
 
-8. RUN AUTOMATED TEST SUITE:
-----------------------------
+8. RUN AUTOMATED TEST SUITE (26/26 TESTS):
+--------------------------------------------
 python -m unittest discover tests
--> Runs all 24 unit tests verifying LIF decay, action potentials, R-STDP, C++ SIMD, ITCH 5.0, and inventory risk.
+-> Runs all 26 unit tests verifying LIF decay, action potentials, R-STDP, C++ SIMD, ITCH 5.0, 16-level L2 ladder, and Hot-Path pipeline.
 
 
-9. GIT COMMANDS TO PUSH FUTURE UPDATES TO GITHUB:
--------------------------------------------------
+9. RUN INTERACTIVE NASDAQ ITCH 5.0 L2 DEPTH & SPIKE INSPECTOR:
+---------------------------------------------------------------
+python run_itch_inspector.py
+-> Displays raw hex bytes, 16-level L2 depth ladder, micro-price, and C++ neuromorphic hot-path trade decision in < 150 ns.
+
+
+10. GIT COMMANDS TO PUSH FUTURE UPDATES TO GITHUB:
+--------------------------------------------------
 git add .
-git commit -m "feat(parser): Day 2 NASDAQ TotalView-ITCH 5.0 binary feed parser"
+git commit -m "Your commit message"
 git push origin main
 
 
-10. GITHUB REPOSITORY LINK:
+11. GITHUB REPOSITORY LINK:
 ---------------------------
 https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob
 ================================================================================
