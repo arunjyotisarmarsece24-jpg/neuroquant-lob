@@ -323,6 +323,12 @@ ITCH_API void itch_get_top_of_book(void* book_handle,
     if (out_total_ask_vol) *out_total_ask_vol = book->total_ask_volume;
 }
 
+ITCH_API void itch_get_depth_10(void* book_handle, neuroquant::itch::L2Depth10* out_depth) {
+    if (!book_handle || !out_depth) return;
+    auto* book = static_cast<neuroquant::itch::ITCHOrderBookCore*>(book_handle);
+    book->get_depth_10(out_depth);
+}
+
 ITCH_API size_t itch_generate_synthetic_stream(uint8_t* out_buffer,
                                                size_t max_bytes,
                                                size_t num_messages,
@@ -478,6 +484,274 @@ ITCH_API void run_itch_benchmark(size_t num_messages, neuroquant::itch::ITCHPars
 
     // High-performance benchmark run
     itch_parse_stream(book.get(), buffer.get(), actual_bytes, true, out_stats);
+}
+
+} // extern "C"
+
+namespace neuroquant::itch {
+
+NeuromorphicLOBPipeline::NeuromorphicLOBPipeline() {
+    reset();
+}
+
+void NeuromorphicLOBPipeline::reset() noexcept {
+    book.reset();
+    LIFConfig cfg{
+        0.5f,   // dt
+        20.0f,  // tau_m
+        -70.0f, // v_rest
+        -75.0f, // v_reset
+        -55.0f, // v_thresh
+        2.0f,   // refractory_period_ms
+        4,      // refractory_steps
+        0.0f,   // decay
+        0.0f    // c_rest
+    };
+    rsnn.init(32, 64, 4, cfg);
+
+    for (size_t s = 0; s < 32; ++s) {
+        for (size_t h = 0; h < 64; ++h) {
+            float w = 0.0f;
+            if (s == 0 || s == 6 || s == 8 || s == 26) {
+                if (h < 32) w = 35.0f / (1.0f + static_cast<float>(h % 5));
+            } else if (s == 3 || s == 7 || s == 16 || s == 27) {
+                if (h >= 32) w = 35.0f / (1.0f + static_cast<float>(h % 5));
+            } else if (s == 28 || s == 29) {
+                w = 20.0f / (1.0f + static_cast<float>(h % 8));
+            }
+            rsnn.w_in_hidden[s * 64 + h] = w;
+        }
+    }
+
+    for (size_t src = 0; src < 64; ++src) {
+        for (size_t dst = 0; dst < 64; ++dst) {
+            float w = 0.0f;
+            if (src < 32 && dst < 32 && (src != dst) && ((src + dst) % 7 == 0)) {
+                w = 8.0f;
+            } else if (src >= 32 && dst >= 32 && (src != dst) && ((src + dst) % 7 == 0)) {
+                w = 8.0f;
+            } else if ((src < 32 && dst >= 32) || (src >= 32 && dst < 32)) {
+                if ((src + dst) % 11 == 0) w = -15.0f;
+            }
+            rsnn.w_hidden_hidden[src * 64 + dst] = w;
+        }
+    }
+
+    for (size_t h = 0; h < 64; ++h) {
+        if (h < 32) {
+            rsnn.w_motor[h * 4 + 0] = 40.0f / (1.0f + static_cast<float>(h % 4));
+            rsnn.w_motor[h * 4 + 1] = -20.0f;
+            rsnn.w_motor[h * 4 + 3] = (h < 8) ? 30.0f : 0.0f;
+        } else {
+            rsnn.w_motor[h * 4 + 0] = -20.0f;
+            rsnn.w_motor[h * 4 + 1] = 40.0f / (1.0f + static_cast<float>(h % 4));
+            rsnn.w_motor[h * 4 + 3] = (h >= 56) ? 30.0f : 0.0f;
+        }
+        rsnn.w_motor[h * 4 + 2] = 5.0f;
+    }
+}
+
+void NeuromorphicLOBPipeline::process_packet(const uint8_t* packet_data, size_t length, HotpathDecision* out_decision) noexcept {
+    if (!packet_data || length < 1 || !out_decision) return;
+    uint64_t t0 = neuroquant::rdtscp();
+
+    char type = static_cast<char>(packet_data[0]);
+    size_t expected_len = get_itch_message_length(type);
+    if (length < expected_len) return;
+
+    uint8_t sensory_spikes[32] = {0};
+
+    switch (type) {
+        case 'A': {
+            const auto* m = reinterpret_cast<const AddOrderMsg*>(packet_data);
+            uint64_t ref = be64(m->order_reference);
+            char side = m->buy_sell_indicator;
+            uint32_t sh = be32(m->shares);
+            uint32_t px = be32(m->price);
+            uint16_t loc = be16(m->stock_locate);
+
+            uint32_t prev_bb = book.best_bid_price;
+            uint32_t prev_ba = book.best_ask_price;
+
+            book.on_add_order(ref, side, sh, px, loc);
+
+            if (side == 'B') {
+                if (book.best_bid_price > prev_bb) sensory_spikes[0] = 1;
+                if (sh >= 500) sensory_spikes[6] = 1;
+                sensory_spikes[8] = 1;
+            } else {
+                if (book.best_ask_price < prev_ba) sensory_spikes[3] = 1;
+                if (sh >= 500) sensory_spikes[7] = 1;
+                sensory_spikes[16] = 1;
+            }
+            break;
+        }
+        case 'E':
+        case 'C': {
+            const auto* m = reinterpret_cast<const OrderExecutedMsg*>(packet_data);
+            uint64_t ref = be64(m->order_reference);
+            uint32_t exec_sh = be32(m->executed_shares);
+            book.on_cancel_order(ref, exec_sh);
+            sensory_spikes[28] = 1;
+            if (exec_sh >= 200) sensory_spikes[29] = 1;
+            break;
+        }
+        case 'X': {
+            const auto* m = reinterpret_cast<const OrderCancelMsg*>(packet_data);
+            book.on_cancel_order(be64(m->order_reference), be32(m->canceled_shares));
+            sensory_spikes[24] = 1;
+            break;
+        }
+        case 'D': {
+            const auto* m = reinterpret_cast<const OrderDeleteMsg*>(packet_data);
+            book.on_delete_order(be64(m->order_reference));
+            sensory_spikes[25] = 1;
+            break;
+        }
+        case 'U': {
+            const auto* m = reinterpret_cast<const OrderReplaceMsg*>(packet_data);
+            book.on_delete_order(be64(m->orig_order_reference));
+            book.on_add_order(be64(m->new_order_reference), 'B', be32(m->shares), be32(m->price), be16(m->stock_locate));
+            sensory_spikes[8] = 1;
+            break;
+        }
+        default:
+            break;
+    }
+
+    L2Depth10 depth;
+    book.get_depth_10(&depth);
+
+    if (depth.depth_imbalance > 0.25) sensory_spikes[26] = 1;
+    if (depth.depth_imbalance < -0.25) sensory_spikes[27] = 1;
+
+    uint8_t out_s[32];
+    uint8_t out_h[64];
+    uint8_t out_m[4];
+    rsnn.step(sensory_spikes, out_s, out_h, out_m);
+
+    int32_t action = 0;
+    float conf = 0.5f;
+
+    if (out_m[0] && !out_m[1]) {
+        action = 1;
+        conf = 0.88f + (out_m[3] ? 0.08f : 0.0f);
+    } else if (out_m[1] && !out_m[0]) {
+        action = -1;
+        conf = 0.88f + (out_m[3] ? 0.08f : 0.0f);
+    } else {
+        if (depth.depth_imbalance > 0.35) {
+            action = 1;
+            conf = 0.65f;
+        } else if (depth.depth_imbalance < -0.35) {
+            action = -1;
+            conf = 0.65f;
+        } else {
+            action = 0;
+            conf = 0.50f;
+        }
+    }
+
+    uint64_t t1 = neuroquant::rdtscp();
+    uint64_t cycles = (t1 > t0) ? (t1 - t0) : 100;
+
+    out_decision->action = action;
+    out_decision->confidence = conf;
+    out_decision->latency_cycles = cycles;
+    out_decision->latency_ns = static_cast<double>(cycles) / 3.0;
+    out_decision->micro_price = depth.micro_price;
+    out_decision->depth_imbalance = depth.depth_imbalance;
+    std::memcpy(out_decision->sensory_spikes, sensory_spikes, 32);
+    std::memcpy(out_decision->motor_spikes, out_m, 4);
+}
+
+void NeuromorphicLOBPipeline::run_stream_benchmark(const uint8_t* buffer, size_t total_bytes, HotpathBenchmarkStats* out_stats) noexcept {
+    if (!buffer || total_bytes == 0 || !out_stats) return;
+
+    size_t offset = 0;
+    uint64_t packet_count = 0;
+    uint64_t total_cycles = 0;
+    uint64_t buys = 0;
+    uint64_t sells = 0;
+    uint64_t holds = 0;
+    double sum_conf = 0.0;
+
+    HotpathDecision dec;
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    while (offset < total_bytes) {
+        if (offset + 2 > total_bytes) break;
+        uint16_t msg_len = be16(*reinterpret_cast<const uint16_t*>(&buffer[offset]));
+        offset += 2;
+        if (offset + msg_len > total_bytes) break;
+
+        process_packet(&buffer[offset], msg_len, &dec);
+        offset += msg_len;
+
+        packet_count++;
+        total_cycles += dec.latency_cycles;
+        sum_conf += dec.confidence;
+
+        if (dec.action == 1) buys++;
+        else if (dec.action == -1) sells++;
+        else holds++;
+    }
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    double total_sec = std::chrono::duration<double>(end_time - start_time).count();
+
+    out_stats->total_packets = packet_count;
+    out_stats->total_cycles = total_cycles;
+    out_stats->avg_nanos = (packet_count > 0) ? ((total_sec * 1e9) / static_cast<double>(packet_count)) : 0.0;
+    out_stats->packets_per_sec = (total_sec > 0.0) ? (static_cast<double>(packet_count) / total_sec) : 0.0;
+    out_stats->buy_signals = buys;
+    out_stats->sell_signals = sells;
+    out_stats->hold_signals = holds;
+    out_stats->avg_confidence = (packet_count > 0) ? (sum_conf / static_cast<double>(packet_count)) : 0.0;
+}
+
+} // namespace neuroquant::itch
+
+extern "C" {
+
+ITCH_API void* itch_pipeline_create() {
+    return new neuroquant::itch::NeuromorphicLOBPipeline();
+}
+
+ITCH_API void itch_pipeline_destroy(void* handle) {
+    if (handle) {
+        delete static_cast<neuroquant::itch::NeuromorphicLOBPipeline*>(handle);
+    }
+}
+
+ITCH_API void itch_pipeline_reset(void* handle) {
+    if (handle) {
+        static_cast<neuroquant::itch::NeuromorphicLOBPipeline*>(handle)->reset();
+    }
+}
+
+ITCH_API void itch_pipeline_process_packet(void* handle,
+                                          const uint8_t* packet_bytes,
+                                          size_t length,
+                                          neuroquant::itch::HotpathDecision* out_decision) {
+    if (!handle || !packet_bytes || !out_decision) return;
+    static_cast<neuroquant::itch::NeuromorphicLOBPipeline*>(handle)->process_packet(packet_bytes, length, out_decision);
+}
+
+ITCH_API void itch_pipeline_run_benchmark(void* handle,
+                                          size_t num_packets,
+                                          neuroquant::itch::HotpathBenchmarkStats* out_stats) {
+    if (!handle || !out_stats || num_packets == 0) return;
+    auto* pipeline = static_cast<neuroquant::itch::NeuromorphicLOBPipeline*>(handle);
+
+    size_t est_bytes = (num_packets * 45) + 4096;
+    auto buffer = std::make_unique<uint8_t[]>(est_bytes);
+    size_t actual_bytes = itch_generate_synthetic_stream(buffer.get(), est_bytes, num_packets, true);
+    if (actual_bytes == 0) return;
+
+    pipeline->reset();
+    pipeline->run_stream_benchmark(buffer.get(), actual_bytes, out_stats);
 }
 
 } // extern "C"

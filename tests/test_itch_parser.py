@@ -170,5 +170,73 @@ class TestITCH50Parser(unittest.TestCase):
         self.assertGreater(bench["msgs_per_second"], 5000000.0, "Throughput must exceed 5,000,000 msgs/sec")
         self.assertLess(bench["avg_nanos_per_msg"], 200.0, "Latency per message must be < 200 nanoseconds")
 
+    def test_multi_level_l2_depth_and_bbo_recovery(self):
+        if not self.available:
+            self.skipTest("ITCH parser not available")
+
+        book = ITCHOrderBook()
+        book.reset()
+        ts = (34200000000000).to_bytes(6, 'big')
+
+        # Add 3 Bids: $185.00 (100 sh), $185.25 (200 sh), $185.50 (300 sh)
+        m1 = struct.pack(">cHH6sQcI8sI", b'A', 1, 1, ts, 201, b'B', 100, b'NVDA    ', 1850000)
+        m2 = struct.pack(">cHH6sQcI8sI", b'A', 1, 2, ts, 202, b'B', 200, b'NVDA    ', 1852500)
+        m3 = struct.pack(">cHH6sQcI8sI", b'A', 1, 3, ts, 203, b'B', 300, b'NVDA    ', 1855000)
+        # Add 2 Asks: $185.75 (400 sh), $186.00 (500 sh)
+        m4 = struct.pack(">cHH6sQcI8sI", b'A', 1, 4, ts, 204, b'S', 400, b'NVDA    ', 1857500)
+        m5 = struct.pack(">cHH6sQcI8sI", b'A', 1, 5, ts, 205, b'S', 500, b'NVDA    ', 1860000)
+
+        stream = b"".join((len(m)).to_bytes(2, 'big') + m for m in [m1, m2, m3, m4, m5])
+        book.parse_stream(stream, has_length_prefix=True)
+
+        depth = book.get_depth_10()
+        self.assertEqual(depth["bid_levels"], 3)
+        self.assertEqual(depth["ask_levels"], 2)
+        # Verify bids are sorted descending: 185.50 > 185.25 > 185.00
+        self.assertAlmostEqual(depth["bids"][0]["price"], 185.5000, places=4)
+        self.assertAlmostEqual(depth["bids"][1]["price"], 185.2500, places=4)
+        self.assertAlmostEqual(depth["bids"][2]["price"], 185.0000, places=4)
+        self.assertEqual(depth["bids"][0]["shares"], 300)
+        self.assertEqual(depth["best_bid"], 185.5000)
+        self.assertEqual(depth["best_ask"], 185.7500)
+        self.assertAlmostEqual(depth["spread"], 0.2500, places=4)
+
+        # Micro-price should be weighted towards the heavier ask side ($185.75 with 400 shares vs $185.50 with 300 shares)
+        self.assertGreater(depth["micro_price"], 185.5000)
+        self.assertLess(depth["micro_price"], 185.7500)
+
+        # Cancel top bid (Order 203 at $185.50 for 300 shares)
+        m_del = struct.pack(">cHH6sQ", b'D', 1, 6, ts, 203)
+        stream_del = (len(m_del)).to_bytes(2, 'big') + m_del
+        book.parse_stream(stream_del, has_length_prefix=True)
+
+        depth_after = book.get_depth_10()
+        self.assertEqual(depth_after["bid_levels"], 2)
+        # Verify ZERO AMNESIA: Best bid immediately falls back to $185.25!
+        self.assertAlmostEqual(depth_after["best_bid"], 185.2500, places=4)
+        self.assertEqual(depth_after["bid_shares"], 200)
+
+    def test_neuromorphic_hotpath_pipeline(self):
+        if not self.available:
+            self.skipTest("ITCH parser not available")
+
+        from neuroquant.market.itch_parser import NeuromorphicHotpathPipeline
+        pipeline = NeuromorphicHotpathPipeline()
+        pipeline.reset()
+
+        # Feed a raw packet
+        ts = (34200000000000).to_bytes(6, 'big')
+        raw_msg = struct.pack(">cHH6sQcI8sI", b'A', 1, 10, ts, 301, b'B', 1000, b'NVDA    ', 1850000)
+        decision = pipeline.process_packet(raw_msg)
+
+        self.assertIn(decision["action"], ["BUY", "SELL", "HOLD"])
+        self.assertGreater(decision["confidence"], 0.0)
+        self.assertGreater(decision["latency_cycles"], 0)
+
+        # Stream benchmark
+        bench = pipeline.run_benchmark(num_packets=5000)
+        self.assertEqual(bench["total_packets"], 5000)
+        self.assertGreater(bench["packets_per_sec"], 100000.0)
+
 if __name__ == "__main__":
     unittest.main()
