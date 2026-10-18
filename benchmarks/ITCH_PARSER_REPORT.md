@@ -1,6 +1,6 @@
 # ⚡ NASDAQ TotalView-ITCH 5.0 High-Performance Binary Feed Parser Report
 
-**Benchmark Execution Date:** 2026-10-18 19:14:09  
+**Benchmark Execution Date:** 2026-10-18 19:30:41  
 **Architecture:** x86_64 Modern C++20  
 **Target Ingestion Rate:** > 5,000,000 messages / second  
 **Author:** Arunjyoti Sarma (Research Scholar, IIT (BHU), Varanasi)  
@@ -12,9 +12,9 @@
 In institutional quantitative trading, market data feeds are transmitted as raw binary protocols (such as NASDAQ TotalView-ITCH 5.0) rather than text or JSON formats. To feed the `NeuroQuant-LOB` neuromorphic spiking network without latency bottlenecks, we engineered a dedicated **zero-copy, zero-heap-allocation binary stream parser in modern C++20**.
 
 Across a continuous **5,000,000 binary packet stress audit**, the parser achieved:
-* **Throughput:** **15,019,620 messages/sec (15.02 Million msgs/sec)** (exceeding the 5M/s target by > 400%).
-* **Mean Latency per Message:** **66.6 nanoseconds**.
-* **Bandwidth Throughput:** **499.2 MB/sec (3.99 Gbps)**.
+* **Throughput:** **15,327,127 messages/sec (15.33 Million msgs/sec)** (exceeding the 5M/s target by > 400%).
+* **Mean Latency per Message:** **65.2 nanoseconds**.
+* **Bandwidth Throughput:** **509.4 MB/sec (4.08 Gbps)**.
 * **Heap Memory Footprint:** **Strictly 0 Bytes allocated on the critical parsing path**.
 
 ---
@@ -59,10 +59,10 @@ When an order book event modifies top-of-book depth or causes a spread widening/
     "trade_messages": 2500,
     "other_messages": 0,
     "total_bytes_parsed": 1742500,
-    "parse_time_nanos": 1720300,
-    "avg_nanos_per_msg": 34.41,
-    "msgs_per_second": 29064698.017787598,
-    "mb_per_second": 965.98
+    "parse_time_nanos": 1611800,
+    "avg_nanos_per_msg": 32.24,
+    "msgs_per_second": 31021218.513463207,
+    "mb_per_second": 1031.01
   },
   "100000_msgs": {
     "total_messages": 100000,
@@ -74,10 +74,10 @@ When an order book event modifies top-of-book depth or causes a spread widening/
     "trade_messages": 5000,
     "other_messages": 0,
     "total_bytes_parsed": 3485000,
-    "parse_time_nanos": 3314000,
-    "avg_nanos_per_msg": 33.14,
-    "msgs_per_second": 30175015.087507542,
-    "mb_per_second": 1002.88
+    "parse_time_nanos": 3448800,
+    "avg_nanos_per_msg": 34.49,
+    "msgs_per_second": 28995592.66991417,
+    "mb_per_second": 963.68
   },
   "500000_msgs": {
     "total_messages": 500000,
@@ -89,10 +89,10 @@ When an order book event modifies top-of-book depth or causes a spread widening/
     "trade_messages": 25000,
     "other_messages": 0,
     "total_bytes_parsed": 17425000,
-    "parse_time_nanos": 20574000,
-    "avg_nanos_per_msg": 41.15,
-    "msgs_per_second": 24302517.740837954,
-    "mb_per_second": 807.71
+    "parse_time_nanos": 20137400,
+    "avg_nanos_per_msg": 40.27,
+    "msgs_per_second": 24829421.87174114,
+    "mb_per_second": 825.22
   },
   "1000000_msgs": {
     "total_messages": 1000000,
@@ -104,10 +104,10 @@ When an order book event modifies top-of-book depth or causes a spread widening/
     "trade_messages": 50000,
     "other_messages": 0,
     "total_bytes_parsed": 34850000,
-    "parse_time_nanos": 53184400,
-    "avg_nanos_per_msg": 53.18,
-    "msgs_per_second": 18802505.997999415,
-    "mb_per_second": 624.91
+    "parse_time_nanos": 53623300,
+    "avg_nanos_per_msg": 53.62,
+    "msgs_per_second": 18648609.839379523,
+    "mb_per_second": 619.8
   }
 }
 ```
@@ -124,9 +124,9 @@ When an order book event modifies top-of-book depth or causes a spread widening/
   "trade_messages": 250000,
   "other_messages": 0,
   "total_bytes_parsed": 174250000,
-  "parse_time_nanos": 332897900,
-  "avg_nanos_per_msg": 66.58,
-  "msgs_per_second": 15019620.129775524,
-  "mb_per_second": 499.19
+  "parse_time_nanos": 326219000,
+  "avg_nanos_per_msg": 65.24,
+  "msgs_per_second": 15327126.868759945,
+  "mb_per_second": 509.41
 }
 ```
