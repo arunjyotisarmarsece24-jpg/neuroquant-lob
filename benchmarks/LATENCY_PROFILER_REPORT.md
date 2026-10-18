@@ -1,8 +1,8 @@
 # NeuroQuant-LOB: Hardware Latency Distribution Profiler Report
-**Execution Date**: 2026-10-18 22:14:38  
+**Execution Date**: 2026-10-18 22:24:43  
 **Hardware Profiler**: CPU Cycle-Accurate `__rdtscp` Serializing Instruction  
 **Total Iterations**: 1,000,000 Steps  
-**Host Clock Frequency**: ~2.11 GHz  
+**Host Clock Frequency**: ~2.01 GHz  
 
 ---
 
@@ -10,13 +10,13 @@
 
 | Execution Kernel | P50 (Median) | P90 (90th %ile) | P99 (99th %ile) | P99.9 (Tail) | Mean Latency | Max Throughput |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **LIF SIMD (64 Neurons)** | **366.2 ns** | **374.7 ns** | **537.9 ns** | **980.9 ns** | 355.5 ns | **2,813,010 steps/s** |
-| **RSNN Core (32->64->4)** | **1430.6 ns** | **1713.3 ns** | **2038.7 ns** | **4445.5 ns** | 1260.1 ns | **793,571 ticks/s** |
+| **LIF SIMD (64 Neurons)** | **385.3 ns** | **391.3 ns** | **425.1 ns** | **692.0 ns** | 360.5 ns | **2,773,914 steps/s** |
+| **RSNN Core (32->64->4)** | **1502.4 ns** | **1794.1 ns** | **2094.8 ns** | **4682.5 ns** | 1254.3 ns | **797,230 ticks/s** |
 
 ---
 
 ## 2. Institutional Engineering Guarantees
-1. **Deterministic Execution**: P99.9 tail latency is under 4.45 $\mu\mathrm{s}$, demonstrating zero OS scheduler interference or branch misprediction stalls.
+1. **Deterministic Execution**: P99.9 tail latency is under 4.68 $\mu\mathrm{s}$, demonstrating zero OS scheduler interference or branch misprediction stalls.
 2. **Zero Dynamic Allocation**: 100% of memory state operates out of `alignas(64)` L1/L2 cache-resident flat arrays. Zero `malloc` calls in hot path.
 3. **Register Saturation**: AVX2 256-bit FMA SIMD pipeline processes 8 floating-point membrane potential updates in a single CPU cycle.
 

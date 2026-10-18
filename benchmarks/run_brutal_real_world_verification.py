@@ -433,6 +433,10 @@ def audit_4_market_making_battle():
     inv_history_a = []
     inv_history_b = []
     toxic_steps = []
+    raster_sensory = []
+    raster_hidden = []
+    raster_motor = []
+    raster_ticks = []
 
     for step in range(2500):
         dt = 0.001
@@ -462,10 +466,19 @@ def audit_4_market_making_battle():
         # Agent B: Day 3 Trained RSNN Core
         spk_b = enc_b.encode(snap_b, step * 0.5)
         if cpp_b:
-            cpp_b.step(spk_b)
+            s_spk, h_spk, m_spk = cpp_b.step(spk_b)
             signals_b = cpp_b.get_motor_readout_signals()
         else:
+            s_spk = spk_b
+            h_spk = np.zeros(64, dtype=bool)
+            m_spk = np.zeros(4, dtype=bool)
             signals_b = {"skew": 0.0, "toxicity_prob": 0.0, "volatility_multiplier": 1.0}
+
+        if 1450 <= step < 1600:
+            raster_ticks.append(step)
+            raster_sensory.append(np.where(s_spk)[0].tolist())
+            raster_hidden.append(np.where(h_spk)[0].tolist())
+            raster_motor.append(np.where(m_spk)[0].tolist())
 
         exec_b.update_quotes(signals_b)
         fill_b, pnl_b = exec_b.process_fill_check(
@@ -529,7 +542,13 @@ def audit_4_market_making_battle():
         "pnl_history_b": pnl_history_b,
         "inv_history_a": inv_history_a,
         "inv_history_b": inv_history_b,
-        "toxic_steps": toxic_steps
+        "toxic_steps": toxic_steps,
+        "spike_raster": {
+            "ticks": raster_ticks,
+            "sensory": raster_sensory,
+            "hidden": raster_hidden,
+            "motor": raster_motor
+        }
     }
 
 # ============================================================================
