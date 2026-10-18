@@ -195,10 +195,13 @@ def run_profiler(iterations: int = 1_000_000):
     print(f"  * Report File:   {report_path}")
     print("=" * 80)
 
-if __name__ == "__main__":
+def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--iterations", type=int, default=1_000_000,
                         help="Number of iterations to profile (default: 1,000,000)")
     args = parser.parse_args()
     run_profiler(args.iterations)
+
+if __name__ == "__main__":
+    main()
