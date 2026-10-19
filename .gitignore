@@ -7,6 +7,10 @@ __pycache__/
 *.so
 *.dll
 *.dylib
+*.exe
+*.o
+*.a
+*.obj
 
 # Distribution / packaging
 .Python

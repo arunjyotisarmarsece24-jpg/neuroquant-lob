@@ -53,6 +53,23 @@ class TestNeuroQuantCLI(unittest.TestCase):
         self.assertIn("ITCH 5.0", res.stdout)
         self.assertIn("Packets Processed", res.stdout)
 
+    def test_cli_risk(self):
+        cmd = [sys.executable, "-m", "neuroquant.cli", "risk", "--checks", "1000"]
+        res = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("PRE-TRADE MICROSECOND HARDWARE RISK GATE", res.stdout)
+        self.assertIn("Circuit Breaker Enforcements", res.stdout)
+        self.assertIn("KILLSWITCH", res.stdout)
+
+    def test_cli_fix(self):
+        cmd = [sys.executable, "-m", "neuroquant.cli", "fix", "--symbol", "BTCUSDT"]
+        res = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("INSTITUTIONAL FIX 4.4 ORDER ROUTING", res.stdout)
+        self.assertIn("35=D", res.stdout)
+        self.assertIn("35=8", res.stdout)
+        self.assertIn("CANCEL WON THE RACE", res.stdout)
+
     def test_subcommand_dispatch_registry(self):
         import argparse
         from neuroquant.cli import main

@@ -1,29 +1,29 @@
 {
   "iterations": 1000000,
-  "cpu_clock_ghz": 2.086,
+  "cpu_clock_ghz": 2.087,
   "lif_population": {
-    "avg_ns": 121.37,
-    "p50_cycles": 256.0,
-    "p90_cycles": 320.0,
-    "p99_cycles": 482.0,
-    "p999_cycles": 882.0,
-    "p50_ns": 122.71,
-    "p90_ns": 153.39,
-    "p99_ns": 231.04,
-    "p999_ns": 422.77,
-    "throughput_steps_sec": 8239234
+    "avg_ns": 346.1,
+    "p50_cycles": 726.0,
+    "p90_cycles": 808.0,
+    "p99_cycles": 1382.0,
+    "p999_cycles": 2656.0,
+    "p50_ns": 347.85,
+    "p90_ns": 387.13,
+    "p99_ns": 662.15,
+    "p999_ns": 1272.56,
+    "throughput_steps_sec": 2889371
   },
   "rsnn_core": {
-    "avg_ns": 456.95,
-    "p50_cycles": 1050.0,
-    "p90_cycles": 1346.0,
-    "p99_cycles": 3240.0,
-    "p999_cycles": 4914.0,
-    "p50_ns": 503.3,
-    "p90_ns": 645.18,
-    "p99_ns": 1553.03,
-    "p999_ns": 2355.43,
-    "throughput_ticks_sec": 2188403
+    "avg_ns": 1246.61,
+    "p50_cycles": 2998.0,
+    "p90_cycles": 3596.0,
+    "p99_cycles": 6650.0,
+    "p999_cycles": 10060.0,
+    "p50_ns": 1436.42,
+    "p90_ns": 1722.93,
+    "p99_ns": 3186.18,
+    "p999_ns": 4820.0,
+    "throughput_ticks_sec": 802172
   },
-  "timestamp": "2026-10-19 18:34:54"
+  "timestamp": "2026-10-19 18:59:28"
 }
