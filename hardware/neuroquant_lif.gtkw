@@ -1,0 +1,26 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (URL: http://gtkwave.sourceforge.net/)
+[*]
+[dumpfile] "neuroquant_lif_trace.vcd"
+[savefile] "neuroquant_lif.gtkw"
+[timestart] 0
+[size] 1200 700
+[pos] -1 -1
+*-24.000000 60000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_lif_neuron.
+[sst_width] 225
+[signals_width] 200
+[sst_expanded] 1
+[sst_vlds_cnt] 1
+@28
+tb_lif_neuron.clk
+tb_lif_neuron.rst_n
+@24
+tb_lif_neuron.i_syn_current[31:0]
+@25
+tb_lif_neuron.o_v_mem[31:0]
+@28
+tb_lif_neuron.o_spike
+tb_lif_neuron.o_ready
+[pattern_trace] 1
+[pattern_trace] 0

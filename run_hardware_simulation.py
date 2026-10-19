@@ -91,10 +91,14 @@ def run_single_module(mod_key: str, open_waveforms: bool = False) -> bool:
         return False
 
     if open_waveforms and os.path.exists(vcd_path):
-        print(f"[*] Launching GTKWave Logic Analyzer on {vcd_path}...")
+        gtkw_file = os.path.join(HARDWARE_DIR, f"neuroquant_{mod_key}.gtkw")
+        launch_args = [GTKWAVE_BIN, vcd_path]
+        if os.path.exists(gtkw_file):
+            launch_args.append(gtkw_file)
+        print(f"[*] Launching GTKWave Logic Analyzer on {vcd_path} (Auto-loading signals)...")
         try:
-            subprocess.Popen([GTKWAVE_BIN, vcd_path], cwd=PROJECT_ROOT)
-            print("[+] GTKWave window launched successfully!")
+            subprocess.Popen(launch_args, cwd=PROJECT_ROOT)
+            print("[+] GTKWave window launched successfully with active traces!")
         except Exception as e:
             print(f"[!] Could not launch GTKWave: {e}")
 
