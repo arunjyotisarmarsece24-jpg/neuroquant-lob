@@ -29,6 +29,7 @@ class NeuromorphicConfig:
     weight_decay: float = 0.0001
     w_min: float = -2.0
     w_max: float = 2.0
+    max_reward_magnitude: float = 10.0 # Strict bound for Lemma 3 compact projection
 
 @dataclass
 class MarketConfig:

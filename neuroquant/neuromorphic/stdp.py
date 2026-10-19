@@ -77,13 +77,29 @@ class RewardModulatedSTDP:
         self.post_trace = self.post_trace * self.decay_post + post_spikes.astype(np.float32)
         
         # 4. Modulate Synaptic Weights via Global Reward
+        # Lemma 3 (Compact Synaptic Projection Invariant):
+        # Under any arbitrary reward shock R in (-inf, +inf) during flash crashes,
+        # the reward is strictly bounded to [-R_max, +R_max], and weights are projected
+        # via Pi_{[w_min, w_max]} into the compact invariant set.
+        # Guarantees ||W[t]||_F <= sqrt(N_pre * N_post) * max(|w_min|, |w_max|) < inf for all t >= 0.
         if self.cfg.enable_r_stdp and reward != 0.0:
-            delta_w = self.eta * reward * self.eligibility
+            r_max = getattr(self.cfg, "max_reward_magnitude", 10.0)
+            clipped_reward = float(np.clip(reward, -r_max, r_max))
+            delta_w = self.eta * clipped_reward * self.eligibility
             
             # Apply weight update with weight decay regularization
             self.weights += delta_w - (self.cfg.weight_decay * self.weights)
             
-            # Clamp weights to prevent unbounded runaway excitation
+            # Strict projection operator Pi_{[w_min, w_max]}
             np.clip(self.weights, self.w_min, self.w_max, out=self.weights)
             
         return self.weights
+
+    def get_frobenius_norm(self) -> float:
+        """Returns the L2 Frobenius norm ||W||_F of the plastic synaptic weight matrix."""
+        return float(np.linalg.norm(self.weights, 'fro'))
+
+    def get_max_theoretical_norm(self) -> float:
+        """Strict compact upper bound guaranteed by Lemma 3."""
+        max_val = max(abs(self.w_min), abs(self.w_max))
+        return float(np.sqrt(self.pre_size * self.post_size) * max_val)

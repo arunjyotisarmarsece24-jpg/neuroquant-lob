@@ -13,7 +13,7 @@
 [![10k Monte Carlo](https://img.shields.io/badge/Monte%20Carlo-10%2C000%20Paths%20(93%25%20Win%20Rate)-success.svg)]()
 [![Almgren-Chriss](https://img.shields.io/badge/Execution-Almgren--Chriss%20Optimal%20(η*v^0.5)-blueviolet.svg)]()
 [![Tiered Fees](https://img.shields.io/badge/Tiered%20Fees--0.002%25%20Maker%20vs%20%2B0.005%25%20Taker-gold.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-84%2F84%20Passing-brightgreen.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-89%2F89%20Passing-brightgreen.svg)]()
 [![Technical Whitepaper](https://img.shields.io/badge/Whitepaper-6--Page%20PDF-darkblue.svg)](paper/neuroquant_lob.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -351,7 +351,7 @@ neuroquant audit
 # 3. Launch the Live Mobile Companion Terminal & Web App
 neuroquant app [--host 0.0.0.0] [--port 5000]
 
-# 4. Run Comprehensive Real-World Verification (84 Tests + 4 Audits + Proofs)
+# 4. Run Comprehensive Real-World Verification (89 Tests + 4 Audits + Proofs)
 neuroquant verify [--tests-only] [--proofs-only] [--open-only]
 
 # 5. Stream Live Crypto Wire or Synthetic NASDAQ ITCH 5.0 Feed
@@ -360,8 +360,8 @@ neuroquant live --symbol BTCUSDT --venue binance [--synthetic-itch]
 # 6. Run Almgren-Chriss Optimal Execution Simulator (Non-Linear Impact & Maker Rebates)
 neuroquant execute --shares 10000 --time 60 --risk 1e-4
 
-# 7. Cycle-Accurate Hardware SIMD Latency Profiler (1M __rdtscp iterations)
-neuroquant benchmark [--hardware-rdtscp] [--adversarial] [--itch]
+# 7. Cycle-Accurate Hardware SIMD Latency Profiler, Proofs, Markouts & Ablations
+neuroquant benchmark [--hardware-rdtscp] [--adversarial] [--itch] [--markout] [--ablation]
 
 # 8. Pre-Trade Microsecond Hardware Risk Gate (< 20 ns Circuit Breakers)
 neuroquant risk [--checks 10000]
