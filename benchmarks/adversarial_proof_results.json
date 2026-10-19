@@ -14,7 +14,7 @@
     "n_perturbations": 1000000,
     "min_delta_U": 1.538182914373465e-10,
     "violations": 0,
-    "throughput_evals_sec": 130620.79058990945
+    "throughput_evals_sec": 115426.87049822726
   },
   "attack_3": {
     "theorem": "Theorem 3 (Lyapunov Attractor Stability)",

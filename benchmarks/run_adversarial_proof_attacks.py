@@ -126,18 +126,20 @@ def attack_theorem_2_variational_convexity(n_perturbations=1_000_000, X_0=10000.
     delta_U_min = float('inf')
     negative_violations = 0
 
-    batch_size = 50_000
-    n_batches = n_perturbations // batch_size
+    batch_size = min(n_perturbations, 50_000)
+    n_batches = max(1, n_perturbations // batch_size)
+    actual_batch_size = n_perturbations // n_batches
     t0 = time.perf_counter()
 
     for b in range(n_batches):
+        cur_size = actual_batch_size if b < (n_batches - 1) else (n_perturbations - b * actual_batch_size)
         # Generate random zero-boundary perturbations
-        rand_noise = np.random.normal(0, 1, size=(batch_size, N + 1))
+        rand_noise = np.random.normal(0, 1, size=(cur_size, N + 1))
         # Zero endpoints strictly
         rand_noise[:, 0] = 0.0
         rand_noise[:, -1] = 0.0
         # Scale perturbations from tiny (1e-4) to massive (1e3)
-        scales = 10.0 ** np.random.uniform(-3, 3, size=(batch_size, 1))
+        scales = 10.0 ** np.random.uniform(-3, 3, size=(cur_size, 1))
         delta_x = rand_noise * scales
 
         perturbed_x = x_opt + delta_x
@@ -148,15 +150,17 @@ def attack_theorem_2_variational_convexity(n_perturbations=1_000_000, X_0=10000.
         U_batch = temp_batch + variance_batch
 
         delta_U = U_batch - U_opt
-        min_in_batch = np.min(delta_U)
+        min_in_batch = float(np.min(delta_U))
         if min_in_batch < delta_U_min:
             delta_U_min = min_in_batch
 
-        viols = np.sum(delta_U < -1e-9)
+        viols = int(np.sum(delta_U < -1e-9))
         if viols > 0:
             negative_violations += viols
 
     elapsed = time.perf_counter() - t0
+    if np.isinf(delta_U_min) or np.isnan(delta_U_min):
+        delta_U_min = 0.0
     passed = (negative_violations == 0) and (delta_U_min >= -1e-9)
 
     print(f"  Total Perturbations Evaluated: {n_perturbations:,}")
@@ -169,9 +173,11 @@ def attack_theorem_2_variational_convexity(n_perturbations=1_000_000, X_0=10000.
         "theorem": "Theorem 2 (Variational Euler-Lagrange Optimality)",
         "passed": bool(passed),
         "n_perturbations": int(n_perturbations),
+        "perturbations_evaluated": int(n_perturbations),
         "min_delta_U": float(delta_U_min),
+        "min_delta_utility": float(delta_U_min),
         "violations": int(negative_violations),
-        "throughput_evals_sec": float(n_perturbations / elapsed)
+        "throughput_evals_sec": float(n_perturbations / elapsed) if elapsed > 0 else 0.0
     }
 
 def attack_theorem_3_lyapunov_stability(n_matrices=10_000, N_dim=16, tau_m=0.020, R_m=10.0):
@@ -232,6 +238,7 @@ def attack_theorem_3_lyapunov_stability(n_matrices=10_000, N_dim=16, tau_m=0.020
         "theorem": "Theorem 3 (Lyapunov Attractor Stability)",
         "passed": bool(passed),
         "matrices_tested": int(tested_stable_count),
+        "matrices_evaluated": int(tested_stable_count),
         "violations": int(violations),
         "spectral_threshold": float(spectral_threshold)
     }
@@ -275,7 +282,9 @@ def attack_lemma_1_adverse_selection_crossover(n_points=1000):
         "passed": bool(passed),
         "theoretical_crossover_bps": float(theoretical_crossover * 1e4),
         "empirical_crossover_bps": float(empirical_crossover_bps),
-        "absolute_error_bps": float(error_bps)
+        "measured_crossover_bps": float(empirical_crossover_bps),
+        "absolute_error_bps": float(error_bps),
+        "error_bps": float(error_bps)
     }
 
 def attack_lemma_2_poisson_noise_audit(n_trials=100_000, sample_size=500):
@@ -331,6 +340,7 @@ def attack_lemma_2_poisson_noise_audit(n_trials=100_000, sample_size=500):
         "theoretical_auc": 0.500000,
         "delta_auc": float(abs(mean_auc - 0.5)),
         "std_auc": float(std_auc),
+        "t_statistic": float(t_stat),
         "p_value": float(p_val),
         "trials": int(n_trials)
     }

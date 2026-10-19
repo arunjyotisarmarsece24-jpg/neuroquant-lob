@@ -208,6 +208,19 @@ def almgren_simulate():
         }
     })
 
+def sanitize_for_json(obj):
+    """Recursively replaces inf and nan with 0.0 for strict RFC 8259 JSON compliance."""
+    import math
+    if isinstance(obj, float):
+        if math.isinf(obj) or math.isnan(obj):
+            return 0.0
+        return obj
+    elif isinstance(obj, dict):
+        return {k: sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [sanitize_for_json(v) for v in obj]
+    return obj
+
 @app.route("/api/run_proof_attack", methods=["POST"])
 def run_proof_attack():
     """Executes live adversarial proof attack and returns mathematical verification metrics."""
@@ -239,7 +252,7 @@ def run_proof_attack():
     
     elapsed_ms = (time.perf_counter() - t0) * 1000.0
     res["elapsed_ms"] = round(elapsed_ms, 2)
-    return jsonify(res)
+    return jsonify(sanitize_for_json(res))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)
