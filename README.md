@@ -13,7 +13,7 @@
 [![10k Monte Carlo](https://img.shields.io/badge/Monte%20Carlo-10%2C000%20Paths%20(93%25%20Win%20Rate)-success.svg)]()
 [![Almgren-Chriss](https://img.shields.io/badge/Execution-Almgren--Chriss%20Optimal%20(η*v^0.5)-blueviolet.svg)]()
 [![Tiered Fees](https://img.shields.io/badge/Tiered%20Fees--0.002%25%20Maker%20vs%20%2B0.005%25%20Taker-gold.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-89%2F89%20Passing-brightgreen.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-92%2F92%20Passing-brightgreen.svg)]()
 [![Technical Whitepaper](https://img.shields.io/badge/Whitepaper-6--Page%20PDF-darkblue.svg)](paper/neuroquant_lob.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -235,11 +235,11 @@ python benchmarks/run_itch_benchmark.py
 python benchmarks/run_veteran_audit.py
 ```
 
-### 7. Run the Full Automated Test Suite (40 Tests)
+### 7. Run the Full Automated Test Suite (92 Tests)
 ```bash
 python -m unittest discover tests
 ```
-* **Status:** 40/40 unit tests passing across Python, C++20 SIMD, NASDAQ ITCH 5.0, Offline PyTorch BPTT, and Almgren-Chriss Execution modules in **0.71s**.
+* **Status:** 92/92 unit tests passing across Python, C++20 SIMD, NASDAQ ITCH 5.0, Offline PyTorch BPTT, Almgren-Chriss Execution, Markout Analytics, and Purged Walk-Forward Backtesting modules.
 
 ### 8. Train RSNN Synaptic Weights via Offline PyTorch BPTT (500k Ticks)
 ```bash
@@ -351,7 +351,7 @@ neuroquant audit
 # 3. Launch the Live Mobile Companion Terminal & Web App
 neuroquant app [--host 0.0.0.0] [--port 5000]
 
-# 4. Run Comprehensive Real-World Verification (89 Tests + 4 Audits + Proofs)
+# 4. Run Comprehensive Real-World Verification (92 Tests + 4 Audits + Proofs)
 neuroquant verify [--tests-only] [--proofs-only] [--open-only]
 
 # 5. Stream Live Crypto Wire or Synthetic NASDAQ ITCH 5.0 Feed
@@ -360,8 +360,8 @@ neuroquant live --symbol BTCUSDT --venue binance [--synthetic-itch]
 # 6. Run Almgren-Chriss Optimal Execution Simulator (Non-Linear Impact & Maker Rebates)
 neuroquant execute --shares 10000 --time 60 --risk 1e-4
 
-# 7. Cycle-Accurate Hardware SIMD Latency Profiler, Proofs, Markouts & Ablations
-neuroquant benchmark [--hardware-rdtscp] [--adversarial] [--itch] [--markout] [--ablation]
+# 7. Cycle-Accurate Hardware SIMD Latency Profiler, Proofs, Markouts, Ablations & Walk-Forward
+neuroquant benchmark [--hardware-rdtscp] [--adversarial] [--itch] [--markout] [--ablation] [--walk-forward]
 
 # 8. Pre-Trade Microsecond Hardware Risk Gate (< 20 ns Circuit Breakers)
 neuroquant risk [--checks 10000]

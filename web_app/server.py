@@ -254,5 +254,55 @@ def run_proof_attack():
     res["elapsed_ms"] = round(elapsed_ms, 2)
     return jsonify(sanitize_for_json(res))
 
+@app.route("/api/benchmark/walk_forward", methods=["GET"])
+def get_walk_forward_benchmark():
+    """Returns the 5-fold Purged & Embargoed Walk-Forward Backtesting results."""
+    wf_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "benchmarks", "walk_forward_benchmark_results.json")
+    if os.path.exists(wf_path):
+        with open(wf_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return jsonify(sanitize_for_json(data))
+    else:
+        from benchmarks.run_empirical_lob_benchmark import run_benchmark
+        run_benchmark()
+        with open(wf_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return jsonify(sanitize_for_json(data))
+
+@app.route("/api/benchmark/ablation", methods=["GET"])
+def get_ablation_benchmark():
+    """Returns the Head-to-Head Architecture Ablation Matrix results."""
+    from benchmarks.run_model_ablation import run_ablation_benchmark
+    res = run_ablation_benchmark(num_ticks=2000)
+    return jsonify(sanitize_for_json(res))
+
+@app.route("/api/benchmark/markout", methods=["GET"])
+def get_markout_benchmark():
+    """Returns the Post-Trade Markout Curve results."""
+    from neuroquant.analysis.markout import MarkoutAnalyzer
+    analyzer = MarkoutAnalyzer(maker_rebate_bps=0.20)
+    report = analyzer.run_markout_study(num_ticks=2500, toxic_ratio=0.20)
+    data = {
+        "total_quotes": report.total_quotes_posted,
+        "naive_fills": report.naive_fills,
+        "neuro_fills": report.neuro_fills,
+        "toxic_sweeps_defended": report.toxic_sweeps_defended,
+        "defense_rate_pct": round(report.defense_rate_pct, 1),
+        "naive_net_edge_bps": round(report.naive_net_edge_bps, 3),
+        "neuro_net_edge_bps": round(report.neuro_net_edge_bps, 3),
+        "net_alpha_gain_bps": round(report.net_alpha_gain_bps, 3),
+        "horizons": [
+            {
+                "horizon_ms": h.horizon_ms,
+                "naive_mean_bps": round(h.naive_mean_bps, 3),
+                "neuro_mean_bps": round(h.neuro_mean_bps, 3),
+                "bps_improvement": round(h.bps_improvement, 3),
+                "t_statistic": round(h.t_statistic, 2),
+                "p_value": h.p_value
+            } for h in report.horizons
+        ]
+    }
+    return jsonify(sanitize_for_json(data))
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)

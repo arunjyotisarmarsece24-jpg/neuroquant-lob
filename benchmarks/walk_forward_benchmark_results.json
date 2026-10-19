@@ -1,0 +1,46 @@
+{
+  "n_ticks": 50000,
+  "n_folds": 5,
+  "methodology": "Purged and Embargoed Walk-Forward Cross-Validation (Lopez de Prado 2018)",
+  "strategies": {
+    "naive_mm": {
+      "name": "Naive Passive MM",
+      "sharpe": -2825.87,
+      "dsr": 0.0,
+      "psr": 0.0,
+      "sortino": -8505.3,
+      "calmar": -15781.26,
+      "max_dd_pct": 4.49,
+      "pnl": -4482.57,
+      "rebates": 6751.45,
+      "win_rate": 49.04,
+      "profit_factor": 0.45
+    },
+    "linear_ofi": {
+      "name": "Linear OFI Ridge",
+      "sharpe": 2714.36,
+      "dsr": 1.0,
+      "psr": 1.0,
+      "sortino": 5690.56,
+      "calmar": 539036.1,
+      "max_dd_pct": 0.09,
+      "pnl": 9662.86,
+      "rebates": 22714.64,
+      "win_rate": 84.19,
+      "profit_factor": 2.18
+    },
+    "neuroquant_rsnn": {
+      "name": "NeuroQuant-RSNN",
+      "sharpe": 3825.75,
+      "dsr": 1.0,
+      "psr": 1.0,
+      "sortino": 3816.02,
+      "calmar": 2993101.55,
+      "max_dd_pct": 0.05,
+      "pnl": 6679.33,
+      "rebates": 4548.78,
+      "win_rate": 90.45,
+      "profit_factor": 3.99
+    }
+  }
+}

@@ -125,7 +125,7 @@ def cmd_verify(args):
         return 0
 
     if args.tests_only:
-        console.print("[*] Running 89 Automated Unit Tests across all subsystems...")
+        console.print("[*] Running 92 Automated Unit Tests across all subsystems...")
         cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"]
         res = subprocess.run(cmd, cwd=PROJECT_ROOT)
         return res.returncode
@@ -396,6 +396,12 @@ def cmd_benchmark(args):
         console.print("[bold yellow]Running Head-to-Head Architecture Ablation Matrix...[/bold yellow]")
         from benchmarks.run_model_ablation import run_ablation_benchmark
         run_ablation_benchmark(num_ticks=min(args.iterations, 5000))
+        return 0
+
+    if getattr(args, "walk_forward", False):
+        console.print("[bold yellow]Running 5-Fold Purged & Embargoed Walk-Forward Backtest (Lopez de Prado standard)...[/bold yellow]")
+        from benchmarks.run_empirical_lob_benchmark import run_benchmark
+        run_benchmark()
         return 0
 
     # Default: Hardware Latency Profiler over N iterations
@@ -947,6 +953,7 @@ def main():
     p_bench.add_argument("--itch", action="store_true", help="Run NASDAQ ITCH 5.0 throughput benchmark")
     p_bench.add_argument("--markout", action="store_true", help="Run Post-Trade Markout & Adverse Selection Analysis")
     p_bench.add_argument("--ablation", action="store_true", help="Run Head-to-Head Architecture Ablation Matrix")
+    p_bench.add_argument("--walk-forward", action="store_true", help="Run 5-Fold Purged & Embargoed Walk-Forward Backtest")
 
     # neuroquant compile-simd
     p_simd = subparsers.add_parser("compile-simd", help="Compile & Diagnose C++20 AVX2 SIMD Core")

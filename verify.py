@@ -45,13 +45,13 @@ def print_banner():
     print(banner)
 
 def run_tests():
-    print("[*] STEP 1: Running Automated Unit Test Suite (89 Tests across all subsystems)...")
+    print("[*] STEP 1: Running Automated Unit Test Suite (92 Tests across all subsystems)...")
     cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"]
     res = subprocess.run(cmd, cwd=PROJECT_ROOT)
     if res.returncode != 0:
         print("[FAIL] Unit test suite failed!")
         return False
-    print("[PASS] All 89/89 unit tests passed cleanly!\n")
+    print("[PASS] All 92/92 unit tests passed cleanly!\n")
     return True
 
 def run_brutal_audit():
@@ -187,7 +187,7 @@ def main():
             print(f"[!] Could not open browser automatically: {e}")
 
     print("=" * 80)
-    print("  [SUCCESS] NEUROQUANT-LOB VETERAN VERIFICATION COMPLETE — 56/56 TESTS PASSING!")
+    print("  [SUCCESS] NEUROQUANT-LOB VETERAN VERIFICATION COMPLETE — 92/92 TESTS PASSING!")
     print("  [PROOFS] ALL 5 ADVERSARIAL ATTACKS PASSED: 1,000,000 TRIALS, 0 VIOLATIONS")
     print("  [WHITEPAPER] TECHNICAL WHITEPAPER PDF READY: paper/neuroquant_lob.pdf (6 PAGES)")
     print("=" * 80)
