@@ -15,6 +15,17 @@ import io
 from rich.console import Console
 from rich.panel import Panel
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+if hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Ensure project root is in Python module search path
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
@@ -76,13 +87,19 @@ def main():
         "  • [cyan]Whitepaper Reader:[/cyan] 6-page technical whitepaper with pinch-to-zoom & PDF export\n\n"
         "[dim]To open on mobile: connect phone to same Wi-Fi and browse the Mobile URL or scan below.[/dim]"
     )
-    console.print(Panel(panel_content, border_style="cyan", expand=False))
-    
-    if qr_ascii_str:
-        console.print("[bold yellow]Scan QR Code on your Phone Camera:[/bold yellow]")
-        print(qr_ascii_str)
-
-    console.print("[dim]Press Ctrl+C in this terminal to gracefully shutdown the server.[/dim]\n")
+    try:
+        console = Console(force_terminal=True, legacy_windows=False)
+        console.print(Panel(panel_content, border_style="cyan", expand=False))
+        if qr_ascii_str:
+            console.print("[bold yellow]Scan QR Code on your Phone Camera:[/bold yellow]")
+            print(qr_ascii_str)
+        console.print("[dim]Press Ctrl+C in this terminal to gracefully shutdown the server.[/dim]\n")
+    except Exception:
+        print("=" * 70)
+        print("NEUROQUANT-LOB: DIGITAL NEUROMORPHIC SPIKING ENGINE")
+        print(f"Desktop URL: {local_url}")
+        print(f"Mobile URL:  {mobile_url}")
+        print("=" * 70)
 
     # Launch desktop browser automatically
     threading.Thread(target=open_browser_delayed, args=(local_url,), daemon=True).start()
