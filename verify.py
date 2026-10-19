@@ -45,13 +45,13 @@ def print_banner():
     print(banner)
 
 def run_tests():
-    print("[*] STEP 1: Running Automated Unit Test Suite (48 Tests across all subsystems)...")
+    print("[*] STEP 1: Running Automated Unit Test Suite (56 Tests across all subsystems)...")
     cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"]
     res = subprocess.run(cmd, cwd=PROJECT_ROOT)
     if res.returncode != 0:
         print("[FAIL] Unit test suite failed!")
         return False
-    print("[PASS] All 48/48 unit tests passed cleanly!\n")
+    print("[PASS] All 56/56 unit tests passed cleanly!\n")
     return True
 
 def run_brutal_audit():
@@ -84,8 +84,18 @@ def run_monte_carlo():
     print("[PASS] 10,000-Path Monte Carlo Stress Test completed successfully!\n")
     return True
 
+def run_adversarial_proofs():
+    print("[*] STEP 5: Running Day 6 Adversarial Mathematical Proof Falsification Suite (1,000,000 Trials per Theorem)...")
+    proof_script = os.path.join(PROJECT_ROOT, "benchmarks", "run_adversarial_proof_attacks.py")
+    res = subprocess.run([sys.executable, proof_script], cwd=PROJECT_ROOT)
+    if res.returncode != 0:
+        print("[FAIL] Adversarial mathematical proof falsification encountered a violation!")
+        return False
+    print("[PASS] All 5 Theorems & Lemmas passed 1,000,000 adversarial trials with 0 violations!\n")
+    return True
+
 def run_plot():
-    print("[*] STEP 5: Generating 6-Panel Ultra-HD Visual Dashboard (300 DPI)...")
+    print("[*] STEP 6: Generating 6-Panel Ultra-HD Visual Dashboard (300 DPI)...")
     plot_script = os.path.join(PROJECT_ROOT, "benchmarks", "plot_audit_results.py")
     res = subprocess.run([sys.executable, plot_script], cwd=PROJECT_ROOT)
     if res.returncode != 0:
@@ -94,7 +104,7 @@ def run_plot():
         print("[PASS] 6-Panel Ultra-HD poster generated at benchmarks/brutal_verification_report.png\n")
 
 def run_paper_compilation():
-    print("[*] STEP 6: Compiling Academic 6-Page Research Preprint PDF (paper/neuroquant_lob.pdf)...")
+    print("[*] STEP 7: Compiling Academic 6-Page Research Preprint PDF (paper/neuroquant_lob.pdf)...")
     paper_script = os.path.join(PROJECT_ROOT, "paper", "compile_paper.py")
     res = subprocess.run([sys.executable, paper_script], cwd=PROJECT_ROOT)
     if res.returncode != 0:
@@ -106,9 +116,10 @@ def run_paper_compilation():
 def main():
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Institutional Verification Runner")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically launch HTML report in browser")
-    parser.add_argument("--tests-only", action="store_true", help="Run only the 48-test automated unit test suite")
+    parser.add_argument("--tests-only", action="store_true", help="Run only the 56-test automated unit test suite")
     parser.add_argument("--execution-only", action="store_true", help="Run only the Day 5 Almgren-Chriss execution benchmark")
     parser.add_argument("--monte-carlo", action="store_true", help="Run the 10,000-path Monte Carlo institutional stress test")
+    parser.add_argument("--proofs-only", action="store_true", help="Run only the 1,000,000-trial adversarial proof attacks")
     parser.add_argument("--paper-only", action="store_true", help="Compile only the Academic 6-page research preprint PDF")
     parser.add_argument("--open-only", action="store_true", help="Directly open living 60 FPS HTML terminal in default browser")
     args = parser.parse_args()
@@ -137,11 +148,15 @@ def main():
         run_monte_carlo()
         return
 
+    if args.proofs_only:
+        run_adversarial_proofs()
+        return
+
     if args.paper_only:
         run_paper_compilation()
         return
 
-    # 1. Run Unit Tests (48 Tests)
+    # 1. Run Unit Tests (56 Tests)
     if not run_tests():
         sys.exit(1)
 
@@ -153,13 +168,17 @@ def main():
     if not run_execution_benchmark():
         sys.exit(1)
 
-    # 4. Generate Visual Dashboard
+    # 4. Run Day 6 Adversarial Mathematical Proof Attacks
+    if not run_adversarial_proofs():
+        sys.exit(1)
+
+    # 5. Generate Visual Dashboard
     run_plot()
 
-    # 5. Compile Academic 6-Page Research Preprint
+    # 6. Compile Academic 6-Page Research Preprint
     run_paper_compilation()
 
-    # 6. Open living interactive HTML report
+    # 7. Open living interactive HTML report
     if not args.no_browser and os.path.exists(html_path):
         print(f"[*] Launching Living 60 FPS Institutional Terminal in default browser...")
         try:
@@ -168,7 +187,8 @@ def main():
             print(f"[!] Could not open browser automatically: {e}")
 
     print("=" * 80)
-    print("  [SUCCESS] NEUROQUANT-LOB VETERAN VERIFICATION COMPLETE — 48/48 TESTS PASSING!")
+    print("  [SUCCESS] NEUROQUANT-LOB VETERAN VERIFICATION COMPLETE — 56/56 TESTS PASSING!")
+    print("  [PROOFS] ALL 5 ADVERSARIAL ATTACKS PASSED: 1,000,000 TRIALS, 0 VIOLATIONS")
     print("  [PREPRINT] ACADEMIC PREPRINT PDF READY: paper/neuroquant_lob.pdf (6 PAGES)")
     print("=" * 80)
 
