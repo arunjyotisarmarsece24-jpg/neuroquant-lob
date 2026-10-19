@@ -53,9 +53,30 @@ class ExecutionConfig:
     inventory_risk_aversion: float = 0.01 # Avellaneda-Stoikov gamma parameter
     order_size: int = 1
     latency_penalty_ms: float = 0.5 # Simulated colocation wire-to-decision latency
-    maker_fee_bps: float = -0.002   # Negative fee = maker rebate
-    taker_fee_bps: float = 0.005
+    maker_fee_bps: float = -0.002   # Negative fee = maker rebate (-0.002% = -0.2 bps)
+    taker_fee_bps: float = 0.005    # Taker fee (+0.005% = +0.5 bps)
+    maker_rebate_pct: float = -0.00002 # Exact decimal rate (-0.002%)
+    taker_fee_pct: float = 0.00005     # Exact decimal rate (+0.005%)
+    permanent_impact_gamma: float = 2.5e-7
+    temporary_impact_eta: float = 5.0e-5
+    impact_power: float = 0.5       # Non-linear square-root market impact law
+
+@dataclass
+class AlmgrenChrissExecutionConfig:
+    total_shares: float = 10_000.0
+    time_horizon_sec: float = 60.0
+    num_intervals: int = 20
+    risk_aversion_lambda: float = 1e-4
+    volatility_sigma: float = 0.20
+    gamma: float = 2.5e-7
+    eta: float = 5.0e-5
+    alpha: float = 0.5              # Non-linear square root exponent
+    spread: float = 0.25
+    maker_rebate_rate: float = -0.00002 # -0.002%
+    taker_fee_rate: float = 0.00005     # +0.005%
 
 CONFIG_NEURO = NeuromorphicConfig()
 CONFIG_MARKET = MarketConfig()
 CONFIG_EXEC = ExecutionConfig()
+CONFIG_AC = AlmgrenChrissExecutionConfig()
+

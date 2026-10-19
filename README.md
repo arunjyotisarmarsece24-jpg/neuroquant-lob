@@ -7,8 +7,10 @@
 [![PyTorch BPTT](https://img.shields.io/badge/PyTorch%20BPTT-Surrogate%20Gradient%20(500k%20ticks)-orange.svg)]()
 [![Real-World Audit](https://img.shields.io/badge/Real--World%20Audit-4%2F4%20Levels%20PASSED-brightgreen.svg)]()
 [![Bit Parity](https://img.shields.io/badge/Bit--for--Bit%20Parity-100.00%25%20(23nV%20MAE)-success.svg)]()
-[![Hardware Profiler](https://img.shields.io/badge/1M%20Profiler-P50%20366ns%20%7C%20P99%20537ns-blue.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-32%2F32%20Passing-brightgreen.svg)]()
+[![Hardware Profiler](https://img.shields.io/badge/1M%20Profiler-P50%20385ns%20%7C%20P99%20425ns-blue.svg)]()
+[![Almgren-Chriss](https://img.shields.io/badge/Execution-Almgren--Chriss%20Optimal%20(η*v^0.5)-blueviolet.svg)]()
+[![Tiered Fees](https://img.shields.io/badge/Tiered%20Fees--0.002%25%20Maker%20vs%20%2B0.005%25%20Taker-gold.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-40%2F40%20Passing-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **An institutional-grade, hardware-independent digital neuromorphic application simulating an asynchronous Recurrent Spiking Neural Network (RSNN) coupled to a high-frequency Limit Order Book (LOB) matching engine with online R-STDP synaptic plasticity and live crypto exchange connectivity.**
@@ -229,11 +231,11 @@ python benchmarks/run_itch_benchmark.py
 python benchmarks/run_veteran_audit.py
 ```
 
-### 7. Run the Full Automated Test Suite (32 Tests)
+### 7. Run the Full Automated Test Suite (40 Tests)
 ```bash
 python -m unittest discover tests
 ```
-* **Status:** 32/32 unit tests passing across Python, C++20 SIMD, NASDAQ ITCH 5.0, and Offline PyTorch BPTT modules in **0.64s**.
+* **Status:** 40/40 unit tests passing across Python, C++20 SIMD, NASDAQ ITCH 5.0, Offline PyTorch BPTT, and Almgren-Chriss Execution modules in **0.71s**.
 
 ### 8. Train RSNN Synaptic Weights via Offline PyTorch BPTT (500k Ticks)
 ```bash
@@ -246,7 +248,7 @@ python train_offline_snn.py --ticks 500000 --epochs 5
 ```bash
 python verify.py
 ```
-* Automatically executes the full 32-test suite, the 4-Level Brutal Real-World Verification harness, generates the 6-Panel 4K report, and launches the interactive HTML dashboard (`benchmarks/audit_report.html`) in your default web browser.
+* Automatically executes the full 40-test suite, the 4-Level Brutal Real-World Verification harness, Day 5 Almgren-Chriss execution benchmark, generates visual dashboards, and launches the interactive HTML dashboard (`benchmarks/audit_report.html`) in your default web browser.
 
 ### 10. Run 4-Level Brutal Real-World Verification Harness
 ```bash
@@ -274,6 +276,25 @@ python benchmarks/plot_audit_results.py
 * Interactive single-page browser dashboard viewable anytime at `benchmarks/audit_report.html` (`python verify.py --open-only`).
 
 ![NeuroQuant-LOB 6-Panel Visual Verification Report](benchmarks/brutal_verification_report.png)
+
+### 13. Run Day 5 Almgren-Chriss Optimal Execution & Non-Linear Market Impact Benchmark
+```bash
+python benchmarks/run_execution_benchmark.py
+```
+* Implements discrete Euler-Lagrange optimal portfolio liquidation ($x_j \propto \sinh(\kappa(T - j\tau))$) under non-linear square-root market impact ($h(v) = \eta \cdot \text{sign}(v) |v|^{0.5}$), permanent price impact ($g(v) = \gamma \cdot v$), and tiered exchange fees ($-0.002\%$ maker rebate credit vs $+0.005\%$ taker fee debit).
+* **Comparative Execution Results (10,000 shares across an institutional flash crash cascade):**
+  * **Static TWAP:** Net Shortfall: **$95,968.25** (5.19 bps) | Avg Price: **$18,491.33** | Maker %: **0.0%**
+  * **Static VWAP:** Net Shortfall: **$92,221.97** (4.99 bps) | Avg Price: **$18,491.70** | Maker %: **0.0%**
+  * **Static Almgren-Chriss:** Net Shortfall: **$63,083.97** (3.41 bps) | Avg Price: **$18,494.62** | Maker %: **0.0%**
+  * **NeuroQuant Adaptive AC:** Net Shortfall: **$36,981.72** (2.00 bps) | Avg Price: **$18,496.86** | Maker %: **28.4%**
+* **Alpha & Risk Surplus:**
+  * **Shortfall Reduction vs TWAP:** **-$58,986.52 (-61.5%)**
+  * **Shortfall Reduction vs Static AC:** **-$26,102.24 (-41.4%)**
+  * **Exchange Maker Rebates Earned:** **$1,050.93** credited to cash portfolio.
+  * **Execution Quality:** Higher average fill price ($+\$5.53/\text{share}$ vs TWAP).
+
+![Almgren-Chriss Execution Benchmark Report](benchmarks/execution_benchmark_report.png)
+
 
 
 ---

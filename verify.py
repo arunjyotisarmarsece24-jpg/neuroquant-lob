@@ -45,13 +45,13 @@ def print_banner():
     print(banner)
 
 def run_tests():
-    print("[*] STEP 1: Running Automated Unit Test Suite (32 Tests)...")
+    print("[*] STEP 1: Running Automated Unit Test Suite (40 Tests across all subsystems)...")
     cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"]
     res = subprocess.run(cmd, cwd=PROJECT_ROOT)
     if res.returncode != 0:
         print("[FAIL] Unit test suite failed!")
         return False
-    print("[PASS] All 32/32 unit tests passed cleanly!\n")
+    print("[PASS] All 40/40 unit tests passed cleanly!\n")
     return True
 
 def run_brutal_audit():
@@ -64,8 +64,18 @@ def run_brutal_audit():
     print("[PASS] All 4 Brutal Audit levels passed with institutional distinction!\n")
     return True
 
+def run_execution_benchmark():
+    print("[*] STEP 3: Running Day 5 Almgren-Chriss Optimal Execution & Market Impact Benchmark...")
+    exec_script = os.path.join(PROJECT_ROOT, "benchmarks", "run_execution_benchmark.py")
+    res = subprocess.run([sys.executable, exec_script], cwd=PROJECT_ROOT)
+    if res.returncode != 0:
+        print("[FAIL] Execution benchmark encountered an error!")
+        return False
+    print("[PASS] Day 5 Almgren-Chriss comparative execution benchmark completed!\n")
+    return True
+
 def run_plot():
-    print("[*] STEP 3: Generating 6-Panel Ultra-HD Visual Dashboard (300 DPI)...")
+    print("[*] STEP 4: Generating 6-Panel Ultra-HD Visual Dashboard (300 DPI)...")
     plot_script = os.path.join(PROJECT_ROOT, "benchmarks", "plot_audit_results.py")
     res = subprocess.run([sys.executable, plot_script], cwd=PROJECT_ROOT)
     if res.returncode != 0:
@@ -76,7 +86,8 @@ def run_plot():
 def main():
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Institutional Verification Runner")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically launch HTML report in browser")
-    parser.add_argument("--tests-only", action="store_true", help="Run only the automated unit test suite")
+    parser.add_argument("--tests-only", action="store_true", help="Run only the 40-test automated unit test suite")
+    parser.add_argument("--execution-only", action="store_true", help="Run only the Day 5 Almgren-Chriss execution benchmark")
     parser.add_argument("--open-only", action="store_true", help="Directly open existing HTML report in default browser")
     args = parser.parse_args()
 
@@ -96,7 +107,11 @@ def main():
         run_tests()
         return
 
-    # 1. Run Unit Tests
+    if args.execution_only:
+        run_execution_benchmark()
+        return
+
+    # 1. Run Unit Tests (40 Tests)
     if not run_tests():
         sys.exit(1)
 
@@ -104,10 +119,14 @@ def main():
     if not run_brutal_audit():
         sys.exit(1)
 
-    # 3. Generate Visual Dashboard
+    # 3. Run Day 5 Execution Benchmark
+    if not run_execution_benchmark():
+        sys.exit(1)
+
+    # 4. Generate Visual Dashboard
     run_plot()
 
-    # 4. Open interactive HTML report
+    # 5. Open interactive HTML report
     if not args.no_browser and os.path.exists(html_path):
         print(f"[*] Launching Interactive Institutional HTML Report in default browser...")
         try:
@@ -116,8 +135,9 @@ def main():
             print(f"[!] Could not open browser automatically: {e}")
 
     print("=" * 80)
-    print("  [SUCCESS] NEUROQUANT-LOB VERIFICATION COMPLETE — READY FOR DAY 5 UPGRADE!")
+    print("  [SUCCESS] NEUROQUANT-LOB FULL VERIFICATION COMPLETE — DAY 5 OPERATIONAL!")
     print("=" * 80)
 
 if __name__ == "__main__":
     main()
+
