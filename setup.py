@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="neuroquant-lob",
-    version="1.0.0",
+    version="1.1.0",
     author="Arunjyoti Sarma",
     description="Digital Neuromorphic Spiking Engine for Asynchronous Microstructure Alpha & Execution",
     long_description=open("README.md", encoding="utf-8").read(),
