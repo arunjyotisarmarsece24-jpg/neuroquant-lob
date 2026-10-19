@@ -45,13 +45,13 @@ def print_banner():
     print(banner)
 
 def run_tests():
-    print("[*] STEP 1: Running Automated Unit Test Suite (92 Tests across all subsystems)...")
+    print("[*] STEP 1: Running Automated Unit Test Suite (95 Tests across all subsystems)...")
     cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"]
     res = subprocess.run(cmd, cwd=PROJECT_ROOT)
     if res.returncode != 0:
         print("[FAIL] Unit test suite failed!")
         return False
-    print("[PASS] All 92/92 unit tests passed cleanly!\n")
+    print("[PASS] All 95/95 unit tests passed cleanly!\n")
     return True
 
 def run_brutal_audit():
