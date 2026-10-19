@@ -89,6 +89,11 @@ class PreTradeRiskGate:
         self.killswitch_reason = ""
         self.killswitch_timestamp_ns = 0
 
+    @property
+    def is_killed(self) -> bool:
+        """Returns True if the pre-trade emergency killswitch has been tripped."""
+        return self.killswitch_tripped
+
     def validate_order(self, 
                        side: str, 
                        quantity: float, 

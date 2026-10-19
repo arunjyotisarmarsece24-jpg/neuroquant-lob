@@ -13,7 +13,7 @@
 [![10k Monte Carlo](https://img.shields.io/badge/Monte%20Carlo-10%2C000%20Paths%20(93%25%20Win%20Rate)-success.svg)]()
 [![Almgren-Chriss](https://img.shields.io/badge/Execution-Almgren--Chriss%20Optimal%20(η*v^0.5)-blueviolet.svg)]()
 [![Tiered Fees](https://img.shields.io/badge/Tiered%20Fees--0.002%25%20Maker%20vs%20%2B0.005%25%20Taker-gold.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-79%2F79%20Passing-brightgreen.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-84%2F84%20Passing-brightgreen.svg)]()
 [![Technical Whitepaper](https://img.shields.io/badge/Whitepaper-6--Page%20PDF-darkblue.svg)](paper/neuroquant_lob.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -342,31 +342,37 @@ NeuroQuant-LOB packages all execution, benchmarking, verification, and live feed
 # Install once in editable/production mode
 pip install -e .
 
-# 1. Launch the Live Mobile Companion Terminal & Web App
+# 1. Autonomous Institutional HFT Market Maker & Execution Loop
+neuroquant live-trade --symbol BTCUSDT --ticks 25 [--live-feed] [--fast]
+
+# 2. Automated 8-Stage Institutional Falsification & Due Diligence Audit
+neuroquant audit
+
+# 3. Launch the Live Mobile Companion Terminal & Web App
 neuroquant app [--host 0.0.0.0] [--port 5000]
 
-# 2. Run Comprehensive Real-World Verification (60 Tests + 4 Audits + Proofs)
+# 4. Run Comprehensive Real-World Verification (84 Tests + 4 Audits + Proofs)
 neuroquant verify [--tests-only] [--proofs-only] [--open-only]
 
-# 3. Stream Live Crypto Wire or Synthetic NASDAQ ITCH 5.0 Feed
+# 5. Stream Live Crypto Wire or Synthetic NASDAQ ITCH 5.0 Feed
 neuroquant live --symbol BTCUSDT --venue binance [--synthetic-itch]
 
-# 4. Run Almgren-Chriss Optimal Execution Simulator (Non-Linear Impact & Maker Rebates)
+# 6. Run Almgren-Chriss Optimal Execution Simulator (Non-Linear Impact & Maker Rebates)
 neuroquant execute --shares 10000 --time 60 --risk 1e-4
 
-# 5. Cycle-Accurate Hardware SIMD Latency Profiler (1M __rdtscp iterations)
+# 7. Cycle-Accurate Hardware SIMD Latency Profiler (1M __rdtscp iterations)
 neuroquant benchmark [--hardware-rdtscp] [--adversarial] [--itch]
 
-# 6. Pre-Trade Microsecond Hardware Risk Gate (< 20 ns Circuit Breakers)
+# 8. Pre-Trade Microsecond Hardware Risk Gate (< 20 ns Circuit Breakers)
 neuroquant risk [--checks 10000]
 
-# 7. Institutional FIX 4.4 Wire Protocol & Venue Matching Simulator
+# 9. Institutional FIX 4.4 Wire Protocol & Venue Matching Simulator
 neuroquant fix [--symbol BTCUSDT] [--wire-dump]
 
-# 8. Compile & Diagnose C++20 AVX2 SIMD Core
+# 10. Compile & Diagnose C++20 AVX2 SIMD Core
 neuroquant compile-simd [--clean] [--check]
 
-# 9. Print Product Manifest & System Information
+# 11. Print Product Manifest & System Information
 neuroquant version
 ```
 
