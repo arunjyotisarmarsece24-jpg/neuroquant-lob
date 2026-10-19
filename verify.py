@@ -104,23 +104,23 @@ def run_plot():
         print("[PASS] 6-Panel Ultra-HD poster generated at benchmarks/brutal_verification_report.png\n")
 
 def run_paper_compilation():
-    print("[*] STEP 7: Compiling Academic 6-Page Research Preprint PDF (paper/neuroquant_lob.pdf)...")
+    print("[*] STEP 7: Compiling 6-Page Technical Architecture Whitepaper PDF (paper/neuroquant_lob.pdf)...")
     paper_script = os.path.join(PROJECT_ROOT, "paper", "compile_paper.py")
     res = subprocess.run([sys.executable, paper_script], cwd=PROJECT_ROOT)
     if res.returncode != 0:
         print("[WARNING] Paper compilation encountered an issue.")
         return False
-    print("[PASS] Academic 6-page research preprint PDF compiled successfully!\n")
+    print("[PASS] 6-page technical architecture whitepaper PDF compiled successfully!\n")
     return True
 
 def main():
-    parser = argparse.ArgumentParser(description="NeuroQuant-LOB Institutional Verification Runner")
+    parser = argparse.ArgumentParser(description="NeuroQuant-LOB Master Verification Runner")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically launch HTML report in browser")
     parser.add_argument("--tests-only", action="store_true", help="Run only the 56-test automated unit test suite")
     parser.add_argument("--execution-only", action="store_true", help="Run only the Day 5 Almgren-Chriss execution benchmark")
     parser.add_argument("--monte-carlo", action="store_true", help="Run the 10,000-path Monte Carlo institutional stress test")
     parser.add_argument("--proofs-only", action="store_true", help="Run only the 1,000,000-trial adversarial proof attacks")
-    parser.add_argument("--paper-only", action="store_true", help="Compile only the Academic 6-page research preprint PDF")
+    parser.add_argument("--paper-only", action="store_true", help="Compile only the 6-page technical architecture whitepaper PDF")
     parser.add_argument("--open-only", action="store_true", help="Directly open living 60 FPS HTML terminal in default browser")
     args = parser.parse_args()
 
@@ -189,7 +189,7 @@ def main():
     print("=" * 80)
     print("  [SUCCESS] NEUROQUANT-LOB VETERAN VERIFICATION COMPLETE — 56/56 TESTS PASSING!")
     print("  [PROOFS] ALL 5 ADVERSARIAL ATTACKS PASSED: 1,000,000 TRIALS, 0 VIOLATIONS")
-    print("  [PREPRINT] ACADEMIC PREPRINT PDF READY: paper/neuroquant_lob.pdf (6 PAGES)")
+    print("  [WHITEPAPER] TECHNICAL WHITEPAPER PDF READY: paper/neuroquant_lob.pdf (6 PAGES)")
     print("=" * 80)
 
 if __name__ == "__main__":

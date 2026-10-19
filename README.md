@@ -11,11 +11,11 @@
 [![10k Monte Carlo](https://img.shields.io/badge/Monte%20Carlo-10%2C000%20Paths%20(93%25%20Win%20Rate)-success.svg)]()
 [![Almgren-Chriss](https://img.shields.io/badge/Execution-Almgren--Chriss%20Optimal%20(η*v^0.5)-blueviolet.svg)]()
 [![Tiered Fees](https://img.shields.io/badge/Tiered%20Fees--0.002%25%20Maker%20vs%20%2B0.005%25%20Taker-gold.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-48%2F48%20Passing-brightgreen.svg)]()
-[![Research Preprint](https://img.shields.io/badge/Preprint-6--Page%20PDF%20(LaTeX%2FTypst)-darkblue.svg)](paper/neuroquant_lob.pdf)
+[![Unit Tests](https://img.shields.io/badge/Tests-56%2F56%20Passing-brightgreen.svg)]()
+[![Technical Whitepaper](https://img.shields.io/badge/Whitepaper-6--Page%20PDF-darkblue.svg)](paper/neuroquant_lob.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **An institutional-grade, hardware-independent digital neuromorphic application simulating an asynchronous Recurrent Spiking Neural Network (RSNN) coupled to a high-frequency Limit Order Book (LOB) matching engine with online R-STDP synaptic plasticity and live crypto exchange connectivity.**
+> **A hardware-independent digital neuromorphic software architecture designed by Arunjyoti Sarma, simulating an asynchronous Recurrent Spiking Neural Network (RSNN) coupled to a high-frequency Limit Order Book (LOB) matching engine with online R-STDP synaptic plasticity and optimal execution.**
 
 ---
 
@@ -299,9 +299,9 @@ python benchmarks/run_execution_benchmark.py
 
 ---
 
-## 📄 Day 6 Academic Research Preprint: NeuroQuant-LOB (SSRN / arXiv)
+## 📄 Technical Architecture Whitepaper & System Reference
 
-We have authored and compiled a rigorous, peer-review-formatted **6-page research preprint PDF** in [`paper/neuroquant_lob.pdf`](paper/neuroquant_lob.pdf) with IEEE Transactions / arXiv dual-column layout. The paper provides complete mathematical proofs, Lyapunov stability theorems, micro-architecture specifications, and transaction cost benchmarks.
+We have authored and compiled a rigorous **6-page technical architecture whitepaper PDF** in [`paper/neuroquant_lob.pdf`](paper/neuroquant_lob.pdf) by **Arunjyoti Sarma**. The paper provides complete mathematical proofs, Lyapunov stability theorems, micro-architecture specifications, and transaction cost benchmarks.
 
 ### Formal Theorems & Mathematical Proofs Included:
 1. **Theorem 1 (Asymptotic Exponential Decay & Contractive Invariance):**  
@@ -321,15 +321,31 @@ We have authored and compiled a rigorous, peer-review-formatted **6-page researc
 
 ### Manuscript Sources & 1-Click Compilation:
 - **Compiled Publication PDF (Strict 6 Pages):** [`paper/neuroquant_lob.pdf`](paper/neuroquant_lob.pdf)
-- **Standard IEEEtran LaTeX Source:** [`paper/neuroquant_lob.tex`](paper/neuroquant_lob.tex)
-- **BibTeX Literature Database:** [`paper/references.bib`](paper/references.bib)
-- **Typst Manuscript Source:** [`paper/neuroquant_lob.typ`](paper/neuroquant_lob.typ)
+- **Author:** Arunjyoti Sarma
+- **Source Files:** [`paper/neuroquant_lob.typ`](paper/neuroquant_lob.typ), [`paper/neuroquant_lob.tex`](paper/neuroquant_lob.tex), [`paper/references.bib`](paper/references.bib)
 - **1-Click Python Compilation:**
   ```bash
   python verify.py --paper-only
   # or directly:
   python paper/compile_paper.py
   ```
+
+---
+
+## 📱 Mobile-First Interactive Companion Web App & PWA
+
+To explore and test NeuroQuant-LOB on your smartphone, tablet, or desktop browser in an absolute real way:
+
+```powershell
+python run_app.py
+```
+This launches the local web server on port 5000 and prints a scannable **terminal QR code** and **LAN URL** (e.g. `http://192.168.1.8:5000`). Connect any phone on the same Wi-Fi network to experience:
+- **Guided Walkthrough:** Visual step-by-step breakdown of LOB microstructure, 230 ns SIMD cores, RSNN spiking dynamics, and Almgren-Chriss execution.
+- **Live L2 Depth Ladder:** Real-time mobile DOM with touch controls to inject toxic sweeps and test quoting defense.
+- **Membrane Oscilloscope:** Live canvas rendering of $V_m$ action potentials and raster spiking plots.
+- **Almgren-Chriss Optimizer:** Interactive sliders for shares, volatility, and fee schedule with real-time trajectory visualization.
+- **Mathematical Proof Attacks:** Run live 1,000,000-trial falsification attacks right from your mobile device.
+- **Integrated Whitepaper Reader:** Read all 6 pages of the technical architecture whitepaper on mobile with pinch-to-zoom and full PDF download.
 
 ---
 

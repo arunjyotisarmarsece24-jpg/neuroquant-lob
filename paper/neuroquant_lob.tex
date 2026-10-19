@@ -1,4 +1,5 @@
-\documentclass[journal,twocolumn,10pt]{IEEEtran}
+\documentclass[journal,twocolumn,10pt]{article}
+\usepackage[margin=1.8cm,top=2.0cm,bottom=2.0cm]{geometry}
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{algorithmic}
@@ -18,14 +19,15 @@
 
 \begin{document}
 
-\title{NeuroQuant-LOB: Microsecond Neuromorphic Computing for Asynchronous High-Frequency Limit Order Book Dynamics and Optimal Execution}
+\title{\textbf{NeuroQuant-LOB: Microsecond Neuromorphic Computing for Asynchronous High-Frequency Limit Order Book Dynamics and Optimal Execution}\\
+\large Technical Whitepaper \& System Architecture Reference}
 
-\author{Arunjyoti~Sarma%
-\thanks{Arunjyoti Sarma is with the Department of Electronics Engineering, Indian Institute of Technology (BHU), Varanasi 221005, India (e-mail: arunjyoti.sarma.ece24@itbhu.ac.in). Source code, C++20 AVX2 kernels, and datasets are open-source at \url{https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob}.}
+\author{\textbf{Arunjyoti~Sarma}\\
+Personal Quantitative Software Engineering Project $|$ Open-Source Flagship\\
+\url{https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob}
 }
 
-\markboth{Preprint: Under Institutional Peer Review, October 2026}%
-{Sarma: NeuroQuant-LOB: Microsecond Neuromorphic Computing for LOB Dynamics and Optimal Execution}
+\date{October 2026}
 
 \maketitle
 
@@ -33,12 +35,11 @@
 Modern financial electronic markets operate at microsecond resolution, producing dense, asynchronous, non-stationary Limit Order Book (LOB) event cascades. Traditional deep learning architectures (e.g., LSTMs, Transformers) deployed on von Neumann computing systems incur unacceptable inference latencies ($100-500\,\mu\text{s}$), suffer from memory bandwidth contention under cache-line thrashing, and fail to exploit temporal sparsity. In this work, we propose \textbf{NeuroQuant-LOB}, an institutional-grade, hardware-vectorized neuromorphic computing architecture that directly couples an asynchronous Recurrent Spiking Neural Network (RSNN) with biological Leaky Integrate-and-Fire (LIF) dynamics to a cache-aligned Level 2 LOB matching engine. Implemented in a bare-metal C++20 AVX2 SIMD hot-path (\texttt{alignas(64)}), our core processes raw NASDAQ TotalView-ITCH 5.0 binary feeds at \textbf{30.18 million messages per second} ($33.1\,\text{ns}$ per packet) with a cycle-accurate median tick-to-signal latency of \textbf{230\,ns} and zero dynamic heap allocations. An offline PyTorch BPTT surrogate-gradient training pipeline trained across 500,000 market events achieves \textbf{8.5\% biological spiking sparsity} with an ROC-AUC of \textbf{0.865} across multi-horizon microstructure targets. Furthermore, we develop a closed-form discrete Euler-Lagrange Almgren-Chriss execution optimizer incorporating non-linear square-root market impact ($\eta \cdot v^{0.5}$), Bouchaud power-law transient impact memory, Glosten-Milgrom adverse selection maker fills, and tiered exchange fee accounting ($-0.002\%$ maker rebate vs. $+0.005\%$ taker fee). Under empirical flash crash stress testing and a 10,000-path Monte Carlo simulation, NeuroQuant-LOB achieves a \textbf{61.5\% reduction in Implementation Shortfall} relative to TWAP and a \textbf{41.4\% reduction} relative to static Almgren-Chriss, earning \textbf{\$1,050.93} in passive maker rebates while demonstrating a \textbf{92.96\% win rate} ($t = 97.16, p < 10^{-300}$). A bare-metal C++20 SIMD schedule solver optimizes full liquidation curves in \textbf{2.82\,$\mu$s} ($>370,000$ schedules/sec).
 \end{abstract}
 
-\begin{IEEEkeywords}
+\paragraph{Keywords:}
 Neuromorphic Computing, Recurrent Spiking Neural Networks (RSNN), High-Frequency Trading (HFT), Limit Order Book (LOB), NASDAQ ITCH 5.0, AVX2 SIMD, Almgren-Chriss Execution, Non-Linear Market Impact, Implementation Shortfall.
-\end{IEEEkeywords}
 
 \section{Introduction \& Microstructure Mechanics}
-\IEEEPARstart{E}{lectronic} financial markets are continuous double auctions coordinated via a centralized Limit Order Book (LOB)~\cite{hasbrouck2007empirical}. In high-frequency equity and derivative venues, price discovery unfolds through discrete packet messages governed by protocols such as NASDAQ TotalView-ITCH 5.0~\cite{cont2010stochastic}. Order arrivals, cancellations, and aggressive cross-spread executions arrive asynchronously in non-Poissonian clusters, exhibiting power-law inter-arrival times and heavy-tailed volume distributions~\cite{bouchaud2004fluctuations}.
+Electronic financial markets are continuous double auctions coordinated via a centralized Limit Order Book (LOB)~\cite{hasbrouck2007empirical}. In high-frequency equity and derivative venues, price discovery unfolds through discrete packet messages governed by protocols such as NASDAQ TotalView-ITCH 5.0~\cite{cont2010stochastic}. Order arrivals, cancellations, and aggressive cross-spread executions arrive asynchronously in non-Poissonian clusters, exhibiting power-law inter-arrival times and heavy-tailed volume distributions~\cite{bouchaud2004fluctuations}.
 
 \subsection{The Microsecond Execution Dilemma}
 Under high-volume regimes, peak burst activity exceeds 500,000 events per second per instrument. Algorithmic execution systems face severe computational bottlenecks:

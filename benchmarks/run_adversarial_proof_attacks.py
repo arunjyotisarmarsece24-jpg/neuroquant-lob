@@ -50,8 +50,9 @@ def attack_theorem_1_bibo_invariance(n_steps=1_000_000, dt=1e-4, tau_m=0.020, R_
     np.random.seed(42)
     inputs = np.random.uniform(-I_max, I_max, size=n_steps)
     
-    # Pathological stress: inject maximum alternating impulses for first 10,000 steps
-    inputs[:10_000] = I_max * np.sign(np.sin(np.arange(10_000) * 0.1))
+    # Pathological stress: inject maximum alternating impulses for first initial steps
+    n_stress = min(10_000, n_steps)
+    inputs[:n_stress] = I_max * np.sign(np.sin(np.arange(n_stress) * 0.1))
 
     violations = 0
     max_envelope_observed = 0.0

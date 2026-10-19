@@ -5,24 +5,23 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
-## [1.1.0] - 2026-10-19 — Institutional Quant & Research Preprint Release
+## [1.1.0] - 2026-10-19 — Flagship Technical Whitepaper & Mobile App Release
 
 ### 🚀 Highlights
-* **Academic Research Preprint PDF:** Authored and compiled [`paper/neuroquant_lob.pdf`](paper/neuroquant_lob.pdf) (Strict 6 Pages, 3.81 MB) in IEEEtran / SSRN / arXiv layout with 15 peer-reviewed citations.
+* **Technical Architecture Whitepaper:** Authored and compiled [`paper/neuroquant_lob.pdf`](paper/neuroquant_lob.pdf) (Strict 6 Pages, 3.81 MB) by **Arunjyoti Sarma**, detailing microsecond neuromorphic LOB dynamics, 230 ns AVX2 SIMD core, and Almgren-Chriss optimal execution with 15 peer-reviewed citations.
+* **Mobile-First Interactive Companion Web App & PWA:** Built touch-optimized mobile interface in `web_app/` with bottom navigation, walkthrough guide, live order book DOM, touch oscilloscope, Almgren-Chriss simulator, whitepaper viewer, and LAN/QR code access (`python run_app.py`).
 * **1,000,000-Trial Adversarial Mathematical Proof Attacks:** Every theorem and lemma empirically verified under 1,000,000 numerical trials with **zero violations**:
   * **Theorem 1 (Asymptotic BIBO Stability):** $\|V(t) - V_{\text{rest}}\| \le 50.00\text{ mV}$ (Max observed: 6.08 mV, margin: +43.92 mV).
   * **Theorem 2 (Discrete Euler-Lagrange Variational Optimality):** Minimum $\Delta U = +1.538\times 10^{-10} \ge 0$ across 1,000,000 zero-boundary perturbations.
   * **Theorem 3 (Lyapunov Global Compact Attractor):** $\dot{\mathcal{V}} < 0$ in 10,000/10,000 stable matrices with $\|\mathbf{W}\|_2 < \tau_m / R_m = 0.0020$.
   * **Lemma 1 (Maker-Taker Fee Crossover):** Measured crossover at 0.7007 bps vs theoretical 0.7000 bps (error: 0.0007 bps).
   * **Lemma 2 (Zero Signal Hallucination under Poisson Null):** Mean $\text{AUC} = 0.499939$, $t = -0.7416$, $p = 0.4583 > 0.05$.
-* **Unit Test Suite Expanded:** Expanded to **56 / 56 automated unit tests passing** in 2.5s ([`tests/test_mathematical_proofs.py`](tests/test_mathematical_proofs.py)).
+* **Unit Test Suite Expanded:** Expanded to **56 / 56 automated unit tests passing** in 0.99s ([`tests/test_mathematical_proofs.py`](tests/test_mathematical_proofs.py)).
 * **Living 60 FPS HTML Terminal Upgrade:**
   * Auto-starts at 60 FPS on page load and auto-replays liquidation trajectories continuously.
-  * Embedded **Institutional Preprint Manuscript Dossier** with 6-page vector renders, zoom controls, and PDF download.
+  * Embedded **Technical Whitepaper Dossier** with 6-page vector renders, zoom controls, and PDF download.
   * Embedded **Interactive Adversarial Proof Room** with client-side JavaScript falsification engines and canvas visualizer.
-  * Embedded **Targeted Quant Managing Director Pitch Room** for Citadel, Millennium, RenTech, Jump Trading, and Jane Street.
 * **Packaging & Distribution:** Compiled PyPI binary wheel (`dist/neuroquant_lob-1.1.0-py3-none-any.whl`) and source tarball (`dist/neuroquant_lob-1.1.0.tar.gz`).
-* **Targeted Quant MD Outreach Package:** Created specialized technical pitch letters in [`outreach/`](outreach/).
 
 ---
 

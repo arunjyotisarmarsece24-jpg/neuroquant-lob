@@ -7,8 +7,8 @@
       #grid(
         columns: (1fr, 1fr),
         align: (left, right),
-        [PREPRINT: NEUROQUANT-LOB — ASYNCHRONOUS LOB & OPTIMAL EXECUTION],
-        [SARMA: MICROSECOND NEUROMORPHIC COMPUTING]
+        [TECHNICAL WHITEPAPER: NEUROQUANT-LOB — ASYNCHRONOUS LOB & OPTIMAL EXECUTION],
+        [ARUNJYOTI SARMA: NEUROMORPHIC QUANTITATIVE COMPUTING]
       )
       #v(-2pt)
       #line(length: 100%, stroke: 0.4pt + rgb("#cccccc"))
@@ -74,15 +74,18 @@
   #text(size: 16.5pt, weight: "bold", font: "Times New Roman")[
     NeuroQuant-LOB: Microsecond Neuromorphic Computing for Asynchronous High-Frequency Limit Order Book Dynamics and Optimal Execution
   ]
+  #v(4pt)
+  #text(size: 10.5pt, weight: "bold", fill: rgb("#1a365d"))[
+    Technical Whitepaper & System Architecture Reference
+  ]
   #v(6pt)
-  #text(size: 10.5pt, weight: "medium")[
-    *Arunjyoti Sarma*
+  #text(size: 11pt, weight: "bold")[
+    Arunjyoti Sarma
   ]
   #v(2pt)
   #text(size: 8.5pt, style: "italic", fill: rgb("#333333"))[
-    Department of Electronics Engineering, Indian Institute of Technology (BHU), Varanasi 221005, India\
-    High-Frequency Algorithmic Systems & Neuromorphic Architecture Research Group\
-    Email: arunjyoti.sarma.ece24\@itbhu.ac.in | Repository: github.com/arunjyotisarmarsece24-jpg/neuroquant-lob
+    Personal Quantitative Software Engineering Project | Open-Source Flagship\
+    Repository: github.com/arunjyotisarmarsece24-jpg/neuroquant-lob
   ]
   #v(8pt)
 ]
