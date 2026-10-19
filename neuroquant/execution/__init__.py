@@ -23,6 +23,10 @@ from .adaptive_execution import (
     NeuromorphicAdaptiveExecutionEngine,
     AdaptiveUrgencyConfig
 )
+from .veteran_execution import (
+    VeteranExecutionEngine,
+    VeteranExecutionConfig
+)
 
 __all__ = [
     "NonLinearMarketImpactEngine",
@@ -35,4 +39,6 @@ __all__ = [
     "LiquidationSchedule",
     "NeuromorphicAdaptiveExecutionEngine",
     "AdaptiveUrgencyConfig",
+    "VeteranExecutionEngine",
+    "VeteranExecutionConfig",
 ]

@@ -45,13 +45,13 @@ def print_banner():
     print(banner)
 
 def run_tests():
-    print("[*] STEP 1: Running Automated Unit Test Suite (40 Tests across all subsystems)...")
+    print("[*] STEP 1: Running Automated Unit Test Suite (48 Tests across all subsystems)...")
     cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"]
     res = subprocess.run(cmd, cwd=PROJECT_ROOT)
     if res.returncode != 0:
         print("[FAIL] Unit test suite failed!")
         return False
-    print("[PASS] All 40/40 unit tests passed cleanly!\n")
+    print("[PASS] All 48/48 unit tests passed cleanly!\n")
     return True
 
 def run_brutal_audit():
@@ -74,8 +74,18 @@ def run_execution_benchmark():
     print("[PASS] Day 5 Almgren-Chriss comparative execution benchmark completed!\n")
     return True
 
+def run_monte_carlo():
+    print("[*] STEP 4: Running 10,000-Path Monte Carlo Institutional Stress Test Harness...")
+    mc_script = os.path.join(PROJECT_ROOT, "benchmarks", "run_monte_carlo_execution.py")
+    res = subprocess.run([sys.executable, mc_script], cwd=PROJECT_ROOT)
+    if res.returncode != 0:
+        print("[FAIL] Monte Carlo simulation encountered an error!")
+        return False
+    print("[PASS] 10,000-Path Monte Carlo Stress Test completed successfully!\n")
+    return True
+
 def run_plot():
-    print("[*] STEP 4: Generating 6-Panel Ultra-HD Visual Dashboard (300 DPI)...")
+    print("[*] STEP 5: Generating 6-Panel Ultra-HD Visual Dashboard (300 DPI)...")
     plot_script = os.path.join(PROJECT_ROOT, "benchmarks", "plot_audit_results.py")
     res = subprocess.run([sys.executable, plot_script], cwd=PROJECT_ROOT)
     if res.returncode != 0:
@@ -86,9 +96,10 @@ def run_plot():
 def main():
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Institutional Verification Runner")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically launch HTML report in browser")
-    parser.add_argument("--tests-only", action="store_true", help="Run only the 40-test automated unit test suite")
+    parser.add_argument("--tests-only", action="store_true", help="Run only the 48-test automated unit test suite")
     parser.add_argument("--execution-only", action="store_true", help="Run only the Day 5 Almgren-Chriss execution benchmark")
-    parser.add_argument("--open-only", action="store_true", help="Directly open existing HTML report in default browser")
+    parser.add_argument("--monte-carlo", action="store_true", help="Run the 10,000-path Monte Carlo institutional stress test")
+    parser.add_argument("--open-only", action="store_true", help="Directly open living 60 FPS HTML terminal in default browser")
     args = parser.parse_args()
 
     html_path = os.path.join(PROJECT_ROOT, "benchmarks", "audit_report.html")
@@ -111,7 +122,11 @@ def main():
         run_execution_benchmark()
         return
 
-    # 1. Run Unit Tests (40 Tests)
+    if args.monte_carlo:
+        run_monte_carlo()
+        return
+
+    # 1. Run Unit Tests (48 Tests)
     if not run_tests():
         sys.exit(1)
 
@@ -126,16 +141,16 @@ def main():
     # 4. Generate Visual Dashboard
     run_plot()
 
-    # 5. Open interactive HTML report
+    # 5. Open living interactive HTML report
     if not args.no_browser and os.path.exists(html_path):
-        print(f"[*] Launching Interactive Institutional HTML Report in default browser...")
+        print(f"[*] Launching Living 60 FPS Institutional Terminal in default browser...")
         try:
             webbrowser.open(f"file://{html_path}")
         except Exception as e:
             print(f"[!] Could not open browser automatically: {e}")
 
     print("=" * 80)
-    print("  [SUCCESS] NEUROQUANT-LOB FULL VERIFICATION COMPLETE — DAY 5 OPERATIONAL!")
+    print("  [SUCCESS] NEUROQUANT-LOB VETERAN VERIFICATION COMPLETE — 48/48 TESTS PASSING!")
     print("=" * 80)
 
 if __name__ == "__main__":

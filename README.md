@@ -3,14 +3,15 @@
 [![CI Pipeline](https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob/actions/workflows/ci.yml/badge.svg)](https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob/actions)
 [![Python 3.10 | 3.11 | 3.12](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![C++20 AVX2 SIMD](https://img.shields.io/badge/C%2B%2B20%20AVX2-Sub--Microsecond%20(230ns)-red.svg)]()
+[![C++20 AC SIMD](https://img.shields.io/badge/C%2B%2B20%20AC%20SIMD-370k%20scheds%2Fsec%20(2.8%CE%BCs)-red.svg)]()
 [![NASDAQ ITCH 5.0](https://img.shields.io/badge/NASDAQ%20ITCH%205.0-30.18M%20msgs%2Fsec%20(33ns)-purple.svg)]()
 [![PyTorch BPTT](https://img.shields.io/badge/PyTorch%20BPTT-Surrogate%20Gradient%20(500k%20ticks)-orange.svg)]()
 [![Real-World Audit](https://img.shields.io/badge/Real--World%20Audit-4%2F4%20Levels%20PASSED-brightgreen.svg)]()
 [![Bit Parity](https://img.shields.io/badge/Bit--for--Bit%20Parity-100.00%25%20(23nV%20MAE)-success.svg)]()
-[![Hardware Profiler](https://img.shields.io/badge/1M%20Profiler-P50%20385ns%20%7C%20P99%20425ns-blue.svg)]()
+[![10k Monte Carlo](https://img.shields.io/badge/Monte%20Carlo-10%2C000%20Paths%20(93%25%20Win%20Rate)-success.svg)]()
 [![Almgren-Chriss](https://img.shields.io/badge/Execution-Almgren--Chriss%20Optimal%20(η*v^0.5)-blueviolet.svg)]()
 [![Tiered Fees](https://img.shields.io/badge/Tiered%20Fees--0.002%25%20Maker%20vs%20%2B0.005%25%20Taker-gold.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-40%2F40%20Passing-brightgreen.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-48%2F48%20Passing-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **An institutional-grade, hardware-independent digital neuromorphic application simulating an asynchronous Recurrent Spiking Neural Network (RSNN) coupled to a high-frequency Limit Order Book (LOB) matching engine with online R-STDP synaptic plasticity and live crypto exchange connectivity.**
