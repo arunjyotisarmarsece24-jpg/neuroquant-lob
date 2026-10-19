@@ -24,22 +24,23 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
-    - name: Install Dependencies
+    - name: Install Dependencies & CLI
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install -e .
 
     - name: Build C++20 AVX2 Core & ITCH Parser (Linux)
       if: runner.os == 'Linux'
       run: |
-        g++ -std=c++20 -O3 -mavx2 -mfma -shared -fPIC -DLIF_EXPORTS -o csrc/liblif_core.so csrc/lif_core.cpp csrc/itch_parser.cpp
+        g++ -std=c++20 -O3 -mavx2 -mfma -shared -fPIC -DLIF_EXPORTS -o csrc/lif_core.so csrc/lif_core.cpp csrc/itch_parser.cpp csrc/almgren_chriss_simd.cpp
 
     - name: Build C++20 AVX2 Core & ITCH Parser (Windows)
       if: runner.os == 'Windows'
       run: |
-        g++ -std=c++20 -O3 -mavx2 -mfma -shared -static -static-libgcc -static-libstdc++ -fPIC -DLIF_EXPORTS -o csrc/lif_core.dll csrc/lif_core.cpp csrc/itch_parser.cpp
+        g++ -std=c++20 -O3 -mavx2 -mfma -shared -static -static-libgcc -static-libstdc++ -fPIC -DLIF_EXPORTS -o csrc/lif_core.dll csrc/lif_core.cpp csrc/itch_parser.cpp csrc/almgren_chriss_simd.cpp
 
-    - name: Run Automated Test Suite (24 Tests)
+    - name: Run Automated Test Suite (79 Tests across all subsystems)
       run: |
         python -m unittest discover tests
 
