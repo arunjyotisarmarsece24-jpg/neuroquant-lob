@@ -12,6 +12,7 @@
 [![Almgren-Chriss](https://img.shields.io/badge/Execution-Almgren--Chriss%20Optimal%20(η*v^0.5)-blueviolet.svg)]()
 [![Tiered Fees](https://img.shields.io/badge/Tiered%20Fees--0.002%25%20Maker%20vs%20%2B0.005%25%20Taker-gold.svg)]()
 [![Unit Tests](https://img.shields.io/badge/Tests-48%2F48%20Passing-brightgreen.svg)]()
+[![Research Preprint](https://img.shields.io/badge/Preprint-6--Page%20PDF%20(LaTeX%2FTypst)-darkblue.svg)](paper/neuroquant_lob.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **An institutional-grade, hardware-independent digital neuromorphic application simulating an asynchronous Recurrent Spiking Neural Network (RSNN) coupled to a high-frequency Limit Order Book (LOB) matching engine with online R-STDP synaptic plasticity and live crypto exchange connectivity.**
@@ -296,7 +297,39 @@ python benchmarks/run_execution_benchmark.py
 
 ![Almgren-Chriss Execution Benchmark Report](benchmarks/execution_benchmark_report.png)
 
+---
 
+## 📄 Day 6 Academic Research Preprint: NeuroQuant-LOB (SSRN / arXiv)
+
+We have authored and compiled a rigorous, peer-review-formatted **6-page research preprint PDF** in [`paper/neuroquant_lob.pdf`](paper/neuroquant_lob.pdf) with IEEE Transactions / arXiv dual-column layout. The paper provides complete mathematical proofs, Lyapunov stability theorems, micro-architecture specifications, and transaction cost benchmarks.
+
+### Formal Theorems & Mathematical Proofs Included:
+1. **Theorem 1 (Asymptotic Exponential Decay & Contractive Invariance):**  
+   Proves via Gronwall's inequality that continuous vectorized LIF membrane potentials are bounded in a compact invariant attractor envelope:
+   $$\limsup_{t \to \infty} |V_i(t) - V_{\text{rest}}| \le R_m I_{\max}$$
+2. **Theorem 2 (Discrete Euler-Lagrange Optimal Liquidation Trajectory):**  
+   Variational derivation of the discrete Almgren-Chriss schedule under non-linear square-root impact ($h(v) = \eta |v|^{0.5}$):
+   $$x_j^* = X_0 \frac{\sinh(\kappa (T - j\tau))}{\sinh(\kappa T)}, \quad \kappa = \frac{1}{\tau}\operatorname{arccosh}\left(1 + \frac{1}{2}\frac{\lambda \sigma^2 \tau^2}{\tilde{\eta}}\right)$$
+3. **Theorem 3 (Lyapunov Stability & Global Attractor for Recurrent Reservoir Dynamics):**  
+   Constructs a quadratic Lyapunov candidate function $\mathcal{V}(\mathbf{V}) = \frac{1}{2}\|\mathbf{V} - V_{\text{rest}}\mathbf{1}\|_2^2$ proving global exponential stability under spectral norm condition $\|\mathbf{W}\|_2 < \frac{\tau_m}{R_m}$.
+4. **Lemma 1 (Bounded Implementation Shortfall with Tiered Exchange Fee Accounting):**  
+   Proves the exact condition under which passive maker limit fills strictly dominate aggressive taker execution subject to Glosten-Milgrom adverse selection $\delta_{\text{adv}}$:
+   $$\phi_k > \frac{\delta_{\text{adv}}(k)}{r_t - r_m} \quad \text{for } \delta_{\text{adv}} < 0.7\text{ bps}$$
+5. **Lemma 2 (Zero Signal Hallucination under Poisson Spiking Null Hypotheses):**  
+   Proves via the Mann-Whitney $U$-statistic and Hoeffding's concentration inequality that uninformative Poisson white noise yields $\mathbb{E}[\text{AUC}] = 0.5000$ with exponential error decay:
+   $$\mathbb{P}\left(\left|\widehat{\text{AUC}} - \frac{1}{2}\right| \ge \epsilon\right) \le 2\exp(-2M\epsilon^2)$$
+
+### Manuscript Sources & 1-Click Compilation:
+- **Compiled Publication PDF (Strict 6 Pages):** [`paper/neuroquant_lob.pdf`](paper/neuroquant_lob.pdf)
+- **Standard IEEEtran LaTeX Source:** [`paper/neuroquant_lob.tex`](paper/neuroquant_lob.tex)
+- **BibTeX Literature Database:** [`paper/references.bib`](paper/references.bib)
+- **Typst Manuscript Source:** [`paper/neuroquant_lob.typ`](paper/neuroquant_lob.typ)
+- **1-Click Python Compilation:**
+  ```bash
+  python verify.py --paper-only
+  # or directly:
+  python paper/compile_paper.py
+  ```
 
 ---
 

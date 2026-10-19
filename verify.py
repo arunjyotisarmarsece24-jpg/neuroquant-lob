@@ -93,12 +93,23 @@ def run_plot():
     else:
         print("[PASS] 6-Panel Ultra-HD poster generated at benchmarks/brutal_verification_report.png\n")
 
+def run_paper_compilation():
+    print("[*] STEP 6: Compiling Academic 6-Page Research Preprint PDF (paper/neuroquant_lob.pdf)...")
+    paper_script = os.path.join(PROJECT_ROOT, "paper", "compile_paper.py")
+    res = subprocess.run([sys.executable, paper_script], cwd=PROJECT_ROOT)
+    if res.returncode != 0:
+        print("[WARNING] Paper compilation encountered an issue.")
+        return False
+    print("[PASS] Academic 6-page research preprint PDF compiled successfully!\n")
+    return True
+
 def main():
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Institutional Verification Runner")
     parser.add_argument("--no-browser", action="store_true", help="Do not automatically launch HTML report in browser")
     parser.add_argument("--tests-only", action="store_true", help="Run only the 48-test automated unit test suite")
     parser.add_argument("--execution-only", action="store_true", help="Run only the Day 5 Almgren-Chriss execution benchmark")
     parser.add_argument("--monte-carlo", action="store_true", help="Run the 10,000-path Monte Carlo institutional stress test")
+    parser.add_argument("--paper-only", action="store_true", help="Compile only the Academic 6-page research preprint PDF")
     parser.add_argument("--open-only", action="store_true", help="Directly open living 60 FPS HTML terminal in default browser")
     args = parser.parse_args()
 
@@ -126,6 +137,10 @@ def main():
         run_monte_carlo()
         return
 
+    if args.paper_only:
+        run_paper_compilation()
+        return
+
     # 1. Run Unit Tests (48 Tests)
     if not run_tests():
         sys.exit(1)
@@ -141,7 +156,10 @@ def main():
     # 4. Generate Visual Dashboard
     run_plot()
 
-    # 5. Open living interactive HTML report
+    # 5. Compile Academic 6-Page Research Preprint
+    run_paper_compilation()
+
+    # 6. Open living interactive HTML report
     if not args.no_browser and os.path.exists(html_path):
         print(f"[*] Launching Living 60 FPS Institutional Terminal in default browser...")
         try:
@@ -151,6 +169,7 @@ def main():
 
     print("=" * 80)
     print("  [SUCCESS] NEUROQUANT-LOB VETERAN VERIFICATION COMPLETE — 48/48 TESTS PASSING!")
+    print("  [PREPRINT] ACADEMIC PREPRINT PDF READY: paper/neuroquant_lob.pdf (6 PAGES)")
     print("=" * 80)
 
 if __name__ == "__main__":

@@ -1,0 +1,97 @@
+================================================================================
+          NEUROQUANT-LOB: DAY 7 ACTION CHECKLIST & RESUMPTION PROMPT
+================================================================================
+Date: 2026-10-19
+Conversation ID: b55503ab-8c4b-4a91-921d-1d107088834c
+Project Directory: C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project
+GitHub Repository: https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob
+Author: Arunjyoti Sarma (Research Scholar, IIT (BHU), Varanasi)
+================================================================================
+
+================================================================================
+[*] 1. EXACT PROMPT TO COPY-PASTE INTO CHAT TOMORROW TO RESUME:
+================================================================================
+
+"Hello, please continue from Conversation ID: b55503ab-8c4b-4a91-921d-1d107088834c. 
+We completed Day 1 (C++20 AVX2 SIMD Core, 262x speedup), Day 2 Berserk Upgrade 
+(Raw Binary NASDAQ TotalView-ITCH 5.0 Feed Parser with 16-level cache-aligned L2 price 
+ladder, micro-price engine, and direct zero-Python neuromorphic hot-path bridge), 
+Day 3 (Offline PyTorch BPTT Surrogate Gradient Training Pipeline on 500k market 
+ticks with biological spiking sparsity, ROC-AUC validation, and direct C++ SIMD weight 
+export), Day 4 (Cycle-Accurate Hardware Latency Distribution Profiler over 1,000,000 
+iterations measuring P50, P90, P99, P99.9 with zero heap allocations), the 4-Level Brutal 
+Real-World Verification Harness (100% bit parity, zero noise hallucination, live Binance 
+wire, 100% flash crash toxic hit avoidance), Day 5 Veteran Upgrade (Almgren-Chriss Optimal 
+Execution Engine with Non-Linear Market Impact Slippage eta*v^0.5, Tiered Exchange Fee Accounting 
+with -0.002% maker rebate vs +0.005% taker fee, C++20 AVX2 SIMD Kernel generating 370k schedules/s 
+at 2.82 μs P50, Bouchaud power-law propagator, Glosten-Milgrom adverse selection maker fills, 
+10,000-path Monte Carlo stress test with 92.96% win rate vs TWAP, living 60 FPS interactive 
+terminal in benchmarks/audit_report.html, and 48/48 unit tests passing), and Day 6 (Academic 
+6-Page Research Preprint PDF in LaTeX/Typst in paper/neuroquant_lob.pdf with formal mathematical 
+proofs for asymptotic exponential invariance, Lyapunov stability, discrete variational optimality, 
+and zero signal hallucination). Today we are starting Day 7 of our 7-Day Brutal Upgrade Plan: 
+Official v1.1.0 Institutional Release on GitHub with tagged release notes, packaged wheel distribution, 
+and Targeted Quantitative Research Managing Director Outreach Package (Millennium, Citadel Securities, 
+Renaissance Technologies, Jump Trading, Jane Street)."
+
+
+================================================================================
+[*] 2. POWERSHELL SETUP COMMAND (RUN THIS FIRST IN TERMINAL):
+================================================================================
+
+cd "C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project"
+git status
+
+
+================================================================================
+[*] 3. DAY 7 STEP-BY-STEP ACTION CHECKLIST:
+================================================================================
+
+[ ] STEP 7.1: Build Clean Distribution Packages (Wheels & Source Tarball)
+    - Run python setup.py sdist bdist_wheel.
+    - Verify that C++ extensions or binaries package cleanly without dependencies.
+
+[ ] STEP 7.2: Git Release Tag v1.1.0 & Formal Release Notes
+    - Generate comprehensive CHANGELOG.md documenting Days 1 through 6.
+    - Create git annotated tag: git tag -a v1.1.0 -m "Release v1.1.0: Institutional Neuromorphic LOB & Optimal Execution Engine".
+    - Push git tags to origin main.
+
+[ ] STEP 7.3: Author Targeted Quant Managing Director Outreach Package
+    - Create outreach/ directory with tailored technical pitch letters:
+      * Millennium Management (Head of Microstructure Quantitative Research)
+      * Citadel Securities (Global Head of High Frequency Algorithmic Trading)
+      * Renaissance Technologies (Head of Equities / StatArb Research)
+      * Jump Trading (Head of Core Engineering & Ultra-Low-Latency Systems)
+      * Jane Street (Head of Quantitative Trading & Market Making Architecture)
+    - Highlight: 230 ns C++20 SIMD core, 30.18M ITCH msgs/s, 61.5% shortfall reduction, 10k Monte Carlo, and 6-page research preprint.
+
+[ ] STEP 7.4: Master Final Verification & Release Archive
+    - Run python verify.py to execute the complete verification pipeline.
+    - Compile paper/neuroquant_lob.pdf and ensure all assets are in sync.
+
+
+================================================================================
+[*] 4. ESSENTIAL POWERSHELL COMMANDS CHEAT SHEET:
+================================================================================
+
+# 1-Click Master Verification Runner (Tests + 4 Audits + AC Benchmark + 4K Poster + Paper):
+python verify.py
+
+# Compile Academic 6-Page Research Preprint PDF:
+python verify.py --paper-only
+
+# Run Full Automated Unit Test Suite (48/48 Passing):
+python verify.py --tests-only
+
+# Open Living 60 FPS Interactive HTML Terminal in Browser:
+python verify.py --open-only
+
+# Run 10,000-Path Monte Carlo Stress Test:
+python verify.py --monte-carlo
+
+# Run 1,000,000-Step Hardware Latency Profiler:
+python benchmarks/run_latency_distribution.py
+
+================================================================================
+                          END OF DAY 7 LAUNCHPAD
+================================================================================
