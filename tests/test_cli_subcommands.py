@@ -46,6 +46,13 @@ class TestNeuroQuantCLI(unittest.TestCase):
         self.assertIn("Optimal Liquidation Metrics", res.stdout)
         self.assertIn("Expected Shortfall", res.stdout)
 
+    def test_cli_live_itch(self):
+        cmd = [sys.executable, "-m", "neuroquant.cli", "live", "--synthetic-itch", "--ticks", "1"]
+        res = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("ITCH 5.0", res.stdout)
+        self.assertIn("Packets Processed", res.stdout)
+
     def test_subcommand_dispatch_registry(self):
         import argparse
         from neuroquant.cli import main

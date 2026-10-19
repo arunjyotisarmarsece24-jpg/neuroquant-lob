@@ -125,7 +125,7 @@ def cmd_verify(args):
         return 0
 
     if args.tests_only:
-        console.print("[*] Running 60 Automated Unit Tests across all subsystems...")
+        console.print("[*] Running 61 Automated Unit Tests across all subsystems...")
         cmd = [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"]
         res = subprocess.run(cmd, cwd=PROJECT_ROOT)
         return res.returncode
@@ -187,46 +187,59 @@ def cmd_live(args):
     brain = DigitalNeuromorphicCore(neuro_cfg)
 
     feed.start()
-    time.sleep(1.0)
+    time.sleep(1.2)  # Allow initial depth snapshot to seed the book
+
+    t_table = Table(title=f"Live {args.symbol} Level-2 Depth & Neuromorphic Spiking", border_style="cyan")
+    t_table.add_column("Elapsed", style="dim", width=10)
+    t_table.add_column("Live Mid ($)", style="bold yellow", justify="right")
+    t_table.add_column("Best Bid ($)", style="green", justify="right")
+    t_table.add_column("Best Ask ($)", style="red", justify="left")
+    t_table.add_column("Spread", justify="right")
+    t_table.add_column("Sensory Spikes", style="cyan")
+    t_table.add_column("Readout Skew", justify="right")
+    t_table.add_column("Toxicity", justify="right")
 
     try:
-        t_table = Table(title=f"Live {args.symbol} Depth & Neuromorphic Spiking", border_style="cyan")
-        t_table.add_column("Tick", justify="right", style="dim")
-        t_table.add_column("Mid ($)", style="bold yellow", justify="right")
-        t_table.add_column("Best Bid ($)", style="green", justify="right")
-        t_table.add_column("Best Ask ($)", style="red", justify="left")
-        t_table.add_column("Spread", justify="right")
-        t_table.add_column("Sensory Spikes", style="cyan")
-        t_table.add_column("Toxicity Alert", style="magenta")
-
+        import numpy as np
+        start_time = time.time()
         count = 0
-        limit = args.ticks if args.ticks > 0 else 50
+        limit = args.ticks if args.ticks > 0 else 15
         while count < limit:
-            time.sleep(0.2)
-            mid = book.get_mid_price()
-            bbo = book.get_bbo()
-            spread = book.get_spread()
-            if bbo[0] is None or bbo[1] is None:
-                continue
+            current_time_ms = (time.time() - start_time) * 1000.0
+            snapshot, desc = feed.step(dt_sec=0.2)
 
-            delta_vec = encoder.step(book)
-            spikes, v_mem = brain.step(delta_vec)
-            spike_count = int(np.sum(spikes))
-            spk_bar = "█" * min(spike_count, 16) + "░" * max(0, 16 - spike_count)
-            tox_val = np.mean(v_mem[-4:]) if len(v_mem) >= 4 else 0.0
+            sensory_spikes = encoder.encode(snapshot, current_time_ms)
+            s_spk, h_spk, m_spk = brain.step(sensory_spikes, reward=0.0)
+            signals = brain.get_motor_readout_signals()
+
+            mid_p = snapshot.get("mid_price", 0.0)
+            best_b = snapshot.get("best_bid", 0.0)
+            best_a = snapshot.get("best_ask", 0.0)
+            spread = snapshot.get("spread", 0.0)
+            num_spikes = int(np.sum(s_spk))
+            skew = signals.get("skew", 0.0)
+            tox = signals.get("toxicity_prob", 0.0) * 100.0
+
+            tox_style = "red" if tox > 60 else "green"
+            skew_style = "green" if skew > 0 else "red"
 
             t_table.add_row(
-                str(count + 1),
-                f"${mid:,.2f}",
-                f"${bbo[0]:,.2f}",
-                f"${bbo[1]:,.2f}",
+                f"{current_time_ms:.0f} ms",
+                f"${mid_p:,.2f}",
+                f"${best_b:,.2f}",
+                f"${best_a:,.2f}",
                 f"${spread:.2f}",
-                f"[{spk_bar}] ({spike_count})",
-                f"{tox_val:.2f} mV"
+                f"{num_spikes} active",
+                f"[{skew_style}]{skew:+.3f}[/{skew_style}]",
+                f"[{tox_style}]{tox:.1f}%[/{tox_style}]"
             )
             count += 1
+            time.sleep(0.3)
 
         console.print(t_table)
+        console.print("\n[bold green]✔ Live real-world ingestion completed successfully![/bold green]\n")
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Stopping live stream...[/yellow]")
     finally:
         feed.stop()
     return 0
