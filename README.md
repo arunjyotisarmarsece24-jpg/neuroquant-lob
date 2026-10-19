@@ -11,7 +11,7 @@
 [![10k Monte Carlo](https://img.shields.io/badge/Monte%20Carlo-10%2C000%20Paths%20(93%25%20Win%20Rate)-success.svg)]()
 [![Almgren-Chriss](https://img.shields.io/badge/Execution-Almgren--Chriss%20Optimal%20(η*v^0.5)-blueviolet.svg)]()
 [![Tiered Fees](https://img.shields.io/badge/Tiered%20Fees--0.002%25%20Maker%20vs%20%2B0.005%25%20Taker-gold.svg)]()
-[![Unit Tests](https://img.shields.io/badge/Tests-56%2F56%20Passing-brightgreen.svg)]()
+[![Unit Tests](https://img.shields.io/badge/Tests-60%2F60%20Passing-brightgreen.svg)]()
 [![Technical Whitepaper](https://img.shields.io/badge/Whitepaper-6--Page%20PDF-darkblue.svg)](paper/neuroquant_lob.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -329,6 +329,59 @@ We have authored and compiled a rigorous **6-page technical architecture whitepa
   # or directly:
   python paper/compile_paper.py
   ```
+
+---
+
+## ⚡ Turnkey Production CLI (`neuroquant`)
+
+NeuroQuant-LOB packages all execution, benchmarking, verification, and live feeds into a **single, unified CLI binary**:
+
+```bash
+# Install once in editable/production mode
+pip install -e .
+
+# 1. Launch the Live Mobile Companion Terminal & Web App
+neuroquant app [--host 0.0.0.0] [--port 5000]
+
+# 2. Run Comprehensive Real-World Verification (60 Tests + 4 Audits + Proofs)
+neuroquant verify [--tests-only] [--proofs-only] [--open-only]
+
+# 3. Stream Live Crypto Wire or Synthetic NASDAQ ITCH 5.0 Feed
+neuroquant live --symbol BTCUSDT --venue binance [--synthetic-itch]
+
+# 4. Run Almgren-Chriss Optimal Execution Simulator (Non-Linear Impact & Maker Rebates)
+neuroquant execute --shares 10000 --time 60 --risk 1e-4
+
+# 5. Cycle-Accurate Hardware SIMD Latency Profiler (1M __rdtscp iterations)
+neuroquant benchmark [--hardware-rdtscp] [--adversarial] [--itch]
+
+# 6. Compile & Diagnose C++20 AVX2 SIMD Core
+neuroquant compile-simd [--clean] [--check]
+
+# 7. Print Product Manifest & System Information
+neuroquant version
+```
+
+---
+
+## 🐳 Enterprise Multi-Stage Docker Containerization
+
+Deploy NeuroQuant-LOB with guaranteed deterministic performance across any cloud or bare-metal environment via **multi-stage Docker containerization**:
+
+* **Stage 1 (Builder):** Uses `gcc:13-bookworm` to compile the C++20 AVX2 SIMD shared core with `-O3 -mavx2 -mfma -march=x86-64-v3`.
+* **Stage 2 (Runtime):** Hardened `python:3.12-slim-bookworm` container with automated AVX2 CPU self-tests, healthchecks, and CLI entrypoint.
+
+### 1-Command Startup:
+```bash
+docker compose up -d
+```
+
+### Direct Docker Run with Hardware SIMD Self-Test:
+```bash
+docker build -t neuroquant-lob:1.1.0-prod .
+docker run -p 5000:5000 neuroquant-lob:1.1.0-prod
+```
+The startup sequence automatically audits the host CPU for AVX2/FMA vector flags, verifies 64-byte memory alignment, executes a 5,000-step pre-flight diagnostic, and exposes the healthcheck endpoint at `/api/telemetry`.
 
 ---
 

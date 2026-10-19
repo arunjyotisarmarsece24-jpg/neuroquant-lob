@@ -1,18 +1,55 @@
 ================================================================================
-NEUROQUANT-LOB: ESSENTIAL COMMANDS CHEAT SHEET
+NEUROQUANT-LOB: ESSENTIAL COMMANDS CHEAT SHEET (UNIFIED CLI & DOCKER)
 ================================================================================
-Conversation ID: c4dccb69-8291-474e-ba95-8f854c66ee96
-Directory: C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project
+Author: Arunjyoti Sarma
+Version: 1.1.0-PROD
 Repository: https://github.com/arunjyotisarmarsece24-jpg/neuroquant-lob
 ================================================================================
 
-0. MASTER ONE-CLICK INSTITUTIONAL VERIFICATION RUNNER:
-------------------------------------------------------
+[*] 0. TURNKEY UNIFIED CLI BINARY ('neuroquant'):
+-------------------------------------------------
+# Launch Mobile/Desktop Terminal with LAN QR Code:
+neuroquant app --host 0.0.0.0 --port 5000
+
+# Run Master Verification Suite (60/60 Tests + 4 Audits + Proofs):
+neuroquant verify
+
+# Stream Live Market Data or Synthetic NASDAQ ITCH 5.0 Feed:
+neuroquant live --symbol BTCUSDT --venue binance
+neuroquant live --synthetic-itch --ticks 100
+
+# Run Almgren-Chriss Optimal Execution Simulator with Non-Linear Slippage:
+neuroquant execute --shares 10000 --time 60 --risk 1e-4
+
+# Run Cycle-Accurate Hardware SIMD Latency Profiler:
+neuroquant benchmark --iterations 100000
+neuroquant benchmark --adversarial
+
+# Compile C++20 AVX2 SIMD Core & Run Hardware Diagnostics:
+neuroquant compile-simd --check
+
+# Display Product Deployment Manifest & Version Information:
+neuroquant version
+
+
+[*] 1. ENTERPRISE DOCKER CONTAINERIZATION:
+------------------------------------------
+# 1-Command Production Launch:
+docker compose up -d
+
+# Direct Multi-Stage Docker Build & Run:
+docker build -t neuroquant-lob:1.1.0-prod .
+docker run -p 5000:5000 neuroquant-lob:1.1.0-prod
+
+
+[*] 2. MASTER ONE-CLICK PYTHON VERIFICATION RUNNER:
+---------------------------------------------------
 python verify.py
--> Runs full 32-test unit test suite.
+-> Runs full 60-test unit test suite across all subsystems.
 -> Runs complete 4-Level Brutal Real-World Verification Harness.
+-> Runs 1,000,000-Trial Adversarial Proof Falsification Suite.
 -> Generates 6-Panel 4K 300 DPI publication report (benchmarks/brutal_verification_report.png).
--> Automatically launches interactive HTML dashboard (benchmarks/audit_report.html) in your browser!
+-> Automatically launches interactive HTML dashboard (benchmarks/audit_report.html) in browser!
 (Headless mode: python verify.py --no-browser)
 
 

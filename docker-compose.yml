@@ -1,0 +1,40 @@
+# ==============================================================================
+# NeuroQuant-LOB Turnkey Institutional Docker Compose Orchestration
+# Author: Arunjyoti Sarma (Research Scholar, IIT (BHU), Varanasi)
+# Version: 1.1.0-PROD
+# Usage: docker compose up -d
+# ==============================================================================
+version: '3.8'
+
+services:
+  neuroquant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: neuroquant-lob:1.1.0-prod
+    container_name: neuroquant-engine
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NEUROQUANT_ENV=production
+      - SIMD_MODE=AVX2
+      - PORT=5000
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/telemetry"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - ./benchmarks:/app/benchmarks
+      - ./data:/app/data

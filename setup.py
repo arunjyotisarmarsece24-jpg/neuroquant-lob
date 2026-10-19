@@ -25,6 +25,12 @@ setup(
         "flask>=3.0.0",
         "rich>=13.7.0",
         "requests>=2.31.0",
-        "psutil>=5.9.0"
+        "psutil>=5.9.0",
+        "qrcode>=7.4.2"
     ],
+    entry_points={
+        "console_scripts": [
+            "neuroquant=neuroquant.cli:main",
+        ],
+    },
 )
