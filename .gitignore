@@ -54,3 +54,5 @@ desktop.ini
 scratch/
 .system_generated/
 data/
+*.vvp
+*.vcd

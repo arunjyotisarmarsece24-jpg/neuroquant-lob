@@ -874,6 +874,16 @@ Author & Principal Architect, NeuroQuant-LOB
     return 0
 
 # ==============================================================================
+# SUBCOMMAND: hardware
+# ==============================================================================
+def cmd_hardware(args):
+    """Run Verilog RTL cycle-accurate simulation via local iverilog and vvp."""
+    print_header("VERILOG RTL NEUROMORPHIC HARDWARE SIMULATION")
+    from run_hardware_simulation import run_hardware_sim
+    success = run_hardware_sim(module=getattr(args, "module", "all"), open_waveforms=getattr(args, "waveforms", False))
+    return 0 if success else 1
+
+# ==============================================================================
 # SUBCOMMAND: version
 # ==============================================================================
 def cmd_version(args):
@@ -975,7 +985,7 @@ def main():
     p_trade.add_argument("--symbol", default="BTCUSDT", help="Symbol to trade (default: BTCUSDT)")
     p_trade.add_argument("--ticks", type=int, default=25, help="Number of trading ticks/cycles to run")
     p_trade.add_argument("--live-feed", action="store_true", help="Connect to live exchange wire instead of Hawkes simulator")
-    p_trade.add_argument("--collar-pct", type=float, default=1.5, help="Pre-trade fat-finger price collar percentage (default: 1.5%)")
+    p_trade.add_argument("--collar-pct", type=float, default=1.5, help="Pre-trade fat-finger price collar percentage (default: 1.5%%)")
     p_trade.add_argument("--max-inventory", type=float, default=50.0, help="Max portfolio inventory contracts (default: 50.0)")
     p_trade.add_argument("--max-order-size", type=float, default=100.0, help="Max single order contracts (default: 100.0)")
     p_trade.add_argument("--fast", action="store_true", help="Execute at maximum throughput without display sleep delays")
@@ -983,6 +993,11 @@ def main():
     # neuroquant audit
     p_audit = subparsers.add_parser("audit", help="Run 8-Stage Institutional Falsification & Due Diligence Audit")
     p_audit.add_argument("--full", action="store_true", default=True, help="Execute complete 8-stage verification pipeline")
+
+    # neuroquant hardware
+    p_hw = subparsers.add_parser("hardware", help="Run 100%% Free Verilog RTL Simulation & Waveform Generation")
+    p_hw.add_argument("--module", "-m", choices=["lif", "itch", "risk", "all"], default="all", help="Select hardware module to simulate (default: all)")
+    p_hw.add_argument("--waveforms", action="store_true", help="Launch GTKWave to view waveform traces (.vcd)")
 
     # neuroquant version
     subparsers.add_parser("version", help="Show product version, author, and system information")
@@ -1005,6 +1020,7 @@ def main():
         "compile-simd": cmd_compile_simd,
         "risk": cmd_risk,
         "fix": cmd_fix,
+        "hardware": cmd_hardware,
         "version": cmd_version,
     }
 
