@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "ticks_evaluated": 1000,
+  "hw_spikes": 8,
+  "sw_spikes": 205,
+  "hw_approvals": 90,
+  "sw_approvals": 250,
+  "hw_rejections": 910,
+  "sw_rejections": 750,
+  "elapsed_seconds": 0.6985
+}

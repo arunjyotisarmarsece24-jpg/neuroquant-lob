@@ -224,6 +224,40 @@ class TestVerilogHardwareSimulation(unittest.TestCase):
         self.assertIn("5 / 5 CHECKS PASSED", res_sim.stdout)
         self.assertIn("100% ARTY S7 + ESP8266 SERIAL BRIDGE VERIFIED!", res_sim.stdout)
 
+    def test_iverilog_cosim_parity_simulation(self):
+        """Test continuous 1,000-tick hardware/software co-simulation stream."""
+        rtl_files = [
+            os.path.join(HARDWARE_DIR, "lif_neuron_core.v"),
+            os.path.join(HARDWARE_DIR, "risk_gate_core.v"),
+        ]
+        tb_file = os.path.join(HARDWARE_DIR, "tb_cosim_parity.v")
+        out_vvp = os.path.join(HARDWARE_DIR, "cosim_sim.vvp")
+
+        # Compile
+        res_compile = subprocess.run(
+            [IVERILOG_BIN, "-g2005-sv", "-o", out_vvp] + rtl_files + [tb_file],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_compile.returncode, 0, f"iverilog compilation failed:\n{res_compile.stderr}")
+
+        # Run simulation
+        res_sim = subprocess.run(
+            [VVP_BIN, out_vvp],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_sim.returncode, 0, f"vvp simulation failed:\n{res_sim.stderr}")
+        self.assertIn("BIT-FOR-BIT HARDWARE CO-SIMULATION STREAM COMPLETED!", res_sim.stdout)
+        self.assertIn("CO-SIMULATION SUMMARY: 1,000 TICKS EVALUATED", res_sim.stdout)
+
+        # Check VCD
+        vcd_path = os.path.join(HARDWARE_DIR, "neuroquant_cosim_trace.vcd")
+        self.assertTrue(os.path.exists(vcd_path), "Cosim VCD trace was not generated!")
+        self.assertGreater(os.path.getsize(vcd_path), 500, "Cosim VCD trace is empty!")
+
 
 if __name__ == "__main__":
     unittest.main()

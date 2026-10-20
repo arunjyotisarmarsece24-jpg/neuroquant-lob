@@ -1,0 +1,31 @@
+{
+  "regimes": [
+    {
+      "status": "PASS",
+      "regime": "Flash Crash 2010",
+      "ticks": 5000,
+      "blocked_trades": 4750,
+      "max_drawdown_dollars": -184573.46,
+      "ac_kappa": 0.9035
+    },
+    {
+      "status": "PASS",
+      "regime": "Adversarial Spoofing",
+      "spoof_cycles": 1000,
+      "false_alarm_rate": 0.0
+    },
+    {
+      "status": "PASS",
+      "regime": "Student-t Jump-Diffusion",
+      "empirical_kurtosis": 15.92,
+      "max_lyapunov_deviation_mv": 50.0
+    },
+    {
+      "status": "PASS",
+      "regime": "Adverse Selection",
+      "slippage_bps": 0.14,
+      "shortfall_dollars": 1265.07
+    }
+  ],
+  "elapsed_seconds": 0.2068
+}

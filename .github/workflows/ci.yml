@@ -54,9 +54,17 @@ jobs:
       run: |
         g++ -std=c++20 -O3 -mavx2 -mfma -shared -static -static-libgcc -static-libstdc++ -fPIC -DLIF_EXPORTS -o csrc/lif_core.dll csrc/lif_core.cpp csrc/itch_parser.cpp csrc/almgren_chriss_simd.cpp
 
-    - name: Run Automated Test Suite (98 Tests across all subsystems)
+    - name: Run Automated Test Suite (106 Tests across all subsystems)
       run: |
         python -m unittest discover tests
+
+    - name: Run Bit-for-Bit Hardware/Software Co-Simulation Parity Benchmark
+      run: |
+        python benchmarks/run_cosim_hardware_software_audit.py
+
+    - name: Run Bitter Quant Adversarial Stress Benchmark (4 Regimes)
+      run: |
+        python benchmarks/run_bitter_regime_stress.py
 
     - name: Run Institutional C++20 SIMD Benchmark
       run: |

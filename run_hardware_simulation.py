@@ -83,6 +83,13 @@ MODULE_CONFIGS = {
         "tb": "tb_uart_bridge.v",
         "out": "uart_sim.vvp",
         "vcd": "neuroquant_uart_bridge_trace.vcd"
+    },
+    "cosim": {
+        "name": "Hardware/Software Co-Simulation Parity (1,000 continuous ticks)",
+        "rtl": ["lif_neuron_core.v", "risk_gate_core.v"],
+        "tb": "tb_cosim_parity.v",
+        "out": "cosim_sim.vvp",
+        "vcd": "neuroquant_cosim_trace.vcd"
     }
 }
 
@@ -139,19 +146,19 @@ def run_hardware_sim(module: str = "all", open_waveforms: bool = False) -> bool:
         return run_single_module(module, open_waveforms)
     elif module == "all":
         success = True
-        for k in ["lif", "itch", "risk", "top", "formal", "uart"]:
+        for k in ["lif", "itch", "risk", "top", "formal", "uart", "cosim"]:
             ok = run_single_module(k, open_waveforms and (k == "lif"))
             if not ok:
                 success = False
         return success
     else:
-        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, top, formal, uart, all.")
+        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, top, formal, uart, cosim, all.")
         return False
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Hardware RTL Simulation Suite")
-    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "top", "formal", "uart", "all"], default="all",
+    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "top", "formal", "uart", "cosim", "all"], default="all",
                         help="Select module to simulate (default: all)")
     parser.add_argument("--waveforms", "-w", action="store_true",
                         help="Launch GTKWave to inspect signal waveforms")
