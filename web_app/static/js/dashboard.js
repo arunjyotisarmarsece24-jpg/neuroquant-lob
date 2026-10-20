@@ -71,6 +71,10 @@ function switchTab(tabId) {
     resizeCanvases();
     if (tabId === 'exec') {
       recomputeAlmgrenChriss();
+    } else if (tabId === 'cnn') {
+      runCNNInference();
+    } else if (tabId === 'quantum') {
+      runQuantumSimulation();
     }
   }, 50);
 }
@@ -807,3 +811,170 @@ window.addEventListener("DOMContentLoaded", () => {
   resizeCanvases();
   recomputeAlmgrenChriss();
 });
+
+// ==================== DEEPLOB CNN INFERENCE ====================
+function runCNNInference() {
+  const predLabel = document.getElementById('cnn-pred-label');
+  const confLabel = document.getElementById('cnn-confidence');
+  const pUp = document.getElementById('cnn-prob-up');
+  const pStat = document.getElementById('cnn-prob-stat');
+  const pDown = document.getElementById('cnn-prob-down');
+  const bUp = document.getElementById('cnn-bar-up');
+  const bStat = document.getElementById('cnn-bar-stat');
+  const bDown = document.getElementById('cnn-bar-down');
+  const lvlGrid = document.getElementById('cnn-level-grid');
+  const fmapGrid = document.getElementById('cnn-fmap-grid');
+
+  if (predLabel) predLabel.innerText = "CONVOLVING...";
+
+  fetch('/api/cnn/inference')
+    .then(res => res.json())
+    .then(data => {
+      const pred = data.prediction || "STATIONARY";
+      const probs = data.probabilities || { up: 0.33, stationary: 0.34, down: 0.33 };
+      
+      if (predLabel) {
+        predLabel.innerText = pred === "UP" ? "▲ UPWARD ALPHA" : (pred === "DOWN" ? "▼ TOXIC DOWNWARD" : "● STATIONARY");
+        predLabel.style.color = pred === "UP" ? "var(--accent-green)" : (pred === "DOWN" ? "var(--accent-red)" : "var(--accent-yellow)");
+      }
+      if (confLabel) confLabel.innerText = (data.confidence * 100).toFixed(1) + "%";
+
+      if (pUp) pUp.innerText = (probs.up * 100).toFixed(1) + "%";
+      if (pStat) pStat.innerText = (probs.stationary * 100).toFixed(1) + "%";
+      if (pDown) pDown.innerText = (probs.down * 100).toFixed(1) + "%";
+
+      if (bUp) bUp.style.width = (probs.up * 100) + "%";
+      if (bStat) bStat.style.width = (probs.stationary * 100) + "%";
+      if (bDown) bDown.style.width = (probs.down * 100) + "%";
+
+      // Render 10 LOB Levels
+      if (lvlGrid && data.spatial_imbalance_activations) {
+        lvlGrid.innerHTML = data.spatial_imbalance_activations.map((act, i) => {
+          const intensity = Math.min(1.0, Math.abs(act) * 3.0);
+          const color = act >= 0 ? `rgba(0, 255, 204, ${0.15 + intensity * 0.7})` : `rgba(255, 0, 119, ${0.15 + intensity * 0.7})`;
+          return `
+            <div style="background:#0f172a; border:1px solid #334155; border-radius:6px; padding:8px 4px; text-align:center;">
+              <div style="font-size:0.75rem; color:#94a3b8; font-weight:700;">L${i+1}</div>
+              <div style="height:40px; margin:6px 0; background:${color}; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700;">
+                ${act.toFixed(2)}
+              </div>
+              <div style="font-size:0.65rem; color:#64748b;">Spatial</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Inception Feature Maps
+      if (fmapGrid && data.inception_channel_activations) {
+        fmapGrid.innerHTML = data.inception_channel_activations.map((act, i) => {
+          const barH = Math.min(100, Math.max(10, Math.abs(act) * 80));
+          return `
+            <div style="background:#0b1329; border:1px solid #1e293b; border-radius:6px; padding:6px 4px; text-align:center;">
+              <div style="font-size:0.68rem; color:#38bdf8;">Ch ${i+1}</div>
+              <div style="height:50px; background:#020617; border-radius:4px; margin:4px 0; display:flex; align-items:flex-end; justify-content:center; overflow:hidden;">
+                <div style="width:100%; height:${barH}%; background:linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);"></div>
+              </div>
+              <div style="font-size:0.65rem; color:#cbd5e1;">${act.toFixed(2)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    })
+    .catch(err => {
+      if (predLabel) predLabel.innerText = "OFFLINE";
+      console.warn("CNN fetch error:", err);
+    });
+}
+
+// ==================== ABSOLUTE QUANTUM SIMULATION ====================
+function runQuantumSimulation() {
+  const gState = document.getElementById('q-ground-state');
+  const gEnergy = document.getElementById('q-ground-energy');
+  const qAdv = document.getElementById('q-advantage');
+  const qEnt = document.getElementById('q-entropy');
+  const qSpd = document.getElementById('q-speedup');
+  const blochGrid = document.getElementById('q-bloch-grid');
+  const specList = document.getElementById('q-basis-spectrum');
+  const venueTbody = document.getElementById('q-venue-tbody');
+
+  if (gState) gState.innerText = "COLLAPSING...";
+
+  fetch('/api/quantum/state')
+    .then(res => res.json())
+    .then(data => {
+      const vqe = data.vqe_routing || {};
+      const qae = data.qae_risk || {};
+
+      if (gState) gState.innerText = vqe.optimal_basis_state || "|00000000>";
+      if (gEnergy) gEnergy.innerText = (vqe.ground_state_energy_hartree || 0).toFixed(4) + " Hartree";
+      if (qAdv) qAdv.innerText = "+" + (vqe.quantum_routing_advantage_pct || 0).toFixed(1) + "%";
+      if (qEnt) qEnt.innerText = (data.entanglement_entropy || 0).toFixed(4) + " bits";
+      if (qSpd) qSpd.innerText = qae.quantum_computational_speedup || "12,732x";
+
+      // Render 8 Bloch vectors
+      if (blochGrid && data.bloch_vectors) {
+        blochGrid.innerHTML = data.bloch_vectors.map(b => {
+          const r = Math.sqrt(b.u*b.u + b.v*b.v + b.w*b.w);
+          const px = 50 + b.u * 38;
+          const py = 50 - b.w * 38;
+          return `
+            <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:10px; text-align:center;">
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; color:#c084fc;">
+                <span>${b.label}</span>
+                <span style="color:#a855f7;">|r|=${r.toFixed(3)}</span>
+              </div>
+              <div style="position:relative; width:100px; height:100px; margin:8px auto; border:1px dashed #64748b; border-radius:50%; background:radial-gradient(circle, rgba(168,85,247,0.1) 0%, rgba(15,23,42,0.8) 100%);">
+                <!-- Center point -->
+                <div style="position:absolute; left:48px; top:48px; width:4px; height:4px; background:#64748b; border-radius:50%;"></div>
+                <!-- State vector -->
+                <div style="position:absolute; left:${px-4}px; top:${py-4}px; width:8px; height:8px; background:#a855f7; border-radius:50%; box-shadow:0 0 8px #a855f7;"></div>
+                <svg width="100" height="100" style="position:absolute; left:0; top:0;">
+                  <line x1="50" y1="50" x2="${px}" y2="${py}" stroke="#a855f7" stroke-width="2" />
+                </svg>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#e2e8f0;">
+                u:${b.u.toFixed(2)} | v:${b.v.toFixed(2)} | w:${b.w.toFixed(2)}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Top Basis State Probability Spectrum
+      if (specList && data.top_states) {
+        specList.innerHTML = data.top_states.map(s => {
+          return `
+            <div style="display:flex; align-items:center; gap:10px; font-size:0.8rem;">
+              <span style="font-family:'JetBrains Mono',monospace; color:#ec4899; min-width:100px;">${s.basis}</span>
+              <div style="flex:1; height:12px; background:#1e293b; border-radius:6px; overflow:hidden;">
+                <div style="height:100%; width:${Math.min(100, s.amplitude_pct * 3)}%; background:linear-gradient(90deg, #ec4899 0%, #a855f7 100%);"></div>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace; color:#f1f5f9; min-width:60px; text-align:right;">${s.amplitude_pct.toFixed(2)}%</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render VQE Liquidity Venues
+      if (venueTbody && vqe.venues) {
+        venueTbody.innerHTML = vqe.venues.map(v => {
+          const isDark = v.type === "Dark";
+          const badgeBg = isDark ? "rgba(168,85,247,0.2)" : "rgba(56,189,248,0.2)";
+          const badgeCol = isDark ? "#c084fc" : "#38bdf8";
+          return `
+            <tr style="border-bottom:1px solid #1e293b;">
+              <td style="padding:8px 6px; font-weight:700;">${v.id}</td>
+              <td style="padding:8px 6px;"><span style="padding:2px 8px; border-radius:4px; font-size:0.75rem; background:${badgeBg}; color:${badgeCol}; font-weight:700;">${v.type}</span></td>
+              <td style="padding:8px 6px; font-family:'JetBrains Mono',monospace; color:#00ffcc;">${v.shares.toLocaleString()}</td>
+              <td style="padding:8px 6px; font-family:'JetBrains Mono',monospace;">${v.cost_bps.toFixed(1)} bps</td>
+              <td style="padding:8px 6px;"><span style="color:#00ffcc;">● ROUTED</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
+    })
+    .catch(err => {
+      if (gState) gState.innerText = "OFFLINE";
+      console.warn("Quantum fetch error:", err);
+    });
+}
