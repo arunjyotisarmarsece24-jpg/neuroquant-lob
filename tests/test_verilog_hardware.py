@@ -258,6 +258,43 @@ class TestVerilogHardwareSimulation(unittest.TestCase):
         self.assertTrue(os.path.exists(vcd_path), "Cosim VCD trace was not generated!")
         self.assertGreater(os.path.getsize(vcd_path), 500, "Cosim VCD trace is empty!")
 
+    def test_iverilog_champion_lif_simulation(self):
+        """Test Day 1 Pareto Champion LIF hardware simulation with optimal_neuromorphic_params.vh."""
+        rtl_file = os.path.join(HARDWARE_DIR, "lif_neuron_core.v")
+        header_file = os.path.join(HARDWARE_DIR, "optimal_neuromorphic_params.vh")
+        tb_file = os.path.join(HARDWARE_DIR, "tb_optimal_champion_lif.v")
+        out_vvp = os.path.join(HARDWARE_DIR, "champion_lif_sim.vvp")
+
+        self.assertTrue(os.path.exists(rtl_file), "lif_neuron_core.v missing!")
+        self.assertTrue(os.path.exists(header_file), "optimal_neuromorphic_params.vh missing!")
+        self.assertTrue(os.path.exists(tb_file), "tb_optimal_champion_lif.v missing!")
+
+        # 1. Compile with include directory
+        res_compile = subprocess.run(
+            [IVERILOG_BIN, "-g2005-sv", "-I", HARDWARE_DIR, "-o", out_vvp, rtl_file, tb_file],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_compile.returncode, 0, f"iverilog compilation failed:\n{res_compile.stderr}")
+
+        # 2. Run simulation
+        res_sim = subprocess.run(
+            [VVP_BIN, out_vvp],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_sim.returncode, 0, f"vvp simulation failed:\n{res_sim.stderr}")
+        self.assertIn("100% VERILOG HARDWARE DAY 1 CHAMPION LIF SIMULATION VERIFIED!", res_sim.stdout)
+        self.assertIn("Passed Assertions:      5", res_sim.stdout)
+        self.assertIn("Failed Assertions:      0", res_sim.stdout)
+
+        # 3. Check VCD trace
+        vcd_path = os.path.join(HARDWARE_DIR, "neuroquant_champion_lif_trace.vcd")
+        self.assertTrue(os.path.exists(vcd_path), "Champion LIF VCD trace was not generated!")
+        self.assertGreater(os.path.getsize(vcd_path), 500, "Champion LIF VCD trace is empty!")
+
 
 if __name__ == "__main__":
     unittest.main()

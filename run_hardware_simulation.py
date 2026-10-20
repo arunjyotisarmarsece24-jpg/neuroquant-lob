@@ -45,6 +45,13 @@ MODULE_CONFIGS = {
         "out": "lif_sim.vvp",
         "vcd": "neuroquant_lif_trace.vcd"
     },
+    "champion_lif": {
+        "name": "Day 1 Pareto Champion Neuromorphic LIF Core (optimal_neuromorphic_params.vh)",
+        "rtl": "lif_neuron_core.v",
+        "tb": "tb_optimal_champion_lif.v",
+        "out": "champion_lif_sim.vvp",
+        "vcd": "neuroquant_champion_lif_trace.vcd"
+    },
     "itch": {
         "name": "AXI4-Stream NASDAQ ITCH 5.0 Hardware Parser",
         "rtl": "itch_parser_axi.v",
@@ -114,7 +121,7 @@ def run_single_module(mod_key: str, open_waveforms: bool = False) -> bool:
     print(f"[*] RTL: {cfg['rtl']} | Testbench: {cfg['tb']}")
     print(f"[*] -------------------------------------------------------------")
 
-    compile_cmd = [IVERILOG_BIN, "-g2005-sv", "-o", out_vvp] + rtl_paths + [tb_path]
+    compile_cmd = [IVERILOG_BIN, "-g2005-sv", "-I", HARDWARE_DIR, "-o", out_vvp] + rtl_paths + [tb_path]
     res_compile = subprocess.run(compile_cmd, cwd=PROJECT_ROOT)
     if res_compile.returncode != 0:
         print(f"[FAIL] iverilog compilation failed for {cfg['name']}!")
@@ -146,19 +153,19 @@ def run_hardware_sim(module: str = "all", open_waveforms: bool = False) -> bool:
         return run_single_module(module, open_waveforms)
     elif module == "all":
         success = True
-        for k in ["lif", "itch", "risk", "top", "formal", "uart", "cosim"]:
+        for k in ["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim"]:
             ok = run_single_module(k, open_waveforms and (k == "lif"))
             if not ok:
                 success = False
         return success
     else:
-        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, top, formal, uart, cosim, all.")
+        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, champion_lif, itch, risk, top, formal, uart, cosim, all.")
         return False
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Hardware RTL Simulation Suite")
-    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "top", "formal", "uart", "cosim", "all"], default="all",
+    parser.add_argument("--module", "-m", choices=["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "all"], default="all",
                         help="Select module to simulate (default: all)")
     parser.add_argument("--waveforms", "-w", action="store_true",
                         help="Launch GTKWave to inspect signal waveforms")
