@@ -1,21 +1,12 @@
 /*
  * ==============================================================================
- * NEUROQUANT-LOB: NODEMCU ESP8266 QUANT WIRELESS GATEWAY FIRMWARE
+ * NEUROQUANT-LOB: NODEMCU ESP8266 WIRELESS QUANT GATEWAY & WEB TELEMETRY
  * ==============================================================================
  * Principal Architect: Arunjyoti Sarma (Research Scholar, IIT (BHU), Varanasi)
  * Hardware Target:     NodeMCU v2/v3 (ESP8266-12E / ESP8266-12F)
  * Physical Link:       Hardware UART @ 921,600 Baud -> Digilent Arty S7 PMOD JA
  * Standard:            Arduino IDE 2.x / ESP8266 Core 3.1.2+
- *
- * Description:
- *   High-speed IoT network bridge for the NeuroQuant neuromorphic FPGA accelerator:
- *     1. Connects to 2.4 GHz Wi-Fi network.
- *     2. Ingests real-time L2 order book updates or synthetic ITCH 5.0 tick bursts.
- *     3. Packs tick data into deterministic 42-byte binary frames:
- *          [0x55, 0xAA, Beat0(8B), Beat1(8B), Beat2(8B), Beat3(8B), Beat4(8B)]
- *     4. Blasts frames over Hardware UART (GPIO1 TXD0) to Arty S7 (PMOD JA1 L17).
- *     5. Captures 12-byte telemetry returns from Arty S7 (PMOD JA2 L18 -> GPIO3 RXD0).
- *     6. Decodes membrane voltage V_m, action potential spikes, and risk clearance.
+ * URL Access:          http://neuroquant.local or http://<ESP8266_IP>
  *
  * Physical Pin Connections (3.3V Logic Level Direct Attach):
  *   --------------------------------------------------------------
@@ -24,21 +15,19 @@
  *   Pin TX (GPIO1 / TXD0) | PMOD JA Pin 1 (L17) | ESP8266 TX -> FPGA RX
  *   Pin RX (GPIO3 / RXD0) | PMOD JA Pin 2 (L18) | ESP8266 RX <- FPGA TX
  *   Pin GND               | PMOD JA Pin 5 (GND) | Common Reference Ground
- *   Pin 3V3 / VIN         | External 3.3V / 5V  | Board Power
  *   --------------------------------------------------------------
  * ==============================================================================
  */
 
 #include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 
-// -----------------------------------------------------------------------------
-// Network Configuration
-// -----------------------------------------------------------------------------
+// Network Configuration (Update with your Wi-Fi credentials)
 const char* WIFI_SSID     = "YOUR_WIFI_SSID";
 const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 
-// Hardware Serial Baud Rate: 921,600 Baud (108.5 ns per bit)
+// Hardware Serial Baud Rate
 #define FPGA_BAUD_RATE 921600
 
 // Packet Framing Constants
@@ -47,60 +36,55 @@ const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 #define FRAME_SYNC0_TELEMETRY 0x55
 #define FRAME_SYNC1_TELEMETRY 0xBB
 
-#define ITCH_PAYLOAD_BYTES    40
 #define TOTAL_INGRESS_BYTES   42 // 2 Sync bytes + 40 ITCH bytes
 #define TELEMETRY_BYTES       12
+#define LED_HEARTBEAT         2  // GPIO2 / D4 (Active-Low)
 
-// Onboard LED for status indication (Active-Low on NodeMCU)
-#define LED_HEARTBEAT 2 // GPIO2 / D4
+ESP8266WebServer server(80);
 
-// -----------------------------------------------------------------------------
-// Buffer Structures
-// -----------------------------------------------------------------------------
+// Buffers & Telemetry Tracking
 uint8_t ingressBuffer[TOTAL_INGRESS_BYTES];
 uint8_t telemetryBuffer[TELEMETRY_BYTES];
 
-// Telemetry state tracking
-uint32_t packetsSent = 0;
-uint32_t telemetryReceived = 0;
-uint32_t approvalsCount = 0;
-uint32_t rejectionsCount = 0;
-uint32_t spikesCount = 0;
+volatile uint32_t packetsSent       = 0;
+volatile uint32_t telemetryReceived = 0;
+volatile uint32_t approvalsCount    = 0;
+volatile uint32_t rejectionsCount   = 0;
+volatile uint32_t spikesCount       = 0;
+volatile float    lastVoltageMv     = -70.0f;
+volatile float    lastLatencyNs     = 25.0f;
+volatile uint8_t  lastViolationCode = 0;
+volatile bool     lastApproval      = true;
 
-// -----------------------------------------------------------------------------
-// Build Binary ITCH 5.0 Type 'A' (Add Order) Packet
-// -----------------------------------------------------------------------------
+// Build Binary ITCH 5.0 Type 'A' Packet
 void buildItchAddOrderPacket(uint8_t* buf, uint32_t orderRef, char side, uint32_t shares, const char* symbol, uint32_t priceDecicents) {
-    // 1. Sync Markers
     buf[0] = FRAME_SYNC0_INGRESS;
     buf[1] = FRAME_SYNC1_INGRESS;
 
-    // 2. Beat 0 (8 bytes): Type 'A' (0x41), Locate (0x0001), Tracking (0x0002), Timestamp_hi (3 bytes)
-    buf[2] = 0x41; // 'A'
-    buf[3] = 0x00; buf[4] = 0x01; // Locate = 1
-    buf[5] = 0x00; buf[6] = 0x02; // Tracking = 2
-    buf[7] = 0x00; buf[8] = 0x00; buf[9] = 0x12; // Timestamp_hi
+    // Beat 0: Type 'A', Locate=1, Tracking=2, Timestamp_hi=0x000012
+    buf[2] = 0x41; buf[3] = 0x00; buf[4] = 0x01; buf[5] = 0x00; buf[6] = 0x02;
+    buf[7] = 0x00; buf[8] = 0x00; buf[9] = 0x12;
 
-    // 3. Beat 1 (8 bytes): Timestamp_lo (3 bytes), OrderRef_hi (5 bytes)
+    // Beat 1: Timestamp_lo=0x345678, OrderRef_hi
     buf[10] = 0x34; buf[11] = 0x56; buf[12] = 0x78;
     buf[13] = 0x00; buf[14] = 0x00; buf[15] = 0x00; buf[16] = 0x00; buf[17] = 0x00;
 
-    // 4. Beat 2 (8 bytes): OrderRef_lo (3 bytes), Side ('B'/'S'), Shares (4 bytes Big-Endian)
+    // Beat 2: OrderRef_lo, Side, Shares
     buf[18] = (uint8_t)((orderRef >> 16) & 0xFF);
     buf[19] = (uint8_t)((orderRef >> 8) & 0xFF);
     buf[20] = (uint8_t)(orderRef & 0xFF);
-    buf[21] = (side == 'S') ? 0x53 : 0x42; // 'B' = 0x42, 'S' = 0x53
+    buf[21] = (side == 'S') ? 0x53 : 0x42;
     buf[22] = (uint8_t)((shares >> 24) & 0xFF);
     buf[23] = (uint8_t)((shares >> 16) & 0xFF);
     buf[24] = (uint8_t)((shares >> 8) & 0xFF);
     buf[25] = (uint8_t)(shares & 0xFF);
 
-    // 5. Beat 3 (8 bytes): Stock Symbol (e.g., "AAPL    ")
+    // Beat 3: Symbol
     for (int i = 0; i < 8; i++) {
         buf[26 + i] = (i < strlen(symbol)) ? symbol[i] : ' ';
     }
 
-    // 6. Beat 4 (8 bytes): Price (4 bytes Big-Endian, 4 decimal places), Padding (4 bytes)
+    // Beat 4: Price in decicents
     buf[34] = (uint8_t)((priceDecicents >> 24) & 0xFF);
     buf[35] = (uint8_t)((priceDecicents >> 16) & 0xFF);
     buf[36] = (uint8_t)((priceDecicents >> 8) & 0xFF);
@@ -108,38 +92,16 @@ void buildItchAddOrderPacket(uint8_t* buf, uint32_t orderRef, char side, uint32_
     buf[38] = 0x00; buf[39] = 0x00; buf[40] = 0x00; buf[41] = 0x00;
 }
 
-// -----------------------------------------------------------------------------
-// Setup Procedure
-// -----------------------------------------------------------------------------
-void setup() {
-    pinMode(LED_HEARTBEAT, OUTPUT);
-    digitalWrite(LED_HEARTBEAT, HIGH); // Off
-
-    // Initialize High-Speed Hardware UART to Arty S7 PMOD
-    Serial.begin(FPGA_BAUD_RATE);
-    while (!Serial) { delay(10); }
-
-    // Connect to Wi-Fi
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-    // Wait for Wi-Fi connection with non-blocking timeout
-    uint32_t tStart = millis();
-    while (WiFi.status() != WL_CONNECTED && (millis() - tStart < 8000)) {
-        delay(250);
-        digitalWrite(LED_HEARTBEAT, !digitalRead(LED_HEARTBEAT));
-    }
-    digitalWrite(LED_HEARTBEAT, (WiFi.status() == WL_CONNECTED) ? LOW : HIGH);
+void sendOrderToFpga(uint32_t ref, char side, uint32_t shares, uint32_t priceDecicents) {
+    buildItchAddOrderPacket(ingressBuffer, ref, side, shares, "AAPL    ", priceDecicents);
+    Serial.write(ingressBuffer, TOTAL_INGRESS_BYTES);
+    packetsSent++;
 }
 
-// -----------------------------------------------------------------------------
-// Read & Process Telemetry Packet from Arty S7
-// -----------------------------------------------------------------------------
 void processTelemetryFromFpga() {
     while (Serial.available() >= TELEMETRY_BYTES) {
-        // Look for Telemetry Sync: 0x55, 0xBB
         if (Serial.peek() != FRAME_SYNC0_TELEMETRY) {
-            Serial.read(); // Discard unaligned byte
+            Serial.read();
             continue;
         }
 
@@ -147,37 +109,34 @@ void processTelemetryFromFpga() {
         uint8_t b1 = Serial.read();
 
         if (b0 == FRAME_SYNC0_TELEMETRY && b1 == FRAME_SYNC1_TELEMETRY) {
-            // Read remaining 10 bytes
             Serial.readBytes(&telemetryBuffer[2], 10);
             telemetryBuffer[0] = b0;
             telemetryBuffer[1] = b1;
 
-            // Verify XOR Checksum
             uint8_t computedCrc = telemetryBuffer[2] ^ telemetryBuffer[3] ^ 
                                   telemetryBuffer[4] ^ telemetryBuffer[5] ^ 
                                   telemetryBuffer[6] ^ telemetryBuffer[7] ^ 
                                   telemetryBuffer[8] ^ telemetryBuffer[9] ^ telemetryBuffer[10];
-            
+
             if (computedCrc == telemetryBuffer[11]) {
                 telemetryReceived++;
-                
                 uint8_t statusByte = telemetryBuffer[2];
-                bool approved      = (statusByte & 0x80) != 0;
-                uint8_t code       = (statusByte & 0x7F);
+                lastApproval       = (statusByte & 0x80) != 0;
+                lastViolationCode  = (statusByte & 0x7F);
                 bool spike         = (telemetryBuffer[3] != 0);
 
-                int32_t rawVoltage = ((int32_t)telemetryBuffer[4] << 24) |
-                                     ((int32_t)telemetryBuffer[5] << 16) |
-                                     ((int32_t)telemetryBuffer[6] << 8)  |
-                                     ((int32_t)telemetryBuffer[7]);
-                float voltageMv = (float)rawVoltage / 65536.0f; // Q16.16 -> mV
+                int32_t rawV = ((int32_t)telemetryBuffer[4] << 24) |
+                               ((int32_t)telemetryBuffer[5] << 16) |
+                               ((int32_t)telemetryBuffer[6] << 8)  |
+                               ((int32_t)telemetryBuffer[7]);
+                lastVoltageMv = (float)rawV / 65536.0f;
 
                 uint32_t cycles = ((uint32_t)telemetryBuffer[8] << 16) |
                                   ((uint32_t)telemetryBuffer[9] << 8)  |
                                   ((uint32_t)telemetryBuffer[10]);
-                float latencyNs = (float)cycles * 10.0f; // 100 MHz clock = 10 ns per cycle
+                lastLatencyNs = (float)cycles * 10.0f;
 
-                if (approved) approvalsCount++;
+                if (lastApproval) approvalsCount++;
                 else rejectionsCount++;
                 if (spike) spikesCount++;
             }
@@ -186,35 +145,151 @@ void processTelemetryFromFpga() {
 }
 
 // -----------------------------------------------------------------------------
-// Main Execution Loop
+// Web Portal Endpoints
 // -----------------------------------------------------------------------------
-void loop() {
-    static uint32_t lastTickTime = 0;
-    static uint32_t orderCounter = 1;
+const char INDEX_HTML[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NeuroQuant-LOB | ESP8266 FPGA Portal</title>
+  <style>
+    :root { --bg:#0b0f19; --card:#151d30; --cyan:#00f2fe; --green:#00ff87; --red:#ff4b4b; --text:#e2e8f0; }
+    body { background:var(--bg); color:var(--text); font-family:-apple-system,sans-serif; margin:0; padding:16px; }
+    .header { text-align:center; padding:12px; border-bottom:1px solid #1e293b; }
+    h1 { margin:0; font-size:1.4rem; color:var(--cyan); }
+    .badge { display:inline-block; padding:4px 8px; border-radius:12px; font-size:0.75rem; background:rgba(0,242,254,0.15); color:var(--cyan); border:1px solid var(--cyan); margin-top:6px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+    .card { background:var(--card); padding:14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); }
+    .lbl { font-size:0.75rem; color:#94a3b8; }
+    .val { font-size:1.3rem; font-weight:bold; margin-top:4px; font-family:monospace; }
+    .green { color:var(--green); } .cyan { color:var(--cyan); } .red { color:var(--red); }
+    .actions { margin-top:20px; display:flex; flex-direction:column; gap:10px; }
+    button { background:#1e293b; color:#fff; border:1px solid #334155; padding:12px; border-radius:6px; font-size:0.9rem; font-weight:bold; cursor:pointer; }
+    button.primary { background:linear-gradient(135deg, #00f2fe, #4facfe); color:#0b0f19; border:none; }
+    button.danger { background:rgba(255,75,75,0.2); border-color:var(--red); color:var(--red); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>⚡ NeuroQuant Arty S7 Bridge</h1>
+    <div class="badge">921,600 BAUD PHYSICAL UART</div>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="lbl">PACKETS BLASTED</div><div id="v-sent" class="val cyan">0</div></div>
+    <div class="card"><div class="lbl">TRADES APPROVED</div><div id="v-app" class="val green">0</div></div>
+    <div class="card"><div class="lbl">RISK REJECTIONS</div><div id="v-rej" class="val red">0</div></div>
+    <div class="card"><div class="lbl">LIF SPIKES FIRED</div><div id="v-spk" class="val cyan">0</div></div>
+    <div class="card"><div class="lbl">MEMBRANE VOLTAGE</div><div id="v-vm" class="val">-70.0 mV</div></div>
+    <div class="card"><div class="lbl">WIRE LATENCY</div><div id="v-lat" class="val green">25.0 ns</div></div>
+  </div>
+  <div class="actions">
+    <button class="primary" onclick="inject('normal')">🚀 INJECT CLEAN ORDER (1,000 AAPL)</button>
+    <button class="danger" onclick="inject('toxic')">⚠️ INJECT FAT-FINGER BREACH (50,000 AAPL)</button>
+    <button onclick="inject('burst')">⚡ BLAST 50-TICK WIRE BURST</button>
+  </div>
+  <script>
+    function update() {
+      fetch('/api/status').then(r => r.json()).then(d => {
+        document.getElementById('v-sent').innerText = d.sent;
+        document.getElementById('v-app').innerText = d.approved;
+        document.getElementById('v-rej').innerText = d.rejected;
+        document.getElementById('v-spk').innerText = d.spikes;
+        document.getElementById('v-vm').innerText = d.voltage_mv.toFixed(2) + ' mV';
+        document.getElementById('v-lat').innerText = d.latency_ns.toFixed(1) + ' ns';
+      });
+    }
+    setInterval(update, 500);
+    function inject(t) { fetch('/api/inject?type=' + t, {method:'POST'}); }
+  </script>
+</body>
+</html>
+)rawliteral";
 
-    // Stream a high-frequency tick every 10 milliseconds (100 Hz wire speed)
-    if (millis() - lastTickTime >= 10) {
-        lastTickTime = millis();
+void handleRoot() {
+    server.send(200, "text/html", INDEX_HTML);
+}
 
-        // Alternate BUY / SELL with varying prices and share sizes
-        char side = (orderCounter % 2 == 0) ? 'B' : 'S';
-        uint32_t shares = (orderCounter % 5 == 0) ? 1000 : 200;
-        uint32_t priceDecicents = 1500000 + (orderCounter % 50) * 100; // $150.00 to $155.00
+void handleStatus() {
+    String json = "{";
+    json += "\"sent\":" + String(packetsSent) + ",";
+    json += "\"telemetry\":" + String(telemetryReceived) + ",";
+    json += "\"approved\":" + String(approvalsCount) + ",";
+    json += "\"rejected\":" + String(rejectionsCount) + ",";
+    json += "\"spikes\":" + String(spikesCount) + ",";
+    json += "\"voltage_mv\":" + String(lastVoltageMv, 2) + ",";
+    json += "\"latency_ns\":" + String(lastLatencyNs, 1) + ",";
+    json += "\"last_approved\":" + String(lastApproval ? "true" : "false") + ",";
+    json += "\"violation_code\":\"0x" + String(lastViolationCode, HEX) + "\"";
+    json += "}";
+    server.send(200, "application/json", json);
+}
 
-        // Build 42-byte binary frame
-        buildItchAddOrderPacket(ingressBuffer, orderCounter, side, shares, "AAPL    ", priceDecicents);
+void handleInject() {
+    String type = server.arg("type");
+    static uint32_t webOrderRef = 9000;
+    webOrderRef++;
 
-        // Transmit over physical PMOD UART to Arty S7
-        Serial.write(ingressBuffer, TOTAL_INGRESS_BYTES);
-        packetsSent++;
-        orderCounter++;
-
-        // Blink heartbeat LED
-        if (orderCounter % 20 == 0) {
-            digitalWrite(LED_HEARTBEAT, !digitalRead(LED_HEARTBEAT));
+    if (type == "normal") {
+        sendOrderToFpga(webOrderRef, 'B', 1000, 1500000); // 1,000 shares @ $150.00
+    } else if (type == "toxic") {
+        sendOrderToFpga(webOrderRef, 'B', 50000, 1500000); // 50,000 shares (Fat-finger breach!)
+    } else if (type == "burst") {
+        for (int i = 0; i < 50; i++) {
+            webOrderRef++;
+            sendOrderToFpga(webOrderRef, (i % 2 == 0) ? 'B' : 'S', 200, 1500000 + i * 10);
+            delay(1);
         }
     }
+    server.send(200, "application/json", "{\"status\":\"ok\"}");
+}
 
-    // Process return telemetry from FPGA
+// -----------------------------------------------------------------------------
+// Setup & Loop
+// -----------------------------------------------------------------------------
+void setup() {
+    pinMode(LED_HEARTBEAT, OUTPUT);
+    digitalWrite(LED_HEARTBEAT, HIGH);
+
+    Serial.begin(FPGA_BAUD_RATE);
+    while (!Serial) { delay(10); }
+
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+    uint32_t tStart = millis();
+    while (WiFi.status() != WL_CONNECTED && (millis() - tStart < 8000)) {
+        delay(200);
+        digitalWrite(LED_HEARTBEAT, !digitalRead(LED_HEARTBEAT));
+    }
+    digitalWrite(LED_HEARTBEAT, (WiFi.status() == WL_CONNECTED) ? LOW : HIGH);
+
+    if (MDNS.begin("neuroquant")) {
+        MDNS.addService("http", "tcp", 80);
+    }
+
+    server.on("/", handleRoot);
+    server.on("/api/status", handleStatus);
+    server.on("/api/inject", HTTP_POST, handleInject);
+    server.begin();
+}
+
+void loop() {
+    server.handleClient();
+    MDNS.update();
+
+    static uint32_t lastAutoTick = 0;
+    static uint32_t autoRef = 1;
+
+    // Stream an autonomous live market tick every 20 ms (50 Hz wire speed)
+    if (millis() - lastAutoTick >= 20) {
+        lastAutoTick = millis();
+        autoRef++;
+        char side = (autoRef % 2 == 0) ? 'B' : 'S';
+        uint32_t shares = (autoRef % 7 == 0) ? 1000 : 200;
+        sendOrderToFpga(autoRef, side, shares, 1500000 + (autoRef % 30) * 100);
+    }
+
     processTelemetryFromFpga();
 }
