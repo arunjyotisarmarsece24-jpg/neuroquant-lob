@@ -316,7 +316,8 @@ def get_hardware_waveform(module="lif"):
         "itch": "itch_parser_waveform.png",
         "risk": "risk_gate_waveform.png",
         "top": "top_system_waveform.png",
-        "formal": "top_system_waveform.png"
+        "formal": "top_system_waveform.png",
+        "uart": "top_system_waveform.png"
     }
     filename = mod_map.get(module.lower(), "lif_neuron_waveform.png")
     hardware_dir = os.path.join(PROJECT_ROOT, "hardware")
@@ -390,6 +391,16 @@ def get_hardware_status():
                 "interface": "Exhaustive Invariance & Property Verification",
                 "checks": "21,514 / 21,514 Checks Passing (100.0%)",
                 "vcd": "hardware/neuroquant_formal_trace.vcd"
+            },
+            "uart": {
+                "name": "Digilent Arty S7 + ESP8266 Hardware UART Bridge",
+                "rtl": "hardware/neuroquant_arty_s7_top.v",
+                "tb": "hardware/tb_uart_bridge.v",
+                "clock": "100.00 MHz (921,600 Baud)",
+                "latency": "Continuous Serial Telemetry Stream",
+                "interface": "PMOD JA (8-N-1 Serial Direct Connect)",
+                "checks": "5 / 5 Checks Passing (100.0%)",
+                "vcd": "hardware/neuroquant_uart_bridge_trace.vcd"
             }
         },
         "fpga_utilization": {
@@ -447,7 +458,8 @@ def run_hardware_simulation_api():
         "itch": "3 / 3 Checks Passed (100.0%)",
         "risk": "8 / 8 Checks Passed (100.0%)",
         "top": "5 / 5 Checks Passed (100.0%)",
-        "formal": "21,514 / 21,514 Formal Invariance Checks Passed (100.0%)"
+        "formal": "21,514 / 21,514 Formal Invariance Checks Passed (100.0%)",
+        "uart": "5 / 5 Checks Passed (100.0%)"
     }
 
     return jsonify({

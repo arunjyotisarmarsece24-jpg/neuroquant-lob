@@ -190,6 +190,40 @@ class TestVerilogHardwareSimulation(unittest.TestCase):
         self.assertIn("VERIFIED MATHEMATICALLY IMMUTABLE", res_sim.stdout)
         self.assertIn("Failed Assertions:         0", res_sim.stdout)
 
+    def test_iverilog_uart_bridge_simulation(self):
+        """Test physical Digilent Arty S7 + NodeMCU ESP8266 serial bridge (921,600 baud)."""
+        rtl_files = [
+            os.path.join(HARDWARE_DIR, "lif_neuron_core.v"),
+            os.path.join(HARDWARE_DIR, "itch_parser_axi.v"),
+            os.path.join(HARDWARE_DIR, "risk_gate_core.v"),
+            os.path.join(HARDWARE_DIR, "neuroquant_fpga_top.v"),
+            os.path.join(HARDWARE_DIR, "uart_rx_bridge.v"),
+            os.path.join(HARDWARE_DIR, "uart_tx_telemetry.v"),
+            os.path.join(HARDWARE_DIR, "neuroquant_arty_s7_top.v"),
+        ]
+        tb_file = os.path.join(HARDWARE_DIR, "tb_uart_bridge.v")
+        out_vvp = os.path.join(HARDWARE_DIR, "uart_sim.vvp")
+
+        # Compile
+        res_compile = subprocess.run(
+            [IVERILOG_BIN, "-g2005-sv", "-o", out_vvp] + rtl_files + [tb_file],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_compile.returncode, 0, f"iverilog compilation failed:\n{res_compile.stderr}")
+
+        # Run simulation
+        res_sim = subprocess.run(
+            [VVP_BIN, out_vvp],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_sim.returncode, 0, f"vvp simulation failed:\n{res_sim.stderr}")
+        self.assertIn("5 / 5 CHECKS PASSED", res_sim.stdout)
+        self.assertIn("100% ARTY S7 + ESP8266 SERIAL BRIDGE VERIFIED!", res_sim.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -72,6 +72,17 @@ MODULE_CONFIGS = {
         "tb": "tb_formal_invariance.v",
         "out": "formal_sim.vvp",
         "vcd": "neuroquant_formal_trace.vcd"
+    },
+    "uart": {
+        "name": "Digilent Arty S7 + ESP8266 Hardware UART Bridge",
+        "rtl": [
+            "lif_neuron_core.v", "itch_parser_axi.v", "risk_gate_core.v",
+            "neuroquant_fpga_top.v", "uart_rx_bridge.v", "uart_tx_telemetry.v",
+            "neuroquant_arty_s7_top.v"
+        ],
+        "tb": "tb_uart_bridge.v",
+        "out": "uart_sim.vvp",
+        "vcd": "neuroquant_uart_bridge_trace.vcd"
     }
 }
 
@@ -128,19 +139,19 @@ def run_hardware_sim(module: str = "all", open_waveforms: bool = False) -> bool:
         return run_single_module(module, open_waveforms)
     elif module == "all":
         success = True
-        for k in ["lif", "itch", "risk", "top", "formal"]:
+        for k in ["lif", "itch", "risk", "top", "formal", "uart"]:
             ok = run_single_module(k, open_waveforms and (k == "lif"))
             if not ok:
                 success = False
         return success
     else:
-        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, top, formal, all.")
+        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, top, formal, uart, all.")
         return False
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Hardware RTL Simulation Suite")
-    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "top", "formal", "all"], default="all",
+    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "top", "formal", "uart", "all"], default="all",
                         help="Select module to simulate (default: all)")
     parser.add_argument("--waveforms", "-w", action="store_true",
                         help="Launch GTKWave to inspect signal waveforms")
