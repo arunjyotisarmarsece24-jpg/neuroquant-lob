@@ -905,6 +905,16 @@ def cmd_hardware(args):
     return 0 if success else 1
 
 # ==============================================================================
+# SUBCOMMAND: sweep
+# ==============================================================================
+def cmd_sweep(args):
+    """Run Day 1 Deep Neuromorphic Parameter Sweeps (Pareto Optimization)."""
+    print_header("DAY 1 DEEP NEUROMORPHIC PARAMETER SWEEPS")
+    from benchmarks.run_deep_parameter_sweeps import run_parameter_sweeps
+    success = run_parameter_sweeps(quick=getattr(args, "quick", False), ticks=getattr(args, "ticks", 2500))
+    return 0 if success else 1
+
+# ==============================================================================
 # SUBCOMMAND: version
 # ==============================================================================
 def cmd_version(args):
@@ -1020,6 +1030,11 @@ def main():
     p_hw.add_argument("--module", "-m", choices=["lif", "itch", "risk", "all"], default="all", help="Select hardware module to simulate (default: all)")
     p_hw.add_argument("--waveforms", action="store_true", help="Launch GTKWave to view waveform traces (.vcd)")
 
+    # neuroquant sweep
+    p_sw = subparsers.add_parser("sweep", help="Run Day 1 Deep Neuromorphic Parameter Sweeps (Pareto Optimization)")
+    p_sw.add_argument("--quick", action="store_true", help="Run fast 27-point representative grid")
+    p_sw.add_argument("--ticks", type=int, default=2500, help="Number of ticks per evaluation (default: 2500)")
+
     # neuroquant version
     subparsers.add_parser("version", help="Show product version, author, and system information")
 
@@ -1042,6 +1057,7 @@ def main():
         "risk": cmd_risk,
         "fix": cmd_fix,
         "hardware": cmd_hardware,
+        "sweep": cmd_sweep,
         "version": cmd_version,
     }
 

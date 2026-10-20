@@ -454,6 +454,45 @@ def get_bitter_status():
             return jsonify(json.load(f))
     return jsonify({"status": "NOT_RUN", "regimes_tested": 0})
 
+@app.route("/api/sweeps/status")
+def get_sweeps_status():
+    """Returns the latest Day 1 Deep Neuromorphic Parameter Sweep and Pareto-frontier results."""
+    json_path = os.path.join(PROJECT_ROOT, "benchmarks", "parameter_sweep_results.json")
+    if os.path.exists(json_path):
+        with open(json_path, "r") as f:
+            return jsonify(json.load(f))
+    return jsonify({"status": "NOT_RUN", "total_evaluated": 0})
+
+@app.route("/api/sweeps/pareto_image")
+def get_pareto_image():
+    """Serves high-resolution publication Pareto-frontier visualization image."""
+    benchmarks_dir = os.path.join(PROJECT_ROOT, "benchmarks")
+    return send_from_directory(benchmarks_dir, "neuromorphic_pareto_frontier.png", mimetype="image/png")
+
+@app.route("/api/sweeps/run", methods=["POST"])
+def run_sweeps_api():
+    """Triggers Day 1 parameter sweep across hyperparameter grid."""
+    from benchmarks.run_deep_parameter_sweeps import run_parameter_sweeps
+    req = request.json or {}
+    quick = req.get("quick", True)
+    ticks = int(req.get("ticks", 2500))
+    t0 = time.perf_counter()
+    ok = run_parameter_sweeps(quick=quick, ticks=ticks, verbose=False)
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    
+    json_path = os.path.join(PROJECT_ROOT, "benchmarks", "parameter_sweep_results.json")
+    champ_data = {}
+    if os.path.exists(json_path):
+        with open(json_path, "r") as f:
+            data = json.load(f)
+            champ_data = data.get("champion", {})
+            
+    return jsonify({
+        "status": "ok" if ok else "error",
+        "elapsed_ms": round(elapsed_ms, 2),
+        "champion": champ_data
+    })
+
 @app.route("/api/hardware/simulate", methods=["POST"])
 def run_hardware_simulation_api():
     """

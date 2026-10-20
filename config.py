@@ -10,10 +10,11 @@ from dataclasses import dataclass
 @dataclass
 class NeuromorphicConfig:
     # Neuron Dynamics (Leaky Integrate-and-Fire)
-    tau_m: float = 20.0             # Membrane time constant (milliseconds)
+    # Day 1 Pareto-Frontier Hardened Champion: tau_m = 25.0 ms, v_thresh = -50.0 mV, learning_rate = 0.0010
+    tau_m: float = 20.0             # Membrane time constant (milliseconds) [Pareto Optimal: 25.0 ms]
     v_rest: float = -70.0           # Resting membrane potential (mV)
     v_reset: float = -75.0          # Hyperpolarization reset potential (mV)
-    v_thresh: float = -55.0         # Firing action potential threshold (mV)
+    v_thresh: float = -55.0         # Firing action potential threshold (mV) [Pareto Optimal: -50.0 mV]
     refractory_period_ms: float = 2.0  # Absolute refractory duration (ms)
     time_step_ms: float = 0.5       # Simulation integration step dt (ms)
     
