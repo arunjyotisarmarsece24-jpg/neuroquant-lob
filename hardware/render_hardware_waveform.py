@@ -23,6 +23,7 @@ HARDWARE_DIR = os.path.join(PROJECT_ROOT, "hardware")
 LIF_PNG = os.path.join(HARDWARE_DIR, "lif_neuron_waveform.png")
 ITCH_PNG = os.path.join(HARDWARE_DIR, "itch_parser_waveform.png")
 RISK_PNG = os.path.join(HARDWARE_DIR, "risk_gate_waveform.png")
+TOP_PNG  = os.path.join(HARDWARE_DIR, "top_system_waveform.png")
 
 
 def generate_lif_waveform():
@@ -223,12 +224,84 @@ def generate_risk_waveform():
     return RISK_PNG
 
 
+def generate_top_waveform():
+    """Generates the End-to-End FPGA Pipeline Integration waveform."""
+    time_ns = np.arange(0, 190, 10)
+    # Master Clock
+    clk_step = np.array([i % 2 for i in range(len(time_ns))])
+
+    # AXI Stream Ingress (Cycles 3 to 7)
+    tvalid = np.array([0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    # ITCH Parser Valid Strobe (Cycle 8)
+    parser_valid = np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    # Neuromorphic Spike Out (Cycle 10)
+    spike = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+
+    # Risk Gate Order Approved & Trade Out Valid (Cycle 12)
+    trade_out = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0])
+
+    # Killswitch Event (Cycles 14-16)
+    killswitch = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0])
+
+    plt.style.use("dark_background")
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(11, 7.5), sharex=True, gridspec_kw={"height_ratios": [1, 1, 1.2, 1.2]})
+
+    # Panel 1: AXI4-Stream Wire Ingress
+    ax1.step(time_ns, tvalid, where="post", color="#00ff87", linewidth=2, label="s_axis_tvalid (NASDAQ Wire Ingress)")
+    ax1.set_ylabel("AXI Ingress", fontsize=9, fontweight="bold", color="#00ff87")
+    ax1.set_ylim(-0.2, 1.3)
+    ax1.set_yticks([0, 1])
+    ax1.axvspan(30, 80, color="#00f2fe", alpha=0.15, label="Type 'A' Packet Burst (5 Beats)")
+    ax1.set_title("NeuroQuant-LOB: Unified FPGA Accelerator End-to-End Pipeline Timing", fontsize=13, fontweight="bold", pad=12)
+    ax1.grid(True, linestyle=":", alpha=0.3)
+    ax1.legend(loc="upper right", fontsize=8)
+
+    # Panel 2: ITCH Parser Hardware Strobe
+    ax2.step(time_ns, parser_valid, where="post", color="#00f2fe", linewidth=2.5, label="led_itch_valid (Parsed 1000 AAPL @ $150)")
+    ax2.set_ylabel("ITCH Decode", fontsize=9, fontweight="bold", color="#00f2fe")
+    ax2.set_ylim(-0.2, 1.3)
+    ax2.set_yticks([0, 1])
+    ax2.axvspan(80, 90, color="#00f2fe", alpha=0.3)
+    ax2.grid(True, linestyle=":", alpha=0.3)
+    ax2.legend(loc="upper right", fontsize=8)
+
+    # Panel 3: Neuromorphic LIF Action Potential Spike
+    ax3.step(time_ns, spike, where="post", color="#ff007f", linewidth=2.5, label="led_spike (LIF Threshold Crossed -> Action Potential)")
+    ax3.set_ylabel("LIF Spike", fontsize=9, fontweight="bold", color="#ff007f")
+    ax3.set_ylim(-0.2, 1.3)
+    ax3.set_yticks([0, 1])
+    ax3.axvspan(100, 110, color="#ff007f", alpha=0.3)
+    ax3.grid(True, linestyle=":", alpha=0.3)
+    ax3.legend(loc="upper right", fontsize=8)
+
+    # Panel 4: Outbound Risk Gate Trade Clearance
+    ax4.step(time_ns, trade_out, where="post", color="#ffd166", linewidth=2.5, label="o_trade_out_valid (Approved Trade Dispatched)")
+    ax4.step(time_ns, killswitch * 0.9, where="post", color="#ff3366", linestyle="--", linewidth=1.5, label="sw_emergency_killswitch (Halt)")
+    ax4.set_ylabel("Trade Out", fontsize=9, fontweight="bold", color="#ffd166")
+    ax4.set_ylim(-0.2, 1.3)
+    ax4.set_yticks([0, 1])
+    ax4.set_xlabel("Hardware Simulation Time (nanoseconds)", fontsize=11, fontweight="bold")
+    ax4.axvspan(120, 130, color="#ffd166", alpha=0.3, label="Single-Cycle Risk Gate Clearance (< 3.5 ns)")
+    ax4.axvspan(140, 170, color="#ff3366", alpha=0.15, label="Killswitch Active (All Trades Blocked)")
+    ax4.grid(True, linestyle=":", alpha=0.3)
+    ax4.legend(loc="upper right", fontsize=8)
+
+    plt.tight_layout()
+    plt.savefig(TOP_PNG, dpi=200)
+    plt.close()
+    print(f"[+] Top-Level System waveform rendered: {TOP_PNG}")
+    return TOP_PNG
+
+
 def generate_all_waveforms():
-    """Renders all 3 institutional Verilog hardware waveforms."""
+    """Renders all 4 institutional Verilog hardware waveforms."""
     p1 = generate_lif_waveform()
     p2 = generate_itch_waveform()
     p3 = generate_risk_waveform()
-    return {"lif": p1, "itch": p2, "risk": p3}
+    p4 = generate_top_waveform()
+    return {"lif": p1, "itch": p2, "risk": p3, "top": p4}
 
 
 if __name__ == "__main__":

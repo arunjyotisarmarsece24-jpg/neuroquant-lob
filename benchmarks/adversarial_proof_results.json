@@ -12,14 +12,17 @@
     "theorem": "Theorem 2 (Variational Euler-Lagrange Optimality)",
     "passed": true,
     "n_perturbations": 1000000,
+    "perturbations_evaluated": 1000000,
     "min_delta_U": 1.538182914373465e-10,
+    "min_delta_utility": 1.538182914373465e-10,
     "violations": 0,
-    "throughput_evals_sec": 115426.87049822726
+    "throughput_evals_sec": 112249.1969888878
   },
   "attack_3": {
     "theorem": "Theorem 3 (Lyapunov Attractor Stability)",
     "passed": true,
     "matrices_tested": 10000,
+    "matrices_evaluated": 10000,
     "violations": 0,
     "spectral_threshold": 0.002
   },
@@ -28,7 +31,9 @@
     "passed": true,
     "theoretical_crossover_bps": 0.7000000000000001,
     "empirical_crossover_bps": 0.7007007007007007,
-    "absolute_error_bps": 0.0007007007007006072
+    "measured_crossover_bps": 0.7007007007007007,
+    "absolute_error_bps": 0.0007007007007006072,
+    "error_bps": 0.0007007007007006072
   },
   "attack_5": {
     "lemma": "Lemma 2 (Zero Signal Hallucination)",
@@ -37,6 +42,7 @@
     "theoretical_auc": 0.5,
     "delta_auc": 6.074944000000748e-05,
     "std_auc": 0.025905171132641833,
+    "t_statistic": -0.7415725434151405,
     "p_value": 0.45834810559094397,
     "trials": 100000
   }

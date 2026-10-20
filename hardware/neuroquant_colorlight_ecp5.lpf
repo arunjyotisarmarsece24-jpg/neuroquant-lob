@@ -1,0 +1,43 @@
+# ==============================================================================
+# NEUROQUANT-LOB: LATTICE ECP5 OPEN-SOURCE PHYSICAL CONSTRAINTS (.LPF)
+# ==============================================================================
+# Target Board:      Colorlight 5A-75B v7.0 / v8.0 ($18 Open-Source FPGA Board)
+# FPGA Part:         LFE5U-25F-6BG256C (25K LUTs, Dual Gigabit Ethernet PHYs)
+# Open-Source Suite: Yosys + Project Trellis + nextpnr-ecp5
+# ==============================================================================
+
+# Master 25MHz onboard oscillator
+LOCATE COMP "clk" SITE "P6";
+IOBUF PORT "clk" IO_TYPE=LVCMOS33;
+FREQUENCY PORT "clk" 25.0 MHz;
+
+# Active-low Reset button
+LOCATE COMP "rst_n" SITE "M13";
+IOBUF PORT "rst_n" IO_TYPE=LVCMOS33 PULLMODE=UP;
+
+# Emergency Killswitch
+LOCATE COMP "sw_emergency_killswitch" SITE "F3";
+IOBUF PORT "sw_emergency_killswitch" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+
+# Manual tick trigger
+LOCATE COMP "i_manual_trigger" SITE "F4";
+IOBUF PORT "i_manual_trigger" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
+
+# Status LEDs
+LOCATE COMP "led_ready" SITE "T6";
+IOBUF PORT "led_ready" IO_TYPE=LVCMOS33;
+
+LOCATE COMP "led_itch_valid" SITE "R6";
+IOBUF PORT "led_itch_valid" IO_TYPE=LVCMOS33;
+
+LOCATE COMP "led_spike" SITE "T7";
+IOBUF PORT "led_spike" IO_TYPE=LVCMOS33;
+
+LOCATE COMP "led_order_approved" SITE "R7";
+IOBUF PORT "led_order_approved" IO_TYPE=LVCMOS33;
+
+LOCATE COMP "led_risk_violated" SITE "T8";
+IOBUF PORT "led_risk_violated" IO_TYPE=LVCMOS33;
+
+LOCATE COMP "o_trade_out_valid" SITE "P7";
+IOBUF PORT "o_trade_out_valid" IO_TYPE=LVCMOS33;

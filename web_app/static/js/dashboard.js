@@ -715,7 +715,8 @@ let currentHwModule = 'lif';
 const hwLegends = {
   lif: '💡 <strong>LIF Neuron Waveform:</strong> Displays cycle-accurate membrane potential $V_m$ relaxation from resting (-70 mV), crossing threshold (-55 mV) to emit a 1-cycle digital action potential spike, resetting to -75 mV, and enforcing a 2-cycle refractory clamp.',
   itch: "💡 <strong>ITCH 5.0 AXI4-Stream Waveform:</strong> Shows 64-bit bus handshake (tvalid, tready, tlast) for incoming NASDAQ network packets, demonstrating cycle-accurate Type 'A' (Add Order) decoding in 5 cycles (15.5 ns @ 322 MHz) and Type 'D' (Delete Order) decoding in 3 cycles (9.3 ns).",
-  risk: '💡 <strong>Hardware Risk Gate Waveform:</strong> Illustrates 8 consecutive institutional test cases verified in a single clock cycle (< 3.5 ns): Clean Order approval, Emergency Killswitch halt, Price Collar block, Max Size limit, Net Inventory breach, De-Risking bypass, MTM Drawdown stop, and Theorem 1 Lyapunov Invariant defense.'
+  risk: '💡 <strong>Hardware Risk Gate Waveform:</strong> Illustrates 8 consecutive institutional test cases verified in a single clock cycle (< 3.5 ns): Clean Order approval, Emergency Killswitch halt, Price Collar block, Max Size limit, Net Inventory breach, De-Risking bypass, MTM Drawdown stop, and Theorem 1 Lyapunov Invariant defense.',
+  top: '💡 <strong>End-to-End Pipeline Waveform:</strong> Demonstrates the complete integrated FPGA workflow: NASDAQ wire packet ingest across 5 beats -> ITCH decoding -> Synaptic modulation -> Neuromorphic LIF action potential spike -> 1-cycle Pre-Trade Risk clearance -> Outbound trade execution strobe (< 25.2 ns total tick-to-trade latency on FPGA silicon) and Killswitch defense.'
 };
 
 function selectHardwareWaveform(mod) {
@@ -729,7 +730,7 @@ function selectHardwareWaveform(mod) {
     dlBtn.href = `/api/hardware/waveform/${mod}`;
     dlBtn.download = `${mod}_hardware_waveform.png`;
   }
-  ['lif', 'itch', 'risk'].forEach(m => {
+  ['lif', 'itch', 'risk', 'top'].forEach(m => {
     const btn = document.getElementById(`hw-tab-${m}`);
     if (btn) {
       if (m === mod) btn.classList.add('active');

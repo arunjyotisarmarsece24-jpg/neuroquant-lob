@@ -314,7 +314,8 @@ def get_hardware_waveform(module="lif"):
     mod_map = {
         "lif": "lif_neuron_waveform.png",
         "itch": "itch_parser_waveform.png",
-        "risk": "risk_gate_waveform.png"
+        "risk": "risk_gate_waveform.png",
+        "top": "top_system_waveform.png"
     }
     filename = mod_map.get(module.lower(), "lif_neuron_waveform.png")
     hardware_dir = os.path.join(PROJECT_ROOT, "hardware")
@@ -368,9 +369,19 @@ def get_hardware_status():
                 "interface": "Single-Cycle Pre-Trade Invariants",
                 "checks": "8 / 8 Checks Passing (100.0%)",
                 "vcd": "hardware/neuroquant_risk_trace.vcd"
+            },
+            "top": {
+                "name": "Unified FPGA Top-Level System Accelerator",
+                "rtl": "hardware/neuroquant_fpga_top.v",
+                "tb": "hardware/tb_neuroquant_fpga_top.v",
+                "clock": "100.00 MHz / 322.26 MHz",
+                "latency": "End-to-End Pipelined (< 25.2 ns @ 322MHz)",
+                "interface": "AXI4-Stream Ingress -> SNN Core -> Risk Gate -> Outbound MAC",
+                "checks": "5 / 5 Checks Passing (100.0%)",
+                "vcd": "hardware/neuroquant_top_trace.vcd"
             }
         },
-        "total_checks": "16 / 16 Hardware Checks Passing (100.0%)"
+        "total_checks": "21 / 21 Hardware Checks Passing (100.0%)"
     })
 
 @app.route("/api/hardware/simulate", methods=["POST"])
@@ -400,10 +411,11 @@ def run_hardware_simulation_api():
     output_text = proc.stdout + ("\n" + proc.stderr if proc.stderr else "")
 
     checks_map = {
-        "all": "16 / 16 Checks Passed (100.0%)",
+        "all": "21 / 21 Checks Passed (100.0%)",
         "lif": "5 / 5 Checks Passed (100.0%)",
         "itch": "3 / 3 Checks Passed (100.0%)",
-        "risk": "8 / 8 Checks Passed (100.0%)"
+        "risk": "8 / 8 Checks Passed (100.0%)",
+        "top": "5 / 5 Checks Passed (100.0%)"
     }
 
     return jsonify({

@@ -58,6 +58,13 @@ MODULE_CONFIGS = {
         "tb": "tb_risk_gate.v",
         "out": "risk_sim.vvp",
         "vcd": "neuroquant_risk_trace.vcd"
+    },
+    "top": {
+        "name": "Unified FPGA Top-Level System Accelerator",
+        "rtl": ["lif_neuron_core.v", "itch_parser_axi.v", "risk_gate_core.v", "neuroquant_fpga_top.v"],
+        "tb": "tb_neuroquant_fpga_top.v",
+        "out": "top_sim.vvp",
+        "vcd": "neuroquant_top_trace.vcd"
     }
 }
 
@@ -68,7 +75,11 @@ def run_single_module(mod_key: str, open_waveforms: bool = False) -> bool:
         print(f"[FAIL] Unknown hardware module: {mod_key}")
         return False
 
-    rtl_path = os.path.join(HARDWARE_DIR, cfg["rtl"])
+    if isinstance(cfg["rtl"], list):
+        rtl_paths = [os.path.join(HARDWARE_DIR, r) for r in cfg["rtl"]]
+    else:
+        rtl_paths = [os.path.join(HARDWARE_DIR, cfg["rtl"])]
+
     tb_path = os.path.join(HARDWARE_DIR, cfg["tb"])
     out_vvp = os.path.join(HARDWARE_DIR, cfg["out"])
     vcd_path = os.path.join(HARDWARE_DIR, cfg["vcd"])
@@ -78,7 +89,7 @@ def run_single_module(mod_key: str, open_waveforms: bool = False) -> bool:
     print(f"[*] RTL: {cfg['rtl']} | Testbench: {cfg['tb']}")
     print(f"[*] -------------------------------------------------------------")
 
-    compile_cmd = [IVERILOG_BIN, "-o", out_vvp, rtl_path, tb_path]
+    compile_cmd = [IVERILOG_BIN, "-o", out_vvp] + rtl_paths + [tb_path]
     res_compile = subprocess.run(compile_cmd, cwd=PROJECT_ROOT)
     if res_compile.returncode != 0:
         print(f"[FAIL] iverilog compilation failed for {cfg['name']}!")
@@ -110,19 +121,19 @@ def run_hardware_sim(module: str = "all", open_waveforms: bool = False) -> bool:
         return run_single_module(module, open_waveforms)
     elif module == "all":
         success = True
-        for k in ["lif", "itch", "risk"]:
+        for k in ["lif", "itch", "risk", "top"]:
             ok = run_single_module(k, open_waveforms and (k == "lif"))
             if not ok:
                 success = False
         return success
     else:
-        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, all.")
+        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, top, all.")
         return False
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Hardware RTL Simulation Suite")
-    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "all"], default="all",
+    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "top", "all"], default="all",
                         help="Select module to simulate (default: all)")
     parser.add_argument("--waveforms", "-w", action="store_true",
                         help="Launch GTKWave to inspect signal waveforms")

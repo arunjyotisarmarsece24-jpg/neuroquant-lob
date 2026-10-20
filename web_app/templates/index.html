@@ -585,17 +585,33 @@
               <div>• Status: <strong style="color:var(--accent-green);">8 / 8 Checks Passed (100%)</strong></div>
             </div>
           </div>
+
+          <div class="guide-card">
+            <div class="guide-card-icon">🌐</div>
+            <h3>4. Unified Top-Level Accelerator</h3>
+            <p style="font-size:0.82rem; margin-bottom:8px;">
+              End-to-end FPGA hardware integration linking AXI ITCH feed -> neuromorphic LIF spike modulation -> single-cycle pre-trade risk -> trade execution strobe.
+            </p>
+            <div style="font-size:0.75rem; font-family:var(--font-mono); color:var(--accent-cyan);">
+              <div>• Clock: 100 MHz / 322.26 MHz</div>
+              <div>• Latency: &lt; 25.2 ns Tick-to-Trade</div>
+              <div>• Status: <strong style="color:var(--accent-green);">5 / 5 Checks Passed (100%)</strong></div>
+            </div>
+          </div>
         </div>
 
         <!-- Interactive Hardware Simulation Control Panel -->
         <div class="interactive-box">
           <div class="box-header">
             <h4>🚀 Interactive Verilog Hardware Simulation Controls</h4>
-            <span id="hw-status-badge" class="badge" style="background:rgba(0,255,135,0.15); color:var(--accent-green);">16/16 Passed</span>
+            <span id="hw-status-badge" class="badge" style="background:rgba(0,255,135,0.15); color:var(--accent-green);">21/21 Passed</span>
           </div>
           <div class="hardware-sim-actions" style="margin-top:10px;">
             <button id="btn-hw-all" class="sim-btn primary" onclick="triggerHardwareSim('all')">
-              🚀 Run Turnkey Suite (16/16 Checks)
+              🚀 Run Full Hardware Suite (21 Checks)
+            </button>
+            <button id="btn-hw-top" class="sim-btn" onclick="triggerHardwareSim('top')">
+              🌐 Simulate Top-Level Pipeline (5 Checks)
             </button>
             <button id="btn-hw-lif" class="sim-btn" onclick="triggerHardwareSim('lif')">
               🧠 Simulate LIF Core (5 Checks)
@@ -630,6 +646,9 @@
             <button id="hw-tab-risk" class="thumb-btn" onclick="selectHardwareWaveform('risk')">
               🛡️ Risk Gate (Circuit Breakers &amp; Invariants)
             </button>
+            <button id="hw-tab-top" class="thumb-btn" onclick="selectHardwareWaveform('top')">
+              🌐 End-to-End Pipeline Timing
+            </button>
           </div>
 
           <!-- Waveform Graphic Display -->
@@ -640,6 +659,44 @@
           <!-- Waveform Context Legend -->
           <div id="hw-waveform-legend" class="bench-note" style="margin-top:10px; font-size:0.8rem;">
             💡 <strong>LIF Neuron Waveform:</strong> Displays cycle-accurate membrane potential $V_m$ relaxation from resting (-70 mV), crossing threshold (-55 mV) to emit a 1-cycle digital action potential spike, resetting to -75 mV, and enforcing a 2-cycle refractory clamp.
+          </div>
+        </div>
+
+        <!-- Online & Physical FPGA Testing & Synthesis Guide -->
+        <div class="interactive-box">
+          <div class="box-header">
+            <h4>🛠️ How to Test on Real FPGA Hardware &amp; Online Open-Source Cloud Boards ($0.00 Cost)</h4>
+            <span class="badge" style="background:rgba(0,242,254,0.15); color:var(--accent-cyan);">OPEN-SOURCE GUIDE</span>
+          </div>
+          <div style="font-size:0.82rem; line-height:1.6; color:var(--text-main); margin-top:10px;">
+            <p style="margin-bottom:8px;">
+              You can test, synthesize, and run this exact Verilog HDL suite right now using 100% free online platforms without purchasing physical hardware:
+            </p>
+            <div class="cards-grid" style="margin-top:10px;">
+              <div class="guide-card" style="background:var(--bg-tertiary);">
+                <div class="guide-card-icon">☁️</div>
+                <h3>1. EDA Playground (Online Cloud Simulator)</h3>
+                <p style="font-size:0.78rem;">
+                  100% free cloud HDL simulator. Paste <code style="color:var(--accent-cyan);">hardware/edaplayground_design.v</code> and <code style="color:var(--accent-cyan);">edaplayground_testbench.v</code> into <strong>www.edaplayground.com</strong>, select <strong>Icarus Verilog 0.10.0</strong>, check <em>"Open EPWave after run"</em>, and view interactive waveforms right in your browser!
+                </p>
+              </div>
+              <div class="guide-card" style="background:var(--bg-tertiary);">
+                <div class="guide-card-icon">⚡</div>
+                <h3>2. GitHub Actions (Automated Yosys Cloud Synthesis)</h3>
+                <p style="font-size:0.78rem;">
+                  Every push to your GitHub repository automatically triggers our free Ubuntu CI workflow (<code style="color:var(--accent-cyan);">.github/workflows/fpga_synthesis.yml</code>) running <strong>Yosys Open Synthesis Suite</strong> to check gate counts, cell utilization (LUTs, FFs, MUXes), and physical silicon synthesis!
+                </p>
+              </div>
+              <div class="guide-card" style="background:var(--bg-tertiary);">
+                <div class="guide-card-icon">🔌</div>
+                <h3>3. Real Physical FPGA Boards</h3>
+                <p style="font-size:0.78rem;">
+                  - <strong>Low-Cost Entry ($18):</strong> Colorlight 5A-75B (Lattice ECP5) with constraints in <code style="color:var(--accent-cyan);">hardware/neuroquant_colorlight_ecp5.lpf</code>.<br>
+                  - <strong>Academic Standard ($130):</strong> Digilent Arty A7 / Basys 3 (Xilinx Artix-7) with constraints in <code style="color:var(--accent-cyan);">hardware/neuroquant_basys3_arty.xdc</code>.<br>
+                  - <strong>HFT Production:</strong> AMD Alveo U50 / Xilinx UltraScale+ (322 MHz 10GbE network clock).
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 

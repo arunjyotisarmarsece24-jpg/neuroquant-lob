@@ -1,0 +1,33 @@
+name: FPGA Verilog Synthesis & Hardware Verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  fpga_ci:
+    name: Cycle-Accurate Simulation & Open-Source Yosys FPGA Synthesis
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Open-Source Hardware EDA Suite (iverilog + yosys)
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq iverilog yosys
+
+    - name: Run Full 21-Check Cycle-Accurate Hardware Simulation
+      run: |
+        python3 run_hardware_simulation.py --module all
+
+    - name: Run Yosys Open-Source FPGA Gate Synthesis & Cell Utilization Report
+      run: |
+        yosys -p "read_verilog hardware/lif_neuron_core.v hardware/itch_parser_axi.v hardware/risk_gate_core.v hardware/neuroquant_fpga_top.v; synth -top neuroquant_fpga_top; stat"
