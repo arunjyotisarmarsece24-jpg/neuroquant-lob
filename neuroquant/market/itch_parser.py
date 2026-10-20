@@ -178,7 +178,11 @@ def _get_dll() -> Optional[ctypes.CDLL]:
         os.path.join(base_dir, "csrc", "lif_core.dll"),
         os.path.join(base_dir, "csrc", "build", "lif_core.dll"),
         os.path.join(base_dir, "csrc", "liblif_core.so"),
+        os.path.join(base_dir, "csrc", "lif_core.so"),
         os.path.join(base_dir, "csrc", "build", "liblif_core.so"),
+        os.path.join(base_dir, "csrc", "build", "lif_core.so"),
+        os.path.join(base_dir, "csrc", "liblif_core.dylib"),
+        os.path.join(base_dir, "csrc", "lif_core.dylib"),
     ]
 
     if sys.platform == "win32":

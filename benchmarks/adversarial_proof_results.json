@@ -16,7 +16,7 @@
     "min_delta_U": 1.538182914373465e-10,
     "min_delta_utility": 1.538182914373465e-10,
     "violations": 0,
-    "throughput_evals_sec": 112249.1969888878
+    "throughput_evals_sec": 119658.57722433135
   },
   "attack_3": {
     "theorem": "Theorem 3 (Lyapunov Attractor Stability)",

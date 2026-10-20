@@ -55,12 +55,21 @@ class VeteranExecutionEngine:
         
         # Load C++20 AVX2 SIMD DLL if available
         self._simd_dll = None
-        dll_path = os.path.join(PROJECT_ROOT, "csrc", "lif_core.dll")
-        if os.path.exists(dll_path):
-            try:
-                self._simd_dll = ctypes.CDLL(dll_path)
-            except Exception:
-                self._simd_dll = None
+        candidates = [
+            os.path.join(PROJECT_ROOT, "csrc", "lif_core.dll"),
+            os.path.join(PROJECT_ROOT, "csrc", "build", "lif_core.dll"),
+            os.path.join(PROJECT_ROOT, "csrc", "liblif_core.so"),
+            os.path.join(PROJECT_ROOT, "csrc", "lif_core.so"),
+            os.path.join(PROJECT_ROOT, "csrc", "build", "liblif_core.so"),
+            os.path.join(PROJECT_ROOT, "csrc", "liblif_core.dylib"),
+        ]
+        for c in candidates:
+            if os.path.exists(c):
+                try:
+                    self._simd_dll = ctypes.CDLL(c)
+                    break
+                except Exception:
+                    self._simd_dll = None
 
         self.fee_model = TieredExchangeFeeModel(FeeModelConfig(
             maker_fee_rate=self.config.maker_rebate_rate,

@@ -128,6 +128,68 @@ class TestVerilogHardwareSimulation(unittest.TestCase):
         self.assertTrue(os.path.exists(vcd_path), "Risk Gate VCD trace was not generated!")
         self.assertGreater(os.path.getsize(vcd_path), 500, "Risk Gate VCD trace is empty!")
 
+    def test_iverilog_top_level_simulation(self):
+        """Test unified top-level FPGA accelerator integration (LIF + ITCH + Risk Gate)."""
+        rtl_files = [
+            os.path.join(HARDWARE_DIR, "lif_neuron_core.v"),
+            os.path.join(HARDWARE_DIR, "itch_parser_axi.v"),
+            os.path.join(HARDWARE_DIR, "risk_gate_core.v"),
+            os.path.join(HARDWARE_DIR, "neuroquant_fpga_top.v"),
+        ]
+        tb_file = os.path.join(HARDWARE_DIR, "tb_neuroquant_fpga_top.v")
+        out_vvp = os.path.join(HARDWARE_DIR, "top_sim.vvp")
+
+        # Compile
+        res_compile = subprocess.run(
+            [IVERILOG_BIN, "-o", out_vvp] + rtl_files + [tb_file],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_compile.returncode, 0, f"iverilog compilation failed:\n{res_compile.stderr}")
+
+        # Run simulation
+        res_sim = subprocess.run(
+            [VVP_BIN, out_vvp],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_sim.returncode, 0, f"vvp simulation failed:\n{res_sim.stderr}")
+        self.assertIn("5 / 5 CHECKS PASSED (100.0%)", res_sim.stdout)
+        self.assertIn("100% VERILOG HARDWARE SYNTHESIS TOP-LEVEL VERIFIED!", res_sim.stdout)
+
+    def test_iverilog_formal_invariance_simulation(self):
+        """Test brutal formal mathematical invariance audit (21,514 property assertions)."""
+        rtl_files = [
+            os.path.join(HARDWARE_DIR, "lif_neuron_core.v"),
+            os.path.join(HARDWARE_DIR, "itch_parser_axi.v"),
+            os.path.join(HARDWARE_DIR, "risk_gate_core.v"),
+            os.path.join(HARDWARE_DIR, "neuroquant_fpga_top.v"),
+        ]
+        tb_file = os.path.join(HARDWARE_DIR, "tb_formal_invariance.v")
+        out_vvp = os.path.join(HARDWARE_DIR, "formal_sim.vvp")
+
+        # Compile with -g2005-sv
+        res_compile = subprocess.run(
+            [IVERILOG_BIN, "-g2005-sv", "-o", out_vvp] + rtl_files + [tb_file],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_compile.returncode, 0, f"iverilog compilation failed:\n{res_compile.stderr}")
+
+        # Run simulation
+        res_sim = subprocess.run(
+            [VVP_BIN, out_vvp],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_sim.returncode, 0, f"vvp simulation failed:\n{res_sim.stderr}")
+        self.assertIn("VERIFIED MATHEMATICALLY IMMUTABLE", res_sim.stdout)
+        self.assertIn("Failed Assertions:         0", res_sim.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

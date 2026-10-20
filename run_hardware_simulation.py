@@ -65,6 +65,13 @@ MODULE_CONFIGS = {
         "tb": "tb_neuroquant_fpga_top.v",
         "out": "top_sim.vvp",
         "vcd": "neuroquant_top_trace.vcd"
+    },
+    "formal": {
+        "name": "Brutal Hardware Formal Invariance Audit (7 Invariant Properties)",
+        "rtl": ["lif_neuron_core.v", "itch_parser_axi.v", "risk_gate_core.v", "neuroquant_fpga_top.v"],
+        "tb": "tb_formal_invariance.v",
+        "out": "formal_sim.vvp",
+        "vcd": "neuroquant_formal_trace.vcd"
     }
 }
 
@@ -89,7 +96,7 @@ def run_single_module(mod_key: str, open_waveforms: bool = False) -> bool:
     print(f"[*] RTL: {cfg['rtl']} | Testbench: {cfg['tb']}")
     print(f"[*] -------------------------------------------------------------")
 
-    compile_cmd = [IVERILOG_BIN, "-o", out_vvp] + rtl_paths + [tb_path]
+    compile_cmd = [IVERILOG_BIN, "-g2005-sv", "-o", out_vvp] + rtl_paths + [tb_path]
     res_compile = subprocess.run(compile_cmd, cwd=PROJECT_ROOT)
     if res_compile.returncode != 0:
         print(f"[FAIL] iverilog compilation failed for {cfg['name']}!")
@@ -121,19 +128,19 @@ def run_hardware_sim(module: str = "all", open_waveforms: bool = False) -> bool:
         return run_single_module(module, open_waveforms)
     elif module == "all":
         success = True
-        for k in ["lif", "itch", "risk", "top"]:
+        for k in ["lif", "itch", "risk", "top", "formal"]:
             ok = run_single_module(k, open_waveforms and (k == "lif"))
             if not ok:
                 success = False
         return success
     else:
-        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, top, all.")
+        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, itch, risk, top, formal, all.")
         return False
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Hardware RTL Simulation Suite")
-    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "top", "all"], default="all",
+    parser.add_argument("--module", "-m", choices=["lif", "itch", "risk", "top", "formal", "all"], default="all",
                         help="Select module to simulate (default: all)")
     parser.add_argument("--waveforms", "-w", action="store_true",
                         help="Launch GTKWave to inspect signal waveforms")
