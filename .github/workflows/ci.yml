@@ -30,6 +30,18 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
 
+    - name: Install Hardware Simulation EDA Tools (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq iverilog
+
+    - name: Install Hardware Simulation EDA Tools (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        choco install -y iverilog
+        echo "C:\iverilog\bin" >> $env:GITHUB_PATH
+
     - name: Build C++20 AVX2 Core & ITCH Parser (Linux)
       if: runner.os == 'Linux'
       run: |
