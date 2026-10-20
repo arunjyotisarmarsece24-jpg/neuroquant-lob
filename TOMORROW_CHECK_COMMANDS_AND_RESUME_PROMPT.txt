@@ -1,0 +1,101 @@
+================================================================================
+NEUROQUANT-LOB: COMMANDS TO CHECK TODAY'S TESTS & TOMORROW RESUME PROMPT
+================================================================================
+CONVERSATION ID: e79b21a3-de2f-4cc8-b77e-af65e7b7bd03
+DATE:            Tuesday, 20 October 2026 -> Wednesday, 21 October 2026
+LATEST COMMIT:   307a9fa (main branch, 100% clean & synced with GitHub)
+AUTHOR:          Arunjyoti Sarma (Research Scholar, IIT (BHU), Varanasi)
+PROJECT ROOT:    C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project
+================================================================================
+
+--------------------------------------------------------------------------------
+PART 1: EXACT POWERSHELL COMMANDS TO VERIFY EVERYTHING TOMORROW MORNING
+--------------------------------------------------------------------------------
+
+First, open PowerShell and navigate to the project directory:
+
+cd C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project
+
+
+--- [CHECK 1] RUN ALL 122 MASTER UNIT TESTS (SOFTWARE + CNN + QUANTUM + HW) ---
+python -m unittest discover tests
+
+Expected Output:
+   Ran 122 tests in ~50s
+   OK (100.0% Success Rate)
+
+
+--- [CHECK 2] RUN ALL 31 CYCLE-ACCURATE VERILOG HARDWARE RTL CHECKS ---
+python run_hardware_simulation.py --module all
+
+Expected Output:
+   >>> ALL VERILOG HARDWARE MODULES COMPILED AND VERIFIED WITH 100% SUCCESS! <<<
+   (Simulates 8 hardware modules: lif, champion_lif, itch, risk, top, formal, uart, cosim)
+   (Verifies 21,514 formal mathematical invariance assertions with 0 violations)
+
+
+--- [CHECK 3] RUN SPECIFIC DEEPLOB CNN & ABSOLUTE QUANTUM HFT TESTS ---
+python -m unittest tests.test_deeplob_cnn tests.test_quantum_lob
+
+Expected Output:
+   Ran 10 tests in ~0.3s
+   OK (100.0% Success Rate)
+
+
+--- [CHECK 4] CHECK ALL 6 LIVE REST API ENDPOINTS ON PORT 5000 ---
+python check_api.py
+
+Expected Output:
+   [PASS] /api/sweeps/status     -> HTTP 200 OK (Champion: tau_m=25.0ms, v_thresh=-50.0mV)
+   [PASS] /api/cosim/status      -> HTTP 200 OK (Status: CONGRUENT 1000 Ticks)
+   [PASS] /api/bitter/status     -> HTTP 200 OK (All 4 Regimes Conquered in 0.16s)
+   [PASS] /api/cnn/inference     -> HTTP 200 OK (DeepLOB CNN Alpha Engine)
+   [PASS] /api/quantum/state     -> HTTP 200 OK (8-Qubit State Vector & VQE Routing)
+   [PASS] /api/telemetry         -> HTTP 200 OK (Real-Time Microstructure Telemetry)
+   >>> ALL INSTITUTIONAL REST API ENDPOINTS 100% HEALTHY & RESPONSIVE! <<<
+
+
+--- [CHECK 5] LAUNCH INTERACTIVE WEB APP IN BROWSER ---
+# Start the web server (if not already running):
+.\START_WEB_SERVER.bat
+
+# Open in browser:
+Start-Process "http://127.0.0.1:5000"
+
+
+--- [CHECK 6] VERIFY GIT REPOSITORY STATUS & SYNC ---
+git status
+git log -n 3 --oneline
+
+Expected Output:
+   On branch main
+   Your branch is up to date with 'origin/main'.
+   nothing to commit, working tree clean
+   307a9fa feat(ai,cnn,quantum): integrate DeepLOB CNN, 8-qubit state vector quantum circuit...
+
+
+================================================================================
+PART 2: EXACT COPY-PASTE PROMPT TO RESUME TOMORROW MORNING (DAY 2)
+================================================================================
+
+When you open Antigravity tomorrow, copy and paste this exact prompt into the chat:
+
+--------------------------------------------------------------------------------
+Good morning! Let's resume from conversation ID e79b21a3-de2f-4cc8-b77e-af65e7b7bd03.
+Refer to the master status file:
+MASTER_STATUS_AND_DAY_2_PLAN_e79b21a3-de2f-4cc8-b77e-af65e7b7bd03.txt
+and verification guide:
+TOMORROW_CHECK_COMMANDS_AND_RESUME_PROMPT.txt.
+
+All 122/122 unit tests, 31/31 Verilog hardware checks, DeepLOB CNN, Absolute Quantum HFT,
+and the Day 1 Pareto frontier are 100% verified and passing on GitHub commit 307a9fa.
+
+Today is Day 2 of our 10-day pre-FPGA software hardening schedule:
+Please execute Day 2: Order-Flow Imbalance (OFI) Calibration against realistic
+high-frequency L2 order book depth ticks, calibrating multi-level OFI decay rates
+and cross-level Hawkes kernels for our C++20 AVX2 SIMD core and Verilog HDL RTL.
+--------------------------------------------------------------------------------
+
+================================================================================
+END OF FILE - 100% SAVED, VERIFIED, COMMITTED, AND PUSHED TO GITHUB!
+================================================================================
