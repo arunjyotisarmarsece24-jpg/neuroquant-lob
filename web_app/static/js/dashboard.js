@@ -709,6 +709,96 @@ document.getElementById("btn-sweep-sell").addEventListener("click", () => {
   });
 });
 
+// ==================== FPGA HARDWARE RTL ENGINE ====================
+let currentHwModule = 'lif';
+
+const hwLegends = {
+  lif: '💡 <strong>LIF Neuron Waveform:</strong> Displays cycle-accurate membrane potential $V_m$ relaxation from resting (-70 mV), crossing threshold (-55 mV) to emit a 1-cycle digital action potential spike, resetting to -75 mV, and enforcing a 2-cycle refractory clamp.',
+  itch: "💡 <strong>ITCH 5.0 AXI4-Stream Waveform:</strong> Shows 64-bit bus handshake (tvalid, tready, tlast) for incoming NASDAQ network packets, demonstrating cycle-accurate Type 'A' (Add Order) decoding in 5 cycles (15.5 ns @ 322 MHz) and Type 'D' (Delete Order) decoding in 3 cycles (9.3 ns).",
+  risk: '💡 <strong>Hardware Risk Gate Waveform:</strong> Illustrates 8 consecutive institutional test cases verified in a single clock cycle (< 3.5 ns): Clean Order approval, Emergency Killswitch halt, Price Collar block, Max Size limit, Net Inventory breach, De-Risking bypass, MTM Drawdown stop, and Theorem 1 Lyapunov Invariant defense.'
+};
+
+function selectHardwareWaveform(mod) {
+  currentHwModule = mod;
+  const img = document.getElementById('hardware-waveform-img');
+  if (img) {
+    img.src = `/api/hardware/waveform/${mod}?t=${Date.now()}`;
+  }
+  const dlBtn = document.getElementById('btn-download-waveform');
+  if (dlBtn) {
+    dlBtn.href = `/api/hardware/waveform/${mod}`;
+    dlBtn.download = `${mod}_hardware_waveform.png`;
+  }
+  ['lif', 'itch', 'risk'].forEach(m => {
+    const btn = document.getElementById(`hw-tab-${m}`);
+    if (btn) {
+      if (m === mod) btn.classList.add('active');
+      else btn.classList.remove('active');
+    }
+  });
+  const legend = document.getElementById('hw-waveform-legend');
+  if (legend && hwLegends[mod]) {
+    legend.innerHTML = hwLegends[mod];
+  }
+}
+
+function refreshHardwareWaveform() {
+  selectHardwareWaveform(currentHwModule);
+}
+
+function triggerHardwareSim(mod) {
+  const statusBadge = document.getElementById('hw-status-badge');
+  const consoleOutput = document.getElementById('hardware-console-output');
+  const btns = document.querySelectorAll('.sim-btn');
+
+  btns.forEach(b => b.disabled = true);
+  if (statusBadge) {
+    statusBadge.innerText = `⏳ Compiling & Simulating (${mod})...`;
+    statusBadge.style.color = 'var(--accent-yellow)';
+  }
+  if (consoleOutput) {
+    consoleOutput.innerText = `[*] Launching Icarus Verilog toolchain on module: ${mod}...\n[*] Compiling RTL & running cycle-accurate vvp simulation...\n`;
+  }
+
+  fetch('/api/hardware/simulate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ module: mod })
+  })
+  .then(res => res.json())
+  .then(data => {
+    btns.forEach(b => b.disabled = false);
+    if (consoleOutput) {
+      consoleOutput.innerText = data.stdout || '[No simulation output returned]';
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+    if (statusBadge) {
+      if (data.success) {
+        statusBadge.innerText = `✔ ${data.checks_passed} (${data.elapsed_ms} ms)`;
+        statusBadge.style.color = 'var(--accent-green)';
+      } else {
+        statusBadge.innerText = `✖ Simulation Error`;
+        statusBadge.style.color = 'var(--accent-red)';
+      }
+    }
+    if (mod !== 'all') {
+      selectHardwareWaveform(mod);
+    } else {
+      refreshHardwareWaveform();
+    }
+  })
+  .catch(err => {
+    btns.forEach(b => b.disabled = false);
+    if (statusBadge) {
+      statusBadge.innerText = `✖ Network Error`;
+      statusBadge.style.color = 'var(--accent-red)';
+    }
+    if (consoleOutput) {
+      consoleOutput.innerText += `\n[ERROR] Failed to reach simulation API: ${err.message}`;
+    }
+  });
+}
+
 // Initial startup call
 window.addEventListener("DOMContentLoaded", () => {
   resizeCanvases();
