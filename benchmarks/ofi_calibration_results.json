@@ -146,8 +146,8 @@
     "20": -0.233,
     "50": -0.2524
   },
-  "simd_avg_ns_per_tick": 165.11,
-  "simd_ticks_per_sec": 6056568.0,
+  "simd_avg_ns_per_tick": 342.36,
+  "simd_ticks_per_sec": 2920902.0,
   "total_ticks": 25000,
-  "execution_time_sec": 12.722
+  "execution_time_sec": 20.24
 }
