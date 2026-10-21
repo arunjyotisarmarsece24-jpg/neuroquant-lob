@@ -1871,4 +1871,148 @@ header, .app-main, .bottom-nav {
   height: 100%;
 }
 
+/* ==================== 3D HOLOGRAPHIC NEUROMORPHIC BRAIN CORTEX ==================== */
+.brain-3d-showcase {
+  background: linear-gradient(135deg, rgba(10, 16, 32, 0.94) 0%, rgba(6, 10, 20, 0.98) 100%);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 242, 254, 0.12);
+  margin-top: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.brain-3d-showcase::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00f2fe, #a855f7, #00ff87, transparent);
+}
+
+.brain-3d-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 14px;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .brain-3d-body {
+    grid-template-columns: 1fr 280px;
+  }
+}
+
+.brain-3d-canvas-wrap {
+  width: 100%;
+  height: 360px;
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.08) 0%, rgba(5, 8, 16, 0.95) 75%);
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+}
+
+.brain-3d-canvas-wrap:active {
+  cursor: grabbing;
+}
+
+.brain-3d-canvas-wrap canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.brain-3d-watermark {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+.brain-3d-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.brain-stat-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: all 0.2s ease;
+}
+
+.brain-stat-card:hover {
+  border-color: rgba(0, 242, 254, 0.4);
+  transform: translateX(3px);
+}
+
+.brain-stat-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.brain-stat-val {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.brain-stat-desc {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.brain-layer-controls {
+  background: rgba(10, 15, 26, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.brain-layer-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.brain-layer-btn:hover {
+  background: rgba(0, 242, 254, 0.15);
+  color: #ffffff;
+  border-color: var(--accent-cyan);
+}
+
+.brain-layer-btn.active {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.3), rgba(168, 85, 247, 0.3));
+  color: #ffffff;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+}
+
 

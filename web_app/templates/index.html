@@ -235,6 +235,63 @@
           </div>
         </div>
 
+        <!-- 3D HOLOGRAPHIC NEUROMORPHIC CORTEX (LIVE SPIKING RSNN CORE) -->
+        <div class="brain-3d-showcase">
+          <div class="box-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:1.4rem;">🧠</span>
+              <div>
+                <h3 style="font-size:1.05rem; font-weight:800; color:#ffffff;">3D Holographic Spiking Neuromorphic Brain Cortex</h3>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Real-time 3D anatomical projection of the 100-neuron RSNN Leaky Integrate-and-Fire core. Drag mouse to rotate in 3D space.</p>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <button class="btn-sm" id="btn-brain-burst" onclick="triggerCorticalBurst()" style="background:linear-gradient(135deg, #00f2fe, #a855f7); color:#050914; font-weight:800; border:none; padding:5px 12px; border-radius:4px; cursor:pointer;">⚡ INJECT CORTICAL BURST</button>
+              <button class="btn-sm" id="btn-brain-autorotate" onclick="toggleBrainAutoRotate()" style="background:rgba(255,255,255,0.06); border:1px solid #334155; color:#cbd5e1; padding:5px 10px; border-radius:4px; cursor:pointer;">🔄 ROTATE: ON</button>
+              <span class="badge" style="background:#00ff87; color:#051020; font-weight:800;">320 SYNAPTIC AXONS</span>
+            </div>
+          </div>
+
+          <div class="brain-3d-body">
+            <!-- 3D Brain Canvas Wrap -->
+            <div class="brain-3d-canvas-wrap" id="brain-canvas-container">
+              <canvas id="hero-3d-brain-canvas" width="680" height="360"></canvas>
+              <div class="brain-3d-watermark">CORTEX v2.0 // ANATOMICAL RSNN 3D PERSPECTIVE</div>
+            </div>
+
+            <!-- Cortical Telemetry Sidebar -->
+            <div class="brain-3d-sidebar">
+              <div class="brain-stat-card">
+                <span class="brain-stat-lbl">Sensory Cortex [0..31]</span>
+                <span class="brain-stat-val" style="color:var(--accent-cyan);" id="stat-cortex-sensory">ACTIVE (32 L2 Ticks)</span>
+                <span class="brain-stat-desc">NASDAQ ITCH 5.0 Depth &amp; OFI Inputs</span>
+              </div>
+
+              <div class="brain-stat-card">
+                <span class="brain-stat-lbl">Recurrent Reservoir [32..95]</span>
+                <span class="brain-stat-val" style="color:#c084fc;" id="stat-cortex-hidden">SPARSE (87.4% Zeros)</span>
+                <span class="brain-stat-desc">64 Hidden Interneurons (W_rec Recurrent)</span>
+              </div>
+
+              <div class="brain-stat-card">
+                <span class="brain-stat-lbl">Motor Readout [96..99]</span>
+                <span class="brain-stat-val" style="color:var(--accent-green);" id="stat-cortex-motor">STREAMING (230 ns)</span>
+                <span class="brain-stat-desc">Quote Skew &amp; Sweep Avoidance Signals</span>
+              </div>
+
+              <div class="brain-layer-controls">
+                <span style="font-size:0.7rem; font-weight:700; color:var(--text-dim); text-transform:uppercase;">Cortical Layer Filter:</span>
+                <div style="display:flex; gap:6px; margin-top:6px;">
+                  <button class="brain-layer-btn active" id="btn-layer-all" onclick="setBrainLayerFilter('all')">ALL</button>
+                  <button class="brain-layer-btn" id="btn-layer-sensory" onclick="setBrainLayerFilter('sensory')">SENSORY</button>
+                  <button class="brain-layer-btn" id="btn-layer-hidden" onclick="setBrainLayerFilter('hidden')">RESERVOIR</button>
+                  <button class="brain-layer-btn" id="btn-layer-motor" onclick="setBrainLayerFilter('motor')">MOTOR</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Quantum-Neuromorphic Live Analog Gauge Strip -->
         <div class="analog-gauge-strip">
           <div class="analog-gauge-card">

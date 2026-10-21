@@ -224,6 +224,11 @@ function updateDashboard(t) {
     triggerRandomNeuralSpike();
   }
 
+  // Feed live incoming spikes to 3D Brain Cortex
+  if (typeof feedSpikesTo3DBrain === 'function') {
+    feedSpikesTo3DBrain(neuro.spikes);
+  }
+
   if (lastEventTag && t.event) {
     lastEventTag.innerText = t.event.split("_")[0];
   }
@@ -1643,4 +1648,347 @@ function toggleNeuralCanvas() {
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   initQuantumNeuralCanvas();
+  init3DBrainCortex();
 });
+
+// ==================== 3D HOLOGRAPHIC NEUROMORPHIC BRAIN CORTEX ENGINE ====================
+let brain3D = {
+  canvas: null,
+  ctx: null,
+  neurons: [],
+  axons: [],
+  autoRotate: true,
+  rotX: 0.22,
+  rotY: 0.0,
+  targetRotX: 0.22,
+  targetRotY: 0.0,
+  isDragging: false,
+  lastMouseX: 0,
+  lastMouseY: 0,
+  layerFilter: 'all',
+  animId: null
+};
+
+function init3DBrainCortex() {
+  brain3D.canvas = document.getElementById('hero-3d-brain-canvas');
+  if (!brain3D.canvas) return;
+  brain3D.ctx = brain3D.canvas.getContext('2d');
+
+  function resizeBrainCanvas() {
+    const wrap = brain3D.canvas.parentElement;
+    if (wrap) {
+      const dpr = window.devicePixelRatio || 1;
+      brain3D.canvas.width = wrap.clientWidth * dpr;
+      brain3D.canvas.height = wrap.clientHeight * dpr;
+      brain3D.ctx.scale(dpr, dpr);
+    }
+  }
+  resizeBrainCanvas();
+  window.addEventListener('resize', resizeBrainCanvas);
+
+  generate3DBrainGeometry();
+
+  const container = document.getElementById('brain-canvas-container') || brain3D.canvas;
+  container.addEventListener('mousedown', (e) => {
+    brain3D.isDragging = true;
+    brain3D.lastMouseX = e.clientX;
+    brain3D.lastMouseY = e.clientY;
+  });
+
+  window.addEventListener('mouseup', () => { brain3D.isDragging = false; });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!brain3D.isDragging) return;
+    const dx = e.clientX - brain3D.lastMouseX;
+    const dy = e.clientY - brain3D.lastMouseY;
+    brain3D.targetRotY += dx * 0.008;
+    brain3D.targetRotX += dy * 0.008;
+    brain3D.lastMouseX = e.clientX;
+    brain3D.lastMouseY = e.clientY;
+  });
+
+  container.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      brain3D.isDragging = true;
+      brain3D.lastMouseX = e.touches[0].clientX;
+      brain3D.lastMouseY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => { brain3D.isDragging = false; });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!brain3D.isDragging || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - brain3D.lastMouseX;
+    const dy = e.touches[0].clientY - brain3D.lastMouseY;
+    brain3D.targetRotY += dx * 0.008;
+    brain3D.targetRotX += dy * 0.008;
+    brain3D.lastMouseX = e.touches[0].clientX;
+    brain3D.lastMouseY = e.touches[0].clientY;
+  }, { passive: true });
+
+  cancelAnimationFrame(brain3D.animId);
+  render3DBrainLoop();
+}
+
+function generate3DBrainGeometry() {
+  brain3D.neurons.length = 0;
+  brain3D.axons.length = 0;
+
+  const totalNeurons = 120;
+
+  for (let i = 0; i < totalNeurons; i++) {
+    const isLeft = (i % 2 === 0);
+    const hemiSign = isLeft ? -1 : 1;
+
+    let layer = 'hidden';
+    let baseColor = '#c084fc';
+    if (i < 32) {
+      layer = 'sensory';
+      baseColor = '#00f2fe';
+    } else if (i >= 96 && i < 100) {
+      layer = 'motor';
+      baseColor = '#00ff87';
+    }
+
+    const u = Math.random();
+    const v = Math.random();
+    const theta = u * Math.PI;
+    const phi = v * Math.PI;
+
+    const gyri = 1 + 0.12 * Math.sin(3 * theta) * Math.cos(4 * phi) + 0.08 * Math.cos(5 * theta);
+    
+    let rx = 65 * gyri;
+    let ry = 58 * gyri;
+    let rz = 82 * gyri;
+
+    let x = hemiSign * (12 + Math.abs(Math.sin(theta) * Math.cos(phi) * rx));
+    let y = -Math.cos(theta) * ry;
+    let z = Math.sin(theta) * Math.sin(phi) * rz - 15;
+
+    if (y > 0 && Math.abs(x) > 35) {
+      y += 10 * Math.sin(phi);
+    }
+    if (z < -25 && y > 12) {
+      y += 12;
+      rx *= 0.8;
+    }
+
+    if (layer === 'sensory') {
+      z = Math.abs(z) * 0.75 + 18;
+    } else if (layer === 'motor') {
+      y = -42 - Math.random() * 8;
+      z = (Math.random() - 0.5) * 18;
+      x = hemiSign * (8 + Math.random() * 12);
+    }
+
+    brain3D.neurons.push({
+      id: i,
+      x: x,
+      y: y,
+      z: z,
+      layer: layer,
+      color: baseColor,
+      spikeFlash: 0,
+      potential: -70 + Math.random() * 14.5
+    });
+  }
+
+  for (let i = 0; i < brain3D.neurons.length; i++) {
+    const n1 = brain3D.neurons[i];
+    let axonCount = 0;
+    for (let j = i + 1; j < brain3D.neurons.length; j++) {
+      const n2 = brain3D.neurons[j];
+      const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y, n1.z - n2.z);
+      if (dist < 44 && axonCount < 5) {
+        brain3D.axons.push({
+          source: i,
+          target: j,
+          dist: dist,
+          activity: 0
+        });
+        axonCount++;
+      }
+    }
+  }
+
+  for (let i = 0; i < 14; i++) {
+    const leftIdx = i * 2;
+    const rightIdx = i * 2 + 1;
+    if (leftIdx < brain3D.neurons.length && rightIdx < brain3D.neurons.length) {
+      brain3D.axons.push({
+        source: leftIdx,
+        target: rightIdx,
+        dist: 26,
+        activity: 0,
+        isCorpusCallosum: true
+      });
+    }
+  }
+}
+
+function render3DBrainLoop() {
+  const ctx = brain3D.ctx;
+  const canvas = brain3D.canvas;
+  if (!ctx || !canvas) return;
+
+  const w = canvas.parentElement ? canvas.parentElement.clientWidth : 680;
+  const h = canvas.parentElement ? canvas.parentElement.clientHeight : 360;
+
+  ctx.clearRect(0, 0, w, h);
+
+  if (brain3D.autoRotate && !brain3D.isDragging) {
+    brain3D.targetRotY += 0.007;
+  }
+  brain3D.rotX += (brain3D.targetRotX - brain3D.rotX) * 0.12;
+  brain3D.rotY += (brain3D.targetRotY - brain3D.rotY) * 0.12;
+
+  const cx = w / 2;
+  const cy = h / 2 + 8;
+  const fov = 340;
+  const cameraZ = 230;
+
+  const cosY = Math.cos(brain3D.rotY);
+  const sinY = Math.sin(brain3D.rotY);
+  const cosX = Math.cos(brain3D.rotX);
+  const sinX = Math.sin(brain3D.rotX);
+
+  const projected = brain3D.neurons.map(n => {
+    const x1 = n.x * cosY + n.z * sinY;
+    const z1 = -n.x * sinY + n.z * cosY;
+
+    const y2 = n.y * cosX - z1 * sinX;
+    const z2 = n.y * sinX + z1 * cosX;
+
+    const scale = fov / (fov + z2 + cameraZ);
+    const px = cx + x1 * scale * 2.1;
+    const py = cy + y2 * scale * 2.1;
+
+    return {
+      neuron: n,
+      px: px,
+      py: py,
+      z2: z2,
+      scale: scale,
+      visible: brain3D.layerFilter === 'all' || brain3D.layerFilter === n.layer
+    };
+  });
+
+  projected.sort((a, b) => b.z2 - a.z2);
+
+  // Draw Axons
+  brain3D.axons.forEach(ax => {
+    const p1 = projected.find(p => p.neuron.id === ax.source);
+    const p2 = projected.find(p => p.neuron.id === ax.target);
+    if (!p1 || !p2 || !p1.visible || !p2.visible) return;
+
+    const avgZ = (p1.z2 + p2.z2) / 2;
+    const depthAlpha = Math.max(0.08, Math.min(0.65, 0.45 + (avgZ / 180)));
+    
+    const isHot = (p1.neuron.spikeFlash > 0.1 || p2.neuron.spikeFlash > 0.1);
+    ctx.lineWidth = isHot ? 1.8 : 0.8;
+    ctx.strokeStyle = isHot 
+      ? `rgba(0, 255, 135, ${depthAlpha * 1.5})` 
+      : (ax.isCorpusCallosum ? `rgba(168, 85, 247, ${depthAlpha})` : `rgba(0, 242, 254, ${depthAlpha * 0.7})`);
+
+    ctx.beginPath();
+    ctx.moveTo(p1.px, p1.py);
+    ctx.lineTo(p2.px, p2.py);
+    ctx.stroke();
+
+    if (isHot) {
+      const pt = (Date.now() / 600) % 1;
+      const phX = p1.px + (p2.px - p1.px) * pt;
+      const phY = p1.py + (p2.py - p1.py) * pt;
+      ctx.fillStyle = '#00ffcc';
+      ctx.beginPath();
+      ctx.arc(phX, phY, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
+  // Draw Neurons
+  projected.forEach(p => {
+    if (!p.visible) return;
+    const n = p.neuron;
+
+    if (n.spikeFlash > 0) {
+      n.spikeFlash -= 0.035;
+      if (n.spikeFlash < 0) n.spikeFlash = 0;
+    }
+
+    const depthFactor = Math.max(0.4, Math.min(1.2, 0.8 + p.z2 / 160));
+    const baseR = (n.layer === 'motor' ? 4.5 : (n.layer === 'sensory' ? 3.5 : 2.8)) * p.scale * 2.1;
+    const flashR = baseR + n.spikeFlash * 7;
+
+    if (n.spikeFlash > 0.1) {
+      const grad = ctx.createRadialGradient(p.px, p.py, 1, p.px, p.py, flashR * 2.4);
+      grad.addColorStop(0, 'rgba(0, 255, 200, 0.8)');
+      grad.addColorStop(0.5, 'rgba(0, 242, 254, 0.3)');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.px, p.py, flashR * 2.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = n.spikeFlash > 0.1 ? '#ffffff' : n.color;
+    ctx.shadowColor = n.color;
+    ctx.shadowBlur = n.spikeFlash > 0.1 ? 16 : 6 * depthFactor;
+    ctx.beginPath();
+    ctx.arc(p.px, p.py, Math.max(1.5, flashR), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  if (currentTab === 'guide' || currentTab === 'brain') {
+    brain3D.animId = requestAnimationFrame(render3DBrainLoop);
+  } else {
+    setTimeout(() => {
+      brain3D.animId = requestAnimationFrame(render3DBrainLoop);
+    }, 150);
+  }
+}
+
+function triggerCorticalBurst() {
+  if (!brain3D.neurons.length) return;
+  brain3D.neurons.forEach((n, idx) => {
+    setTimeout(() => {
+      n.spikeFlash = 1.0;
+      n.potential = -49.0;
+      if (idx % 6 === 0) playMicroChirp(1200 + Math.random() * 600, 0.025);
+    }, (n.z + 80) * 2.2);
+  });
+  showQuantumToast("🧠 CORTICAL BURST INJECTED: 100 NEURONS FIRING");
+  hudLog("Cortical avalanche burst injected into 3D Spiking RSNN Cortex.", "CORTEX_BURST");
+}
+
+function toggleBrainAutoRotate() {
+  brain3D.autoRotate = !brain3D.autoRotate;
+  const btn = document.getElementById('btn-brain-autorotate');
+  if (btn) {
+    btn.innerText = brain3D.autoRotate ? "🔄 ROTATE: ON" : "⏸️ ROTATE: OFF";
+    btn.style.color = brain3D.autoRotate ? "var(--accent-cyan)" : "var(--text-muted)";
+  }
+}
+
+function setBrainLayerFilter(layer) {
+  brain3D.layerFilter = layer;
+  document.querySelectorAll('.brain-layer-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.id === `btn-layer-${layer}`);
+  });
+  showQuantumToast(`CORTICAL FILTER: [${layer.toUpperCase()}]`);
+}
+
+function feedSpikesTo3DBrain(activeSpikeIndices) {
+  if (!brain3D.neurons.length) return;
+  if (Array.isArray(activeSpikeIndices) && activeSpikeIndices.length > 0) {
+    activeSpikeIndices.forEach(idx => {
+      const neuron = brain3D.neurons[idx % brain3D.neurons.length];
+      if (neuron) neuron.spikeFlash = 1.0;
+    });
+  } else if (Math.random() < 0.35) {
+    const rIdx = Math.floor(Math.random() * brain3D.neurons.length);
+    brain3D.neurons[rIdx].spikeFlash = 0.9;
+  }
+}
