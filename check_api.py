@@ -16,6 +16,7 @@ def check_endpoints():
     base_url = "http://127.0.0.1:5000"
     endpoints = [
         ("/api/sweeps/status", "Day 1 Neuromorphic Parameter Sweeps"),
+        ("/api/ofi/status", "Day 2 Multi-Level OFI & Hawkes Calibration"),
         ("/api/cosim/status", "Hardware/Software Co-Simulation Parity"),
         ("/api/bitter/status", "Bitter Quant Adversarial Stress"),
         ("/api/cnn/inference", "DeepLOB Spatial-Temporal CNN Alpha Engine"),
@@ -43,6 +44,12 @@ def check_endpoints():
                     tot = data.get("total_evaluated", 0)
                     print(f"       -> Champion: tau_m={c.get('tau_m')}ms, v_thresh={c.get('v_thresh')}mV, F1={round(c.get('macro_f1', 0), 4)}")
                     print(f"       -> Total Evaluated: {tot} configurations")
+                elif ep == "/api/ofi/status":
+                    w = data.get("weights", [])
+                    rho = data.get("spectral_radius", 0.0)
+                    ns = data.get("simd_avg_ns_per_tick", 0.0)
+                    print(f"       -> Multi-Level OFI: {len(w)} Levels | Weights={w}")
+                    print(f"       -> Hawkes rho(Gamma)={rho:.4f} (< 1.0 Stable) | AVX2 SIMD: {ns:.1f} ns/tick")
                 elif ep == "/api/cosim/status":
                     print(f"       -> Status: {data.get('verdict', 'CONGRUENT')} ({data.get('ticks_evaluated', 1000)} Ticks)")
                 elif ep == "/api/bitter/status":
