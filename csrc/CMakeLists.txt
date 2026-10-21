@@ -10,6 +10,10 @@ add_library(lif_core SHARED
     lif_core.h
     itch_parser.cpp
     itch_parser.h
+    almgren_chriss_simd.cpp
+    almgren_chriss_simd.h
+    ofi_calibrator_simd.cpp
+    ofi_calibrator_simd.h
 )
 
 target_compile_definitions(lif_core PRIVATE LIF_EXPORTS)

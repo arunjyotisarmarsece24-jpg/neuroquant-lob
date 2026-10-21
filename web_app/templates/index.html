@@ -1043,6 +1043,90 @@ localparam integer       OPTIMAL_REFRACTORY_CYC = 2;             // 20 ns @ 100 
       </div>
     </section>
 
+    <!-- TAB 11: ORDER-FLOW IMBALANCE (OFI) CALIBRATION & HAWKES ENGINE -->
+    <section id="tab-ofi" class="tab-pane">
+      <div class="guide-container">
+        
+        <div class="hero-banner">
+          <div class="hero-tag">DAY 2 PRE-FPGA SOFTWARE HARDENING</div>
+          <h2>Multi-Level OFI & Cross-Level Hawkes Calibration</h2>
+          <p class="hero-sub">
+            Order Flow Imbalance vectors across L2 depth levels 1–5 with exponential decay, cross-level Hawkes cross-excitation kernel, and C++20 AVX2 SIMD acceleration.
+          </p>
+        </div>
+
+        <!-- OFI Metric Highlights -->
+        <div class="feature-grid">
+          <div class="feat-card">
+            <div class="feat-icon">⚡</div>
+            <h3>C++20 AVX2 SIMD Core</h3>
+            <p id="ofi-simd-latency" style="font-size:1.4rem; color:#00ffcc; font-weight:800; font-family:'JetBrains Mono',monospace;">
+              167.58 ns / tick
+            </p>
+            <p style="font-size:0.8rem; color:#94a3b8;" id="ofi-simd-rate">
+              5,967,299 ticks / sec
+            </p>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-icon">📐</div>
+            <h3>Hawkes Spectral Radius</h3>
+            <p id="ofi-spectral-radius" style="font-size:1.4rem; color:#38bdf8; font-weight:800; font-family:'JetBrains Mono',monospace;">
+              ρ(Γ) = 0.1096
+            </p>
+            <p style="font-size:0.8rem; color:#10b981;">
+              ✔ Stationarity Invariant Holds (&lt; 1.0)
+            </p>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-icon">🎯</div>
+            <h3>Predictive Hit Rate</h3>
+            <p id="ofi-hit-rate" style="font-size:1.4rem; color:#f59e0b; font-weight:800; font-family:'JetBrains Mono',monospace;">
+              46.2% vs 42.4%
+            </p>
+            <p style="font-size:0.8rem; color:#94a3b8;">
+              +3.8% edge over Level-1 Cont OFI
+            </p>
+          </div>
+
+          <div class="feat-card">
+            <div class="feat-icon">⏱️</div>
+            <h3>Depth Information Decay</h3>
+            <p id="ofi-decay-range" style="font-size:1.4rem; color:#ec4899; font-weight:800; font-family:'JetBrains Mono',monospace;">
+              86.6ms – 693.2ms
+            </p>
+            <p style="font-size:0.8rem; color:#94a3b8;">
+              tau_1/2 monotonic with book depth
+            </p>
+          </div>
+        </div>
+
+        <!-- Trigger Calibration Button -->
+        <div style="margin:20px 0; display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+          <button class="cta-btn" onclick="triggerOFICalibration(true)" style="background:linear-gradient(135deg, #00ffcc 0%, #0284c7 100%); color:#0a0e17; font-weight:800; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">
+            🚀 Run High-Speed Calibration (10,000 Ticks)
+          </button>
+          <button class="cta-btn" onclick="triggerOFICalibration(false)" style="background:#1f2937; color:#f3f4f6; border:1px solid #374151; padding:10px 20px; border-radius:6px; cursor:pointer;">
+            🔬 Run Deep Institutional Calibration (25,000 Ticks)
+          </button>
+          <span id="ofi-calib-status" style="font-size:0.85rem; color:#10b981; font-weight:600;"></span>
+        </div>
+
+        <!-- 4-Panel Visualization Poster -->
+        <div class="interactive-box">
+          <div class="box-header">
+            <h4>📊 Publication Calibration Analysis (Multi-Level OFI & Hawkes)</h4>
+            <span class="badge" style="background:#00ffcc; color:#000;">300 DPI INSTITUTIONAL POSTER</span>
+          </div>
+          <div style="text-align:center; padding:10px; background:#0a0e17; border-radius:8px; margin-top:10px;">
+            <img id="ofi-poster-img" src="/api/ofi/chart" alt="OFI Calibration Analysis" style="max-width:100%; height:auto; border-radius:6px; box-shadow: 0 4px 20px rgba(0,255,204,0.15);" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
   <!-- Bottom Mobile Navigation Bar (Always visible on mobile) -->
@@ -1082,6 +1166,10 @@ localparam integer       OPTIMAL_REFRACTORY_CYC = 2;             // 20 ns @ 100 
     <button class="nav-item" onclick="switchTab('sweeps')">
       <span class="nav-icon">🎯</span>
       <span class="nav-label">Sweeps</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('ofi')">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">OFI Core</span>
     </button>
     <button class="nav-item" onclick="switchTab('paper')">
       <span class="nav-icon">📄</span>

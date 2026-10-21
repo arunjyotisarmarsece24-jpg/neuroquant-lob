@@ -1,6 +1,6 @@
 {
   "title": "NeuroQuant-LOB Day 1 Deep Neuromorphic Parameter Sweep",
-  "timestamp": "2026-10-20T14:29:23Z",
+  "timestamp": "2026-10-21T06:31:54Z",
   "grid_config": {
     "tau_m_values": [
       10.0,

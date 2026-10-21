@@ -295,6 +295,42 @@ class TestVerilogHardwareSimulation(unittest.TestCase):
         self.assertTrue(os.path.exists(vcd_path), "Champion LIF VCD trace was not generated!")
         self.assertGreater(os.path.getsize(vcd_path), 500, "Champion LIF VCD trace is empty!")
 
+    def test_iverilog_multilevel_ofi_hawkes_simulation(self):
+        """Test Day 2 Multi-Level OFI & Cross-Level Hawkes RTL simulation with optimal_ofi_params.vh."""
+        rtl_file = os.path.join(HARDWARE_DIR, "multilevel_ofi_hawkes.v")
+        header_file = os.path.join(HARDWARE_DIR, "optimal_ofi_params.vh")
+        tb_file = os.path.join(HARDWARE_DIR, "tb_multilevel_ofi_hawkes.v")
+        out_vvp = os.path.join(HARDWARE_DIR, "ofi_sim.vvp")
+
+        self.assertTrue(os.path.exists(rtl_file), "multilevel_ofi_hawkes.v missing!")
+        self.assertTrue(os.path.exists(header_file), "optimal_ofi_params.vh missing!")
+        self.assertTrue(os.path.exists(tb_file), "tb_multilevel_ofi_hawkes.v missing!")
+
+        # 1. Compile with SystemVerilog switch and include directory
+        res_compile = subprocess.run(
+            [IVERILOG_BIN, "-g2005-sv", "-I", HARDWARE_DIR, "-o", out_vvp, rtl_file, tb_file],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_compile.returncode, 0, f"iverilog compilation failed:\n{res_compile.stderr}")
+
+        # 2. Run simulation
+        res_sim = subprocess.run(
+            [VVP_BIN, out_vvp],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_sim.returncode, 0, f"vvp simulation failed:\n{res_sim.stderr}")
+        self.assertIn("100% MULTI-LEVEL OFI & HAWKES RTL VERIFIED!", res_sim.stdout)
+        self.assertIn("5 / 5 PASSED", res_sim.stdout)
+
+        # 3. Check VCD trace
+        vcd_path = os.path.join(HARDWARE_DIR, "neuroquant_ofi_trace.vcd")
+        self.assertTrue(os.path.exists(vcd_path), "OFI VCD trace was not generated!")
+        self.assertGreater(os.path.getsize(vcd_path), 500, "OFI VCD trace is empty!")
+
 
 if __name__ == "__main__":
     unittest.main()

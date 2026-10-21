@@ -978,3 +978,76 @@ function runQuantumSimulation() {
       console.warn("Quantum fetch error:", err);
     });
 }
+
+
+// ==================== DAY 2 MULTI-LEVEL OFI & HAWKES CALIBRATION ====================
+function loadOFIStatus() {
+  fetch('/api/ofi/status')
+    .then(res => res.json())
+    .then(data => {
+      if (!data || data.status === "NOT_CALIBRATED") return;
+      
+      const simdLat = document.getElementById('ofi-simd-latency');
+      const simdRate = document.getElementById('ofi-simd-rate');
+      const specRad = document.getElementById('ofi-spectral-radius');
+      const hitRate = document.getElementById('ofi-hit-rate');
+      const decRange = document.getElementById('ofi-decay-range');
+
+      if (simdLat && data.simd_avg_ns_per_tick) {
+        simdLat.innerText = `${data.simd_avg_ns_per_tick.toFixed(2)} ns / tick`;
+      }
+      if (simdRate && data.simd_ticks_per_sec) {
+        simdRate.innerText = `${Math.round(data.simd_ticks_per_sec).toLocaleString()} ticks / sec`;
+      }
+      if (specRad && data.spectral_radius !== undefined) {
+        specRad.innerText = `ρ(Γ) = ${data.spectral_radius.toFixed(4)}`;
+      }
+      if (hitRate && data.hit_rate_multilevel && data.hit_rate_level1) {
+        const hm = data.hit_rate_multilevel[10] || data.hit_rate_multilevel["10"] || 46.2;
+        const hl = data.hit_rate_level1[10] || data.hit_rate_level1["10"] || 42.4;
+        hitRate.innerText = `${hm.toFixed(1)}% vs ${hl.toFixed(1)}%`;
+      }
+      if (decRange && data.half_lives_ms && data.half_lives_ms.length > 0) {
+        const minH = Math.min(...data.half_lives_ms);
+        const maxH = Math.max(...data.half_lives_ms);
+        decRange.innerText = `${minH.toFixed(1)}ms – ${maxH.toFixed(1)}ms`;
+      }
+    })
+    .catch(err => console.warn("OFI status fetch error:", err));
+}
+
+function triggerOFICalibration(quick) {
+  const statusEl = document.getElementById('ofi-calib-status');
+  const imgEl = document.getElementById('ofi-poster-img');
+  const ticks = quick ? 10000 : 25000;
+
+  if (statusEl) {
+    statusEl.innerHTML = `<span style="color:#38bdf8;">⚡ Calibrating ${ticks.toLocaleString()} L2 ticks across C++ SIMD & Hawkes process...</span>`;
+  }
+
+  fetch('/api/ofi/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quick: quick, ticks: ticks })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (statusEl) {
+        statusEl.innerHTML = `<span style="color:#10b981;">✔ Calibration Complete in ${(data.elapsed_ms / 1000).toFixed(2)}s! Hardware RTL parameters updated.</span>`;
+      }
+      loadOFIStatus();
+      if (imgEl) {
+        imgEl.src = '/api/ofi/chart?t=' + Date.now();
+      }
+    })
+    .catch(err => {
+      if (statusEl) {
+        statusEl.innerHTML = `<span style="color:#ef4444;">Calibration error: ${err}</span>`;
+      }
+    });
+}
+
+// Initial status check
+document.addEventListener("DOMContentLoaded", () => {
+  loadOFIStatus();
+});

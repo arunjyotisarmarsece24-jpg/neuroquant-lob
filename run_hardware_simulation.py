@@ -97,6 +97,13 @@ MODULE_CONFIGS = {
         "tb": "tb_cosim_parity.v",
         "out": "cosim_sim.vvp",
         "vcd": "neuroquant_cosim_trace.vcd"
+    },
+    "ofi": {
+        "name": "Day 2 Calibrated Multi-Level OFI & Cross-Level Hawkes RTL Core",
+        "rtl": "multilevel_ofi_hawkes.v",
+        "tb": "tb_multilevel_ofi_hawkes.v",
+        "out": "ofi_sim.vvp",
+        "vcd": "neuroquant_ofi_trace.vcd"
     }
 }
 
@@ -153,19 +160,19 @@ def run_hardware_sim(module: str = "all", open_waveforms: bool = False) -> bool:
         return run_single_module(module, open_waveforms)
     elif module == "all":
         success = True
-        for k in ["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim"]:
+        for k in ["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi"]:
             ok = run_single_module(k, open_waveforms and (k == "lif"))
             if not ok:
                 success = False
         return success
     else:
-        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, champion_lif, itch, risk, top, formal, uart, cosim, all.")
+        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, champion_lif, itch, risk, top, formal, uart, cosim, ofi, all.")
         return False
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Hardware RTL Simulation Suite")
-    parser.add_argument("--module", "-m", choices=["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "all"], default="all",
+    parser.add_argument("--module", "-m", choices=["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi", "all"], default="all",
                         help="Select module to simulate (default: all)")
     parser.add_argument("--waveforms", "-w", action="store_true",
                         help="Launch GTKWave to inspect signal waveforms")

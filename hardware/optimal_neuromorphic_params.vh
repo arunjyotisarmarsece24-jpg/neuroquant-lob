@@ -4,7 +4,7 @@
 // Mathematically calibrated from 150-point grid search across realistic L2 ticks.
 // Target Hardware: AMD Xilinx UltraScale+ / Digilent Arty S7 (Spartan-7)
 // Arithmetic: Signed Q16.16 Fixed-Point (Scale: 1.0 = 65,536)
-// Generated: 2026-10-20 14:29:23 UTC
+// Generated: 2026-10-21 06:31:54 UTC
 // ==============================================================================
 
 `ifndef OPTIMAL_NEUROMORPHIC_PARAMS_VH
