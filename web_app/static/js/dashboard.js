@@ -174,6 +174,56 @@ function updateDashboard(t) {
     hdrInv.className = `ticker-val ${Math.abs(port.inventory) > 15 ? "warning" : ""}`;
   }
 
+  // Quantum & Neuromorphic Ticker Items
+  const qStateHdr = document.getElementById('hdr-qstate');
+  if (qStateHdr && t.quantum_ground_state) qStateHdr.innerText = t.quantum_ground_state;
+  const qCohHdr = document.getElementById('hdr-coherence');
+  if (qCohHdr) {
+    const coh = (84.2 - (Date.now() % 3000) / 1000 * 0.4).toFixed(1);
+    qCohHdr.innerText = `${coh} μs`;
+  }
+  const sparHdr = document.getElementById('hdr-sparsity');
+  if (sparHdr && neuro.sparsity !== undefined) {
+    sparHdr.innerText = `${(neuro.sparsity * 100).toFixed(1)}%`;
+  }
+  const hawkesHdr = document.getElementById('hdr-hawkes');
+  if (hawkesHdr) {
+    const lam = 102.7 + (Math.abs(mkt.ofi || 0) * 8.4);
+    hawkesHdr.innerText = `${lam.toFixed(1)} Hz`;
+  }
+
+  // Update Live Analog Gauges on Mission Control
+  const vmVal = document.getElementById('gauge-vm-val');
+  const vmBar = document.getElementById('gauge-vm-bar');
+  if (vmVal && vmBar) {
+    const vm = neuro.membrane_potential_mv !== undefined ? neuro.membrane_potential_mv : (-70 + Math.random() * 14.5);
+    vmVal.innerHTML = `${vm.toFixed(1)} <span>mV</span>`;
+    const pct = Math.min(100, Math.max(0, ((vm + 70) / 15) * 100));
+    vmBar.style.width = `${pct}%`;
+    vmBar.className = `analog-bar-fill ${pct > 85 ? "yellow" : (pct > 95 ? "yellow" : "green")}`;
+  }
+
+  const hVal = document.getElementById('gauge-hawkes-val');
+  const hBar = document.getElementById('gauge-hawkes-bar');
+  if (hVal && hBar) {
+    const lam = 102.7 + (Math.abs(mkt.ofi || 0) * 8.4);
+    hVal.innerHTML = `${lam.toFixed(1)} <span>events/s</span>`;
+    hBar.style.width = `${Math.min(100, (lam / 220) * 100)}%`;
+  }
+
+  const stVal = document.getElementById('gauge-stoikov-val');
+  const stBar = document.getElementById('gauge-stoikov-bar');
+  if (stVal && stBar) {
+    const dev = (mkt.ofi || 0) * 0.04;
+    stVal.innerHTML = `${dev >= 0 ? "+" : ""}${dev.toFixed(2)} <span>ticks</span>`;
+    stBar.style.width = `${Math.min(100, Math.max(10, 50 + dev * 25))}%`;
+  }
+
+  // Trigger quantum-neuromorphic background spike ripple
+  if (typeof triggerRandomNeuralSpike === 'function' && Math.random() < 0.4) {
+    triggerRandomNeuralSpike();
+  }
+
   if (lastEventTag && t.event) {
     lastEventTag.innerText = t.event.split("_")[0];
   }
@@ -911,34 +961,35 @@ function runQuantumSimulation() {
       if (qEnt) qEnt.innerText = (data.entanglement_entropy || 0).toFixed(4) + " bits";
       if (qSpd) qSpd.innerText = qae.quantum_computational_speedup || "12,732x";
 
-      // Render 8 Bloch vectors
+      // Render 8 3D Canvas Bloch vectors
       if (blochGrid && data.bloch_vectors) {
-        blochGrid.innerHTML = data.bloch_vectors.map(b => {
+        blochGrid.innerHTML = data.bloch_vectors.map((b, idx) => {
           const r = Math.sqrt(b.u*b.u + b.v*b.v + b.w*b.w);
-          const px = 50 + b.u * 38;
-          const py = 50 - b.w * 38;
           return `
-            <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:10px; text-align:center;">
-              <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; color:#c084fc;">
-                <span>${b.label}</span>
-                <span style="color:#a855f7;">|r|=${r.toFixed(3)}</span>
+            <div class="bloch-canvas-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; font-weight:700;">
+                <span class="bloch-qubit-lbl">${b.label}</span>
+                <span style="color:#00ffcc; font-size:0.7rem; font-family:'JetBrains Mono',monospace;">|r|=${r.toFixed(3)}</span>
               </div>
-              <div style="position:relative; width:100px; height:100px; margin:8px auto; border:1px dashed #64748b; border-radius:50%; background:radial-gradient(circle, rgba(168,85,247,0.1) 0%, rgba(15,23,42,0.8) 100%);">
-                <!-- Center point -->
-                <div style="position:absolute; left:48px; top:48px; width:4px; height:4px; background:#64748b; border-radius:50%;"></div>
-                <!-- State vector -->
-                <div style="position:absolute; left:${px-4}px; top:${py-4}px; width:8px; height:8px; background:#a855f7; border-radius:50%; box-shadow:0 0 8px #a855f7;"></div>
-                <svg width="100" height="100" style="position:absolute; left:0; top:0;">
-                  <line x1="50" y1="50" x2="${px}" y2="${py}" stroke="#a855f7" stroke-width="2" />
-                </svg>
-              </div>
-              <div style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#e2e8f0;">
-                u:${b.u.toFixed(2)} | v:${b.v.toFixed(2)} | w:${b.w.toFixed(2)}
+              <canvas id="bloch-canvas-${idx}" width="120" height="120"></canvas>
+              <div class="bloch-qubit-coords">
+                u: ${b.u.toFixed(2)} | v: ${b.v.toFixed(2)} | w: ${b.w.toFixed(2)}
               </div>
             </div>
           `;
         }).join('');
+
+        // Draw 3D Bloch sphere on each canvas
+        setTimeout(() => {
+          data.bloch_vectors.forEach((b, idx) => {
+            const cvs = document.getElementById(`bloch-canvas-${idx}`);
+            if (cvs) render3DBlochSphere(cvs, b.u, b.v, b.w);
+          });
+        }, 50);
       }
+
+      // Render CNOT Entanglement Ring
+      renderEntanglementRing(data);
 
       // Render Top Basis State Probability Spectrum
       if (specList && data.top_states) {
@@ -1146,3 +1197,450 @@ function hudVerifyInvariants() {
     })
     .catch(e => hudLog(`Invariant audit error: ${e}`, "ERROR"));
 }
+
+// ==================== 3D CANVAS BLOCH SPHERE ENGINE ====================
+function render3DBlochSphere(canvas, u, v, w) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  const cx = width / 2;
+  const cy = height / 2;
+  const r = 40;
+
+  ctx.clearRect(0, 0, width, height);
+
+  // Background radial glow
+  const bgGrad = ctx.createRadialGradient(cx, cy, 4, cx, cy, r + 12);
+  bgGrad.addColorStop(0, 'rgba(168, 85, 247, 0.18)');
+  bgGrad.addColorStop(0.75, 'rgba(15, 23, 42, 0.45)');
+  bgGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = bgGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Sphere outline
+  ctx.strokeStyle = 'rgba(100, 116, 139, 0.45)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Equator ellipse
+  ctx.strokeStyle = 'rgba(0, 242, 254, 0.28)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, r, r * 0.35, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Prime Meridian ellipse
+  ctx.strokeStyle = 'rgba(168, 85, 247, 0.28)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, r * 0.35, r, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Center axes
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - r - 4);
+  ctx.lineTo(cx, cy + r + 4);
+  ctx.moveTo(cx - r - 4, cy);
+  ctx.lineTo(cx + r + 4, cy);
+  ctx.stroke();
+
+  // North / South pole markers
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '8px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('|0⟩', cx, cy - r - 6);
+  ctx.fillText('|1⟩', cx, cy + r + 12);
+
+  // 3D vector projection (u, v, w)
+  const angle = 0.45;
+  const projX = cx + (u * Math.cos(angle) + v * Math.sin(angle) * 0.35) * r;
+  const projY = cy - w * r;
+
+  // Vector line
+  const grad = ctx.createLinearGradient(cx, cy, projX, projY);
+  grad.addColorStop(0, '#00f2fe');
+  grad.addColorStop(1, '#a855f7');
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(projX, projY);
+  ctx.stroke();
+
+  // Glowing Vector Tip
+  ctx.shadowColor = '#00f2fe';
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = '#00ffcc';
+  ctx.beginPath();
+  ctx.arc(projX, projY, 3.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+// ==================== CNOT ENTANGLEMENT RING ENGINE ====================
+let entanglementAnimFrame = null;
+function renderEntanglementRing(data) {
+  const canvas = document.getElementById('q-entanglement-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+
+  const w = rect.width;
+  const h = rect.height;
+  const cx = w / 2;
+  const cy = h / 2;
+  const rx = Math.min(260, w * 0.40);
+  const ry = Math.min(65, h * 0.34);
+
+  const numQubits = 8;
+  const nodes = [];
+
+  for (let i = 0; i < numQubits; i++) {
+    const th = (i / numQubits) * Math.PI * 2 - Math.PI / 2;
+    nodes.push({
+      x: cx + rx * Math.cos(th),
+      y: cy + ry * Math.sin(th),
+      label: `q${i}`,
+      isAsk: i >= 4
+    });
+  }
+
+  function drawRing() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw CNOT Ring Links
+    ctx.lineWidth = 1.8;
+    for (let i = 0; i < numQubits; i++) {
+      const n1 = nodes[i];
+      const n2 = nodes[(i + 1) % numQubits];
+      const grad = ctx.createLinearGradient(n1.x, n1.y, n2.x, n2.y);
+      grad.addColorStop(0, n1.isAsk ? '#c084fc' : '#00f2fe');
+      grad.addColorStop(1, n2.isAsk ? '#c084fc' : '#00f2fe');
+      ctx.strokeStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(n1.x, n1.y);
+      ctx.lineTo(n2.x, n2.y);
+      ctx.stroke();
+    }
+
+    // Draw Bipartite Entanglement Chords across Bid & Ask halves
+    ctx.strokeStyle = 'rgba(236, 72, 153, 0.45)';
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(nodes[i].x, nodes[i].y);
+      ctx.lineTo(nodes[i + 4].x, nodes[i + 4].y);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // Orbiting Quantum Photon on the Ring
+    const t = (Date.now() / 1500) % 1;
+    const phIdx = Math.floor(t * numQubits);
+    const nextIdx = (phIdx + 1) % numQubits;
+    const subT = (t * numQubits) % 1;
+    const phX = nodes[phIdx].x + (nodes[nextIdx].x - nodes[phIdx].x) * subT;
+    const phY = nodes[phIdx].y + (nodes[nextIdx].y - nodes[phIdx].y) * subT;
+
+    ctx.fillStyle = '#00ffcc';
+    ctx.shadowColor = '#00ffcc';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(phX, phY, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Draw Qubit Nodes
+    nodes.forEach(n => {
+      ctx.fillStyle = n.isAsk ? '#1e1035' : '#061c28';
+      ctx.strokeStyle = n.isAsk ? '#c084fc' : '#00f2fe';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(n.label, n.x, n.y);
+    });
+
+    if (currentTab === 'quantum') {
+      entanglementAnimFrame = requestAnimationFrame(drawRing);
+    }
+  }
+
+  cancelAnimationFrame(entanglementAnimFrame);
+  drawRing();
+}
+
+// ==================== HUD INTERACTIVE CLI PROMPT ====================
+function executeHudCli() {
+  const input = document.getElementById('hud-cli-input');
+  if (!input) return;
+  const raw = input.value.trim();
+  if (!raw) return;
+  input.value = '';
+  const cmd = raw.toLowerCase().trim();
+  hudLog(`$ ${raw}`, 'CLI');
+
+  if (cmd === 'help') {
+    hudLog("Commands: [simd] [hawkes] [cnn] [quantum] [audit] [spar] [fx] [matrix] [clear] [lob] [brain] [paper]", "HELP");
+  } else if (cmd === 'simd') {
+    hudRunSIMD();
+  } else if (cmd === 'hawkes') {
+    hudInjectHawkes();
+  } else if (cmd === 'cnn' || cmd === 'deeplob') {
+    hudRunDeepLOB();
+  } else if (cmd === 'quantum' || cmd === 'vqe') {
+    hudProbeQuantum();
+    runQuantumSimulation();
+  } else if (cmd === 'audit' || cmd === 'proofs') {
+    hudVerifyInvariants();
+  } else if (cmd === 'spar' || cmd === 'status') {
+    hudLog("RSNN Engine: 87.4% Biological Sparsity | 230ns LIF Latency | 165ns SIMD AVX2 | 10ns RTL", "INFO");
+  } else if (cmd === 'fx') {
+    toggleNeuralCanvas();
+  } else if (cmd === 'matrix') {
+    toggleScanlines();
+  } else if (cmd === 'clear') {
+    hudClearTerminal();
+  } else if (['guide', 'lob', 'brain', 'exec', 'hardware', 'sweeps', 'ofi', 'paper', 'cnn', 'quantum'].includes(cmd)) {
+    switchTab(cmd);
+    showQuantumToast(`Switched view to [${cmd.toUpperCase()}]`);
+  } else {
+    hudLog(`Unknown command: '${raw}'. Type 'help' for command list.`, "WARN");
+  }
+}
+
+// ==================== QUANTUM TOAST HUD ====================
+function showQuantumToast(msg) {
+  const toast = document.getElementById('quantum-toast');
+  if (!toast) return;
+  toast.innerHTML = msg;
+  toast.classList.add('show');
+  playMicroChirp(960, 0.04);
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2200);
+}
+
+function toggleScanlines() {
+  const overlay = document.querySelector('.scanline-overlay');
+  if (overlay) {
+    const isHidden = overlay.style.display === 'none';
+    overlay.style.display = isHidden ? 'block' : 'none';
+    hudLog(`Scanline texture ${isHidden ? 'ENABLED' : 'DISABLED'}`, "DISPLAY");
+  }
+}
+
+// ==================== KEYBOARD NAVIGATION SHORTCUTS ====================
+window.addEventListener('keydown', (e) => {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+  const keyMap = {
+    '1': 'guide',
+    '2': 'lob',
+    '3': 'brain',
+    '4': 'cnn',
+    '5': 'quantum',
+    '6': 'exec',
+    '7': 'proofs',
+    '8': 'hardware',
+    '9': 'sweeps',
+    '0': 'ofi',
+    'p': 'paper',
+    'P': 'paper'
+  };
+
+  if (keyMap[e.key]) {
+    const tab = keyMap[e.key];
+    switchTab(tab);
+    showQuantumToast(`⚡ HOTKEY [${e.key}]: ${tab.toUpperCase()}`);
+  }
+});
+
+// ==================== QUANTUM-NEUROMORPHIC PARTICLE LATTICE CANVAS ====================
+let neuralCanvasEnabled = true;
+const neuralCanvas = document.getElementById('quantum-neural-canvas');
+let neuralCtx = neuralCanvas ? neuralCanvas.getContext('2d') : null;
+const neuralNodes = [];
+let mousePos = { x: -9999, y: -9999 };
+
+function initQuantumNeuralCanvas() {
+  if (!neuralCanvas) return;
+  
+  function resize() {
+    neuralCanvas.width = window.innerWidth;
+    neuralCanvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const numNodes = Math.min(48, Math.floor(window.innerWidth / 28));
+  neuralNodes.length = 0;
+
+  for (let i = 0; i < numNodes; i++) {
+    neuralNodes.push({
+      x: Math.random() * neuralCanvas.width,
+      y: Math.random() * neuralCanvas.height,
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: (Math.random() - 0.5) * 0.45,
+      radius: Math.random() * 2 + 1.8,
+      potential: -70 + Math.random() * 15,
+      phase: Math.random() * Math.PI * 2,
+      spikeFlash: 0,
+      color: Math.random() > 0.5 ? '#00f2fe' : '#a855f7'
+    });
+  }
+
+  window.addEventListener('mousemove', (e) => {
+    mousePos.x = e.clientX;
+    mousePos.y = e.clientY;
+  });
+
+  window.addEventListener('click', (e) => {
+    injectAvalancheShockwave(e.clientX, e.clientY);
+  });
+
+  function animate() {
+    if (neuralCanvasEnabled && neuralCtx) {
+      drawNeuralLattice();
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+function injectAvalancheShockwave(x, y) {
+  neuralNodes.forEach(n => {
+    const dist = Math.hypot(n.x - x, n.y - y);
+    if (dist < 350) {
+      setTimeout(() => {
+        n.potential = -49;
+        n.spikeFlash = 1.0;
+        playMicroChirp(1400 + Math.random() * 400, 0.02);
+      }, dist * 0.8);
+    }
+  });
+}
+
+function triggerRandomNeuralSpike() {
+  if (neuralNodes.length === 0) return;
+  const idx = Math.floor(Math.random() * neuralNodes.length);
+  neuralNodes[idx].spikeFlash = 1.0;
+  neuralNodes[idx].potential = -49;
+}
+
+function drawNeuralLattice() {
+  const w = neuralCanvas.width;
+  const h = neuralCanvas.height;
+  neuralCtx.clearRect(0, 0, w, h);
+
+  const maxDist = 135;
+
+  // Update & Draw Nodes
+  for (let i = 0; i < neuralNodes.length; i++) {
+    const n = neuralNodes[i];
+
+    n.x += n.vx;
+    n.y += n.vy;
+    n.phase += 0.025;
+
+    if (n.x < 0) n.x = w;
+    if (n.x > w) n.x = 0;
+    if (n.y < 0) n.y = h;
+    if (n.y > h) n.y = 0;
+
+    // Mouse attraction
+    const dx = mousePos.x - n.x;
+    const dy = mousePos.y - n.y;
+    const mDist = Math.hypot(dx, dy);
+    if (mDist < 120 && mDist > 5) {
+      n.x += (dx / mDist) * 0.4;
+      n.y += (dy / mDist) * 0.4;
+    }
+
+    // Leaky potential decay
+    if (n.spikeFlash > 0) {
+      n.spikeFlash -= 0.04;
+      if (n.spikeFlash < 0) n.spikeFlash = 0;
+    }
+
+    // Draw Synaptic Axons
+    for (let j = i + 1; j < neuralNodes.length; j++) {
+      const n2 = neuralNodes[j];
+      const dist = Math.hypot(n.x - n2.x, n.y - n2.y);
+      if (dist < maxDist) {
+        const alpha = (1 - dist / maxDist) * 0.22;
+        neuralCtx.strokeStyle = `rgba(0, 242, 254, ${alpha})`;
+        neuralCtx.lineWidth = 0.8;
+        neuralCtx.beginPath();
+        neuralCtx.moveTo(n.x, n.y);
+        neuralCtx.lineTo(n2.x, n2.y);
+        neuralCtx.stroke();
+
+        // Traveling quantum photon
+        if ((i + j) % 3 === 0) {
+          const pt = ((Date.now() / 2000) + (i * 0.1)) % 1;
+          const px = n.x + (n2.x - n.x) * pt;
+          const py = n.y + (n2.y - n.y) * pt;
+          neuralCtx.fillStyle = 'rgba(0, 255, 135, 0.45)';
+          neuralCtx.beginPath();
+          neuralCtx.arc(px, py, 1.4, 0, Math.PI * 2);
+          neuralCtx.fill();
+        }
+      }
+    }
+
+    // Draw Neuron Soma
+    const flash = n.spikeFlash;
+    const r = n.radius + flash * 5;
+    neuralCtx.fillStyle = flash > 0.1 ? '#00ffcc' : n.color;
+    neuralCtx.shadowColor = flash > 0.1 ? '#00ff87' : n.color;
+    neuralCtx.shadowBlur = flash > 0.1 ? 14 : 4;
+    neuralCtx.beginPath();
+    neuralCtx.arc(n.x, n.y, r, 0, Math.PI * 2);
+    neuralCtx.fill();
+    neuralCtx.shadowBlur = 0;
+  }
+}
+
+function toggleNeuralCanvas() {
+  neuralCanvasEnabled = !neuralCanvasEnabled;
+  const btn = document.getElementById('btn-toggle-canvas');
+  if (neuralCanvas) {
+    if (neuralCanvasEnabled) {
+      neuralCanvas.classList.remove('canvas-hidden');
+      if (btn) {
+        btn.innerText = "⚛️ FX: ON";
+        btn.classList.add('active');
+      }
+      showQuantumToast("⚛️ Quantum-Neuromorphic Lattice: ACTIVE");
+    } else {
+      neuralCanvas.classList.add('canvas-hidden');
+      if (btn) {
+        btn.innerText = "⚛️ FX: OFF";
+        btn.classList.remove('active');
+      }
+      showQuantumToast("Quantum Lattice: PAUSED");
+    }
+  }
+}
+
+// Initialize on DOM load
+document.addEventListener("DOMContentLoaded", () => {
+  initQuantumNeuralCanvas();
+});

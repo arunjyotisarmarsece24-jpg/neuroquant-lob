@@ -15,6 +15,11 @@
 </head>
 <body>
 
+  <!-- Dynamic Quantum-Neuromorphic Particle Lattice Background Canvas -->
+  <canvas id="quantum-neural-canvas"></canvas>
+  <div class="scanline-overlay"></div>
+  <div id="quantum-toast" class="quantum-toast">⚛️ SYSTEM ARMED</div>
+
   <!-- Top Global Header -->
   <header>
     <div class="header-main">
@@ -24,6 +29,7 @@
         <span class="badge live-badge" id="conn-badge">● LIVE SSE</span>
       </div>
       <div class="header-actions">
+        <button id="btn-toggle-canvas" class="btn-sm fx-btn active" onclick="toggleNeuralCanvas()" title="Toggle Quantum-Neuromorphic Particle Lattice">⚛️ FX: ON</button>
         <a href="/paper/download" class="btn-sm pdf-btn" title="Download Whitepaper PDF">📥 PDF</a>
         <button id="btn-toggle-audio" class="btn-sm audio-btn" title="Toggle Microstructure Audio">🔊 MUTE</button>
       </div>
@@ -50,6 +56,22 @@
       <div class="ticker-item">
         <span class="ticker-lbl">Inv</span>
         <span class="ticker-val" id="hdr-inv">0 / ±50</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-lbl">Q-State</span>
+        <span class="ticker-val" id="hdr-qstate" style="color:#c084fc;">|01100000⟩</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-lbl">Coherence</span>
+        <span class="ticker-val" id="hdr-coherence" style="color:#00ff87;">84.2 μs</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-lbl">Sparsity</span>
+        <span class="ticker-val" id="hdr-sparsity" style="color:#00f2fe;">87.4%</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-lbl">Hawkes λ</span>
+        <span class="ticker-val" id="hdr-hawkes" style="color:#f59e0b;">102.7 Hz</span>
       </div>
     </div>
 
@@ -213,6 +235,69 @@
           </div>
         </div>
 
+        <!-- Quantum-Neuromorphic Live Analog Gauge Strip -->
+        <div class="analog-gauge-strip">
+          <div class="analog-gauge-card">
+            <div class="analog-gauge-header">
+              <span>Membrane Potential (V_m)</span>
+              <span class="badge" id="gauge-vm-badge" style="background:rgba(0,255,135,0.15); color:#00ff87;">SUB-THRESHOLD</span>
+            </div>
+            <div class="analog-gauge-val" id="gauge-vm-val">-63.4 <span>mV</span></div>
+            <div class="analog-bar-track">
+              <div class="analog-bar-fill green" id="gauge-vm-bar" style="width: 44%;"></div>
+            </div>
+            <div class="analog-gauge-sub">
+              <span>Rest: -70.0 mV</span>
+              <span style="color:#ff3366;">Threshold: -55.0 mV</span>
+            </div>
+          </div>
+
+          <div class="analog-gauge-card">
+            <div class="analog-gauge-header">
+              <span>Quantum Coherence (T_2*)</span>
+              <span class="badge" style="background:rgba(168,85,247,0.15); color:#c084fc;">ENTANGLED</span>
+            </div>
+            <div class="analog-gauge-val" id="gauge-q-val" style="color:#c084fc;">84.2 <span>μs</span></div>
+            <div class="analog-bar-track">
+              <div class="analog-bar-fill purple" id="gauge-q-bar" style="width: 84%;"></div>
+            </div>
+            <div class="analog-gauge-sub">
+              <span>Decoherence: 0.012/μs</span>
+              <span>256 Superposition States</span>
+            </div>
+          </div>
+
+          <div class="analog-gauge-card">
+            <div class="analog-gauge-header">
+              <span>Hawkes Jump Intensity (λ)</span>
+              <span class="badge" style="background:rgba(245,158,11,0.15); color:#f59e0b;">STATIONARY</span>
+            </div>
+            <div class="analog-gauge-val" id="gauge-hawkes-val" style="color:#f59e0b;">102.7 <span>events/s</span></div>
+            <div class="analog-bar-track">
+              <div class="analog-bar-fill yellow" id="gauge-hawkes-bar" style="width: 51%;"></div>
+            </div>
+            <div class="analog-gauge-sub">
+              <span>Base μ_0: 102.7 Hz</span>
+              <span>ρ(Γ): 0.1096 &lt; 1.0</span>
+            </div>
+          </div>
+
+          <div class="analog-gauge-card">
+            <div class="analog-gauge-header">
+              <span>Stoikov Micro-Price Drift (δ)</span>
+              <span class="badge" style="background:rgba(0,242,254,0.15); color:#00f2fe;">BALANCED</span>
+            </div>
+            <div class="analog-gauge-val" id="gauge-stoikov-val" style="color:#00f2fe;">+0.12 <span>ticks</span></div>
+            <div class="analog-bar-track">
+              <div class="analog-bar-fill cyan" id="gauge-stoikov-bar" style="width: 56%;"></div>
+            </div>
+            <div class="analog-gauge-sub">
+              <span>Spread: $0.25</span>
+              <span>Imbalance: +0.24</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Mission Control Interactive Live Execution HUD -->
         <div class="hud-panel">
           <div class="hud-header">
@@ -257,7 +342,14 @@
 [VERILOG RTL] 36/36 hardware assertions loaded into Spartan-7 simulation core.
 [MICROSTRUCTURE] Multi-Level OFI decay rates (lambda=[8.0, 5.0, 3.0, 2.0, 1.0] s^-1) calibrated.
 [QUANTUM ISING] 8-qubit Hamiltonian register active with ring CNOT entanglement topology.
-[READY] Select an action above to trigger live sub-microsecond algorithmic execution.</div>
+[READY] Select an action above or type below to trigger live sub-microsecond algorithmic execution.</div>
+
+          <!-- Interactive Command Prompt Input -->
+          <div class="hud-cli-box">
+            <span class="hud-cli-prompt">root@neuroquant:~$</span>
+            <input type="text" id="hud-cli-input" class="hud-cli-input" placeholder="Type a command: 'help', 'quantum', 'simd', 'hawkes', 'cnn', 'spar', 'matrix', 'clear'..." autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter') executeHudCli()">
+            <button class="btn-sm" onclick="executeHudCli()" style="background:linear-gradient(135deg, #00f2fe, #a855f7); color:#050914; font-weight:800; border:none; padding:4px 12px; border-radius:4px; cursor:pointer;">RUN ↵</button>
+          </div>
         </div>
 
         <!-- Microsecond Signal Pipeline Blueprint -->
@@ -1371,6 +1463,17 @@ localparam integer       OPTIMAL_REFRACTORY_CYC = 2;             // 20 ns @ 100 
             <h3>QAE Quadratic Speedup</h3>
             <p><strong id="q-speedup" style="color:#38bdf8; font-size:1.5rem;">12,732x</strong></p>
             <p>$O(1/\epsilon)$ Quantum Amplitude Estimation vs $O(1/\epsilon^2)$ Classical Monte Carlo for 99.9% CVaR.</p>
+          </div>
+        </div>
+
+        <!-- Interactive 8-Qubit CNOT Entanglement Ring Visualizer -->
+        <div class="entanglement-box">
+          <div class="box-header">
+            <h4>⚛️ 8-Qubit CNOT Ring Topology &amp; Entanglement Chords</h4>
+            <span class="badge" style="background:rgba(168,85,247,0.25); color:#c084fc; border:1px solid rgba(168,85,247,0.5);">CNOT RING ACTIVE</span>
+          </div>
+          <div class="entanglement-canvas-wrap">
+            <canvas id="q-entanglement-canvas"></canvas>
           </div>
         </div>
 

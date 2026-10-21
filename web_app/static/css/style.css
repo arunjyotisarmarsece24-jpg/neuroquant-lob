@@ -1604,3 +1604,271 @@ input[type="range"] {
   word-break: break-all;
 }
 
+/* ==================== QUANTUM NEUROMORPHIC DESIGN SUITE ==================== */
+
+/* Dynamic Background Quantum-Neural Canvas */
+#quantum-neural-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.42;
+  transition: opacity 0.4s ease;
+}
+
+#quantum-neural-canvas.canvas-hidden {
+  opacity: 0 !important;
+}
+
+/* Scanline Holographic Texture (Subtle CRT Overlay) */
+.scanline-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(rgba(18, 16, 26, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.28;
+}
+
+/* Ensure app content sits above canvas */
+header, .app-main, .bottom-nav {
+  position: relative;
+  z-index: 10;
+}
+
+/* Quantum Toast Notification */
+.quantum-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(10, 16, 32, 0.94);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--accent-cyan);
+  box-shadow: 0 0 24px rgba(0, 242, 254, 0.4), inset 0 0 10px rgba(0, 242, 254, 0.15);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 8px;
+  z-index: 99999;
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantum-toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Header FX Action Button */
+.fx-btn {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+.fx-btn:hover {
+  background: rgba(168, 85, 247, 0.3);
+  color: #ffffff;
+}
+.fx-btn.active {
+  background: rgba(0, 242, 254, 0.2);
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.35);
+}
+
+/* Interactive Command Line Prompt (HUD Terminal CLI) */
+.hud-cli-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #03060d;
+  border: 1px solid #1e293b;
+  border-top: 1px solid rgba(0, 242, 254, 0.15);
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+}
+
+.hud-cli-prompt {
+  color: var(--accent-cyan);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.hud-cli-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #00ff87;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.hud-cli-input::placeholder {
+  color: #475569;
+  font-weight: 400;
+}
+
+/* Quantum-Neuromorphic Live Analog Gauge Strip */
+.analog-gauge-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.analog-gauge-card {
+  background: rgba(10, 16, 30, 0.82);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.analog-gauge-card:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 6px 20px rgba(0, 242, 254, 0.15);
+  transform: translateY(-2px);
+}
+
+.analog-gauge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.analog-gauge-val {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.analog-gauge-val span {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.analog-bar-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.analog-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.analog-bar-fill.cyan { background: linear-gradient(90deg, #00f2fe, #38bdf8); }
+.analog-bar-fill.purple { background: linear-gradient(90deg, #a855f7, #ec4899); }
+.analog-bar-fill.green { background: linear-gradient(90deg, #00ff87, #10b981); }
+.analog-bar-fill.yellow { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+.analog-gauge-sub {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* 3D Canvas Bloch Sphere Cards */
+.bloch-canvas-card {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  position: relative;
+  transition: all 0.22s ease;
+}
+
+.bloch-canvas-card:hover {
+  border-color: #c084fc;
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.2);
+  transform: translateY(-3px);
+}
+
+.bloch-canvas-card canvas {
+  width: 120px;
+  height: 120px;
+  margin: 6px auto;
+  display: block;
+}
+
+.bloch-qubit-lbl {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #c084fc;
+}
+
+.bloch-qubit-coords {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* Quantum Entanglement Ring Visualizer */
+.entanglement-box {
+  background: rgba(10, 15, 28, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.entanglement-canvas-wrap {
+  width: 100%;
+  max-width: 720px;
+  height: 190px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.entanglement-canvas-wrap canvas {
+  width: 100%;
+  height: 100%;
+}
+
+
