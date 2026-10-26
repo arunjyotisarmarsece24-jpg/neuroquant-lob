@@ -367,6 +367,42 @@ class TestVerilogHardwareSimulation(unittest.TestCase):
         self.assertTrue(os.path.exists(vcd_path), "Almgren VCD trace was not generated!")
         self.assertGreater(os.path.getsize(vcd_path), 500, "Almgren VCD trace is empty!")
 
+    def test_iverilog_fix_engine_bridge_simulation(self):
+        """Test Day 5 Institutional FIX 4.4 Engine Pre-Trade Bridge compiles and passes all 5 checks."""
+        rtl_file = os.path.join(HARDWARE_DIR, "fix_engine_bridge.v")
+        header_file = os.path.join(HARDWARE_DIR, "optimal_fix_params.vh")
+        tb_file = os.path.join(HARDWARE_DIR, "tb_fix_engine_bridge.v")
+        out_vvp = os.path.join(HARDWARE_DIR, "fix_sim.vvp")
+
+        self.assertTrue(os.path.exists(rtl_file), "fix_engine_bridge.v missing!")
+        self.assertTrue(os.path.exists(header_file), "optimal_fix_params.vh missing!")
+        self.assertTrue(os.path.exists(tb_file), "tb_fix_engine_bridge.v missing!")
+
+        # 1. Compile with SystemVerilog switch and include directory
+        res_compile = subprocess.run(
+            [IVERILOG_BIN, "-g2005-sv", "-I", HARDWARE_DIR, "-o", out_vvp, rtl_file, tb_file],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_compile.returncode, 0, f"iverilog compilation failed:\n{res_compile.stderr}")
+
+        # 2. Run simulation
+        res_sim = subprocess.run(
+            [VVP_BIN, out_vvp],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_sim.returncode, 0, f"vvp simulation failed:\n{res_sim.stderr}")
+        self.assertIn("ALL HARDWARE FIX ENGINE BRIDGE CHECKS PASSED (100.0%)", res_sim.stdout)
+        self.assertIn("5 / 5 CHECKS PASSED", res_sim.stdout)
+
+        # 3. Check VCD trace
+        vcd_path = os.path.join(HARDWARE_DIR, "neuroquant_fix_trace.vcd")
+        self.assertTrue(os.path.exists(vcd_path), "FIX VCD trace was not generated!")
+        self.assertGreater(os.path.getsize(vcd_path), 500, "FIX VCD trace is empty!")
+
 
 if __name__ == "__main__":
     unittest.main()

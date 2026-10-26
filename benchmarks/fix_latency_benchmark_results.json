@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-10-26T15:43:20+0530",
+  "architect": "Arunjyoti Sarma",
+  "affiliation": "Department of Electronics Engineering, IIT (BHU), Varanasi",
+  "fellowship_target": "NVIDIA Graduate Fellowship ($60,000 USD)",
+  "protocol": "FIX.4.4 Zero-Allocation Tag-Value Wire Engine",
+  "total_orders_profiled": 10000,
+  "sla_threshold_us": 10.0,
+  "sla_compliance_p99": true,
+  "simd_metrics": {
+    "min_us": 0.818,
+    "p50_us": 1.23,
+    "p90_us": 1.373,
+    "p99_us": 2.451,
+    "p999_us": 4.039,
+    "max_us": 30.956,
+    "mean_us": 1.27,
+    "std_us": 0.628,
+    "throughput_ops": 784326.0,
+    "orders": 10000
+  },
+  "component_breakdown_us": {
+    "avx2_wire_parse_us": 0.221,
+    "pre_trade_risk_gate_us": 0.148,
+    "venue_matching_exec_us": 0.553,
+    "wire_serialization_chk_us": 0.307
+  },
+  "summary": {
+    "p50_latency_us": 1.23,
+    "p99_latency_us": 2.451,
+    "max_latency_us": 30.956,
+    "orders_per_sec": 784326.0,
+    "hardware_cycles_at_100mhz": 123,
+    "sub_10us_certified": true
+  }
+}

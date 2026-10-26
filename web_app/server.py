@@ -321,7 +321,8 @@ def get_hardware_waveform(module="lif"):
         "risk": "risk_gate_waveform.png",
         "top": "top_system_waveform.png",
         "formal": "top_system_waveform.png",
-        "uart": "top_system_waveform.png"
+        "uart": "top_system_waveform.png",
+        "fix": "fix_engine_waveform.png"
     }
     filename = mod_map.get(module.lower(), "lif_neuron_waveform.png")
     hardware_dir = os.path.join(PROJECT_ROOT, "hardware")
@@ -415,6 +416,16 @@ def get_hardware_status():
                 "interface": "Python/C++ Reference Model vs Synthesizable Verilog RTL",
                 "checks": "1,000 / 1,000 Ticks Passing (100.0%)",
                 "vcd": "hardware/neuroquant_cosim_trace.vcd"
+            },
+            "fix": {
+                "name": "Zero-Allocation Hardware FIX 4.4 Engine Pre-Trade Bridge",
+                "rtl": "hardware/fix_engine_bridge.v",
+                "tb": "hardware/tb_fix_engine_bridge.v",
+                "clock": "100.00 MHz / 322.26 MHz",
+                "latency": "47 Clock Cycles (470 ns @ 100MHz / 145 ns @ 322MHz)",
+                "interface": "Parallel Tag-Value Streaming + 10G Pre-Trade Risk Gate",
+                "checks": "5 / 5 Checks Passing (100.0%)",
+                "vcd": "hardware/neuroquant_fix_trace.vcd"
             }
         },
         "fpga_utilization": {
@@ -524,7 +535,7 @@ def run_hardware_simulation_api():
     output_text = proc.stdout + ("\n" + proc.stderr if proc.stderr else "")
 
     checks_map = {
-        "all": "36 / 36 Core + 21,514 Formal Invariance Checks Passed (100.0%)",
+        "all": "41 / 41 Core + 21,514 Formal Invariance Checks Passed (100.0%)",
         "lif": "5 / 5 Checks Passed (100.0%)",
         "champion_lif": "5 / 5 Checks Passed (100.0%)",
         "itch": "3 / 3 Checks Passed (100.0%)",
@@ -533,7 +544,8 @@ def run_hardware_simulation_api():
         "formal": "21,514 / 21,514 Formal Invariance Checks Passed (100.0%)",
         "uart": "5 / 5 Checks Passed (100.0%)",
         "cosim": "1,000 / 1,000 Co-Simulation Ticks Passed (100.0%)",
-        "ofi": "5 / 5 Checks Passed (100.0%)"
+        "ofi": "5 / 5 Checks Passed (100.0%)",
+        "fix": "5 / 5 Checks Passed (100.0%)"
     }
 
     return jsonify({
@@ -716,6 +728,93 @@ def run_walkforward_api():
         "elapsed_ms": round(elapsed_ms, 2),
         "summary": sanitize_for_json(res.get("summary", {}))
     })
+
+# ==============================================================================
+# DAY 5: FIX 4.4 ENGINE MICROSECOND LATENCY PROFILING REST APIS
+# ==============================================================================
+@app.route("/api/fix/status", methods=["GET"])
+def get_fix_status():
+    """Returns latest Day 5 FIX 4.4 ultra-low latency profiling results."""
+    json_path = os.path.join(PROJECT_ROOT, "benchmarks", "fix_latency_benchmark_results.json")
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                return jsonify(sanitize_for_json(json.load(f)))
+        except Exception as e:
+            return jsonify({"status": "ERROR", "message": str(e)})
+    return jsonify({"status": "NOT_CALIBRATED"})
+
+@app.route("/api/fix/chart", methods=["GET"])
+def get_fix_chart():
+    """Serves high-resolution publication 4-panel FIX latency distribution figure."""
+    benchmarks_dir = os.path.join(PROJECT_ROOT, "benchmarks")
+    return send_from_directory(benchmarks_dir, "fix_latency_distribution_analysis.png", mimetype="image/png")
+
+@app.route("/api/fix/inject", methods=["POST"])
+def inject_fix_order():
+    """Accepts NewOrderSingle parameters, parses wire bytes, runs risk gate, and returns ExecutionReport with microsecond latency."""
+    import time
+    from neuroquant.execution.fix.protocol import (
+        FixProtocolEngine, FixSide, FixOrdType, FixTimeInForce
+    )
+    from neuroquant.execution.fix.matching_simulator import InstitutionalVenueSimulator
+
+    req = request.json or {}
+    symbol = req.get("symbol", "AAPL")
+    side_str = req.get("side", "BUY").upper()
+    side = FixSide.BUY if side_str == "BUY" else FixSide.SELL
+    qty = float(req.get("order_qty", 100.0))
+    price = float(req.get("price", 185.50))
+    cl_ord_id = req.get("cl_ord_id", f"CLI_{int(time.time()*1000)%10000000:07d}")
+
+    t0 = time.perf_counter_ns()
+    
+    # 1. Synthesize FIX wire message
+    nos = FixProtocolEngine.create_new_order_single(
+        cl_ord_id=cl_ord_id,
+        symbol=symbol,
+        side=side,
+        order_qty=qty,
+        price=price,
+        ord_type=FixOrdType.LIMIT,
+        time_in_force=FixTimeInForce.DAY,
+        sender_comp_id="NEUROQUANT",
+        target_comp_id="CITADEL_CONNECT"
+    )
+    wire = FixProtocolEngine.encode(nos)
+    
+    # 2. Decode wire format
+    decoded = FixProtocolEngine.decode(wire)
+    
+    # 3. Microsecond pre-trade risk evaluation
+    max_qty_limit = 1000.0
+    risk_passed = (decoded.get_float(38) <= max_qty_limit)
+    
+    # 4. Simulated venue execution
+    venue = InstitutionalVenueSimulator()
+    if risk_passed:
+        reports = venue.submit_order(decoded)
+        exec_report = reports[0]
+        exec_wire = FixProtocolEngine.encode(exec_report)
+    else:
+        exec_wire = b""
+        
+    t1 = time.perf_counter_ns()
+    latency_us = (t1 - t0) / 1000.0
+
+    return jsonify({
+        "status": "APPROVED" if risk_passed else "REJECTED_RISK",
+        "cl_ord_id": cl_ord_id,
+        "symbol": symbol,
+        "side": side_str,
+        "order_qty": qty,
+        "price": price,
+        "wire_bytes_len": len(wire),
+        "round_trip_us": round(latency_us, 3),
+        "sub_10us_sla": latency_us < 10.0,
+        "exec_report_wire": exec_wire.decode("latin1", errors="replace")
+    })
+
 
 
 

@@ -111,6 +111,13 @@ MODULE_CONFIGS = {
         "tb": "tb_almgren_chriss_risk_gate.v",
         "out": "almgren_sim.vvp",
         "vcd": "neuroquant_almgren_trace.vcd"
+    },
+    "fix": {
+        "name": "Day 5 Institutional FIX 4.4 Engine Pre-Trade Bridge (Sub-10us)",
+        "rtl": "fix_engine_bridge.v",
+        "tb": "tb_fix_engine_bridge.v",
+        "out": "fix_sim.vvp",
+        "vcd": "neuroquant_fix_trace.vcd"
     }
 }
 
@@ -167,19 +174,19 @@ def run_hardware_sim(module: str = "all", open_waveforms: bool = False) -> bool:
         return run_single_module(module, open_waveforms)
     elif module == "all":
         success = True
-        for k in ["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi", "almgren"]:
+        for k in ["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi", "almgren", "fix"]:
             ok = run_single_module(k, open_waveforms and (k == "lif"))
             if not ok:
                 success = False
         return success
     else:
-        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, champion_lif, itch, risk, top, formal, uart, cosim, ofi, almgren, all.")
+        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, champion_lif, itch, risk, top, formal, uart, cosim, ofi, almgren, fix, all.")
         return False
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Hardware RTL Simulation Suite")
-    parser.add_argument("--module", "-m", choices=["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi", "almgren", "all"], default="all",
+    parser.add_argument("--module", "-m", choices=["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi", "almgren", "fix", "all"], default="all",
                         help="Select module to simulate (default: all)")
     parser.add_argument("--waveforms", "-w", action="store_true",
                         help="Launch GTKWave to inspect signal waveforms")
