@@ -680,6 +680,44 @@ def get_almgren_calibration_chart():
     benchmarks_dir = os.path.join(PROJECT_ROOT, "benchmarks")
     return send_from_directory(benchmarks_dir, "almgren_chriss_calibration_analysis.png", mimetype="image/png")
 
+# ==============================================================================
+# DAY 4: MULTI-HORIZON WALK-FORWARD & DEFLATED SHARPE RATIO REST APIS
+# ==============================================================================
+@app.route("/api/walkforward/status", methods=["GET"])
+def get_walkforward_status():
+    """Returns latest Day 4 Multi-Horizon Walk-Forward & DSR audit results."""
+    json_path = os.path.join(PROJECT_ROOT, "benchmarks", "multi_horizon_walk_forward_results.json")
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                return jsonify(sanitize_for_json(json.load(f)))
+        except Exception as e:
+            return jsonify({"status": "ERROR", "message": str(e)})
+    return jsonify({"status": "NOT_CALIBRATED"})
+
+@app.route("/api/walkforward/chart", methods=["GET"])
+def get_walkforward_chart():
+    """Serves high-resolution publication 4-panel Walk-Forward DSR diagnostic figure."""
+    benchmarks_dir = os.path.join(PROJECT_ROOT, "benchmarks")
+    return send_from_directory(benchmarks_dir, "multi_horizon_walk_forward_analysis.png", mimetype="image/png")
+
+@app.route("/api/walkforward/run", methods=["POST"])
+def run_walkforward_api():
+    """Triggers Day 4 Multi-Horizon Walk-Forward backtest across Purged & Embargoed folds."""
+    from benchmarks.run_multi_horizon_walk_forward import run_multi_horizon_walk_forward
+    req = request.json or {}
+    quick = req.get("quick", True)
+    ticks = int(req.get("ticks", 10000))
+    t0 = time.perf_counter()
+    res = run_multi_horizon_walk_forward(quick=quick, ticks=ticks)
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    return jsonify({
+        "status": "COMPLETED",
+        "elapsed_ms": round(elapsed_ms, 2),
+        "summary": sanitize_for_json(res.get("summary", {}))
+    })
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)

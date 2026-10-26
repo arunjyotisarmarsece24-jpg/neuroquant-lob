@@ -107,12 +107,13 @@ def check_web_server():
     return True
 
 def check_rest_apis():
-    print(f"\n{BOLD}[STEP 2/6] Auditing All 8 Institutional REST API Endpoints...{RESET}")
+    print(f"\n{BOLD}[STEP 2/6] Auditing All 9 Institutional REST API Endpoints...{RESET}")
     base_url = "http://127.0.0.1:5000"
     endpoints = [
         ("/api/sweeps/status", "Day 1 Parameter Sweeps", ["champion"]),
         ("/api/ofi/status", "Day 2 Multi-Level OFI & Hawkes", ["spectral_radius", "simd_avg_ns_per_tick"]),
         ("/api/almgren/status", "Day 3 Almgren-Chriss Impact", ["gamma_permanent", "eta_temporary", "alpha_power_law"]),
+        ("/api/walkforward/status", "Day 4 Multi-Horizon Walk-Forward & DSR", ["summary", "horizons_tested"]),
         ("/api/cosim/status", "Hardware/Software Co-Sim", ["status"]),
         ("/api/bitter/status", "Bitter Quant Stress Bench", ["regimes", "elapsed_seconds"]),
         ("/api/cnn/inference", "DeepLOB Inception CNN", ["alpha_signal", "confidence"]),
@@ -134,6 +135,9 @@ def check_rest_apis():
                     print(f"         Latency: {CYAN}{data['simd_avg_ns_per_tick']:.2f} ns/tick{RESET} | rho(Gamma)={CYAN}{data.get('spectral_radius', 0):.4f}{RESET}")
                 elif "alpha_power_law" in data:
                     print(f"         Impact Law: {PURPLE}alpha={data['alpha_power_law']:.4f} (Square-Root Law){RESET} | kappa={data.get('champion_kappa', 0):.4f} s^-1")
+                elif "horizons_tested" in data and "summary" in data:
+                    s = data["summary"]
+                    print(f"         Multi-Horizon DSR: {PURPLE}DSR={s.get('neuroquant_mean_dsr', 1.0):.4f}{RESET} | Mean SR: {CYAN}{s.get('neuroquant_mean_sharpe', 0):.2f}{RESET} | Defense: {GREEN}{s.get('adverse_selection_protection_pct', 100):.1f}%{RESET}")
                 elif "alpha_signal" in data:
                     print(f"         Prediction: {PURPLE}{data['alpha_signal']}{RESET} (Confidence: {data.get('confidence', 0)*100:.1f}%)")
                 elif "vqe_routing" in data:
