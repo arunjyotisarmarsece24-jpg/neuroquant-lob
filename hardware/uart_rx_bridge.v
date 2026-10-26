@@ -45,9 +45,9 @@ module uart_rx_bridge #(
     output reg  [31:0]            rx_error_count    // Sync losses / framing errors
 );
 
-    // Constant Clocks Per Bit: 100,000,000 / 921,600 = 108.5 -> 109 cycles
+    // Constant Clocks Per Bit: 100,000,000 / BAUD_RATE
     localparam CLKS_PER_BIT   = CLK_FREQ_HZ / BAUD_RATE;
-    localparam TIMEOUT_CYCLES = CLK_FREQ_HZ / 10_000; // 100 us watchdog timeout
+    localparam TIMEOUT_CYCLES = CLK_FREQ_HZ / 20; // 50 ms watchdog timeout (robust against microcontroller inter-byte jitter)
 
     assign m_axis_tkeep = 8'hFF;
 

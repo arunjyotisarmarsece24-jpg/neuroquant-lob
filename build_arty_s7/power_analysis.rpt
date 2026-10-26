@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2024.2 (win64) Build 5239630 Fri Nov 08 22:35:27 MST 2024
-| Date             : Mon Oct 26 12:16:48 2026
+| Date             : Mon Oct 26 14:04:06 2026
 | Host             : Admin running 64-bit major release  (build 9200)
 | Command          : report_power -file ./build_arty_s7/power_analysis.rpt
 | Design           : neuroquant_arty_s7_top
@@ -53,14 +53,13 @@ Table of Contents
 | On-Chip                 | Power (W) | Used     | Available | Utilization (%) |
 +-------------------------+-----------+----------+-----------+-----------------+
 | Clocks                  |     0.003 |        3 |       --- |             --- |
-| Slice Logic             |     0.005 |     1618 |       --- |             --- |
-|   LUT as Logic          |     0.004 |      799 |     14600 |            5.47 |
-|   CARRY4                |    <0.001 |      129 |      3650 |            3.53 |
-|   Register              |    <0.001 |      471 |     29200 |            1.61 |
-|   F7/F8 Muxes           |    <0.001 |        3 |     14600 |            0.02 |
+| Slice Logic             |     0.005 |     1652 |       --- |             --- |
+|   LUT as Logic          |     0.004 |      814 |     14600 |            5.58 |
+|   CARRY4                |    <0.001 |      131 |      3650 |            3.59 |
+|   Register              |    <0.001 |      480 |     29200 |            1.64 |
 |   Others                |     0.000 |       10 |       --- |             --- |
 |   LUT as Shift Register |     0.000 |        8 |      5000 |            0.16 |
-| Signals                 |     0.005 |     1211 |       --- |             --- |
+| Signals                 |     0.005 |     1254 |       --- |             --- |
 | I/O                     |     0.003 |       19 |       150 |           12.67 |
 | Static Power            |     0.061 |          |           |                 |
 | Total                   |     0.077 |          |           |                 |
@@ -142,7 +141,7 @@ Table of Contents
 +------------------------+-----------+
 | neuroquant_arty_s7_top |     0.016 |
 |   u_neuroquant_core    |     0.009 |
-|     u_lif_neuron       |     0.007 |
+|     u_lif_neuron       |     0.008 |
 |     u_risk_gate        |     0.001 |
 |   u_uart_rx            |     0.002 |
 +------------------------+-----------+

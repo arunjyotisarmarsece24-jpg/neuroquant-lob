@@ -1,21 +1,10 @@
 /*
  * ==============================================================================
- * NEUROQUANT-LOB: ARDUINO NANO HARDWARE TICK STREAMER & ADVERSARIAL INJECTOR
+ * NEUROQUANT-LOB: ARDUINO NANO TICK STREAMER (AUTONOMOUS HARDWARE DEMO)
  * ==============================================================================
- * Principal Architect: Arunjyoti Sarma (Research Scholar, IIT (BHU), Varanasi)
- * Hardware Target:     Arduino Nano (ATmega328P, 16 MHz, 5V / 3.3V)
- * Interface:           Hardware UART (115,200 Baud) -> Arty S7 PMOD JA Pin 1 (L17)
- * Standard:            Arduino IDE 2.x
- *
- * Physical Wiring Instructions (CRITICAL):
- *   -------------------------------------------------------------------------
- *   Arduino Nano Pin | Arty S7 PMOD JA Pin | Signal Function
- *   -------------------------------------------------------------------------
- *   Pin TX (Pin D1)  | PMOD JA Pin 1 (L17) | Arduino TX -> FPGA RX (Ticks)
- *   Pin RX (Pin D0)  | PMOD JA Pin 2 (L18) | Arduino RX <- FPGA TX (Telemetry)
- *   Pin GND          | PMOD JA Pin 5 (GND) | MANDATORY COMMON GROUND REFERENCE
- *   -------------------------------------------------------------------------
- *   NOTE: Arduino Nano Pin 13 LED will blink with each transmitted market packet.
+ * Hardware: Arduino Nano (ATmega328P) -> Digilent Arty S7-25
+ * Pins:     Nano TX1 -> Arty S7 IO0 | Nano RX0 -> Arty S7 IO1 | GND -> GND
+ * Baud:     115,200 Baud (Standard 8-N-1 Serial)
  * ==============================================================================
  */
 
@@ -25,22 +14,12 @@
 #define BAUD_RATE             115200
 #define PIN_LED               13
 
-// Packet Framing Constants
 #define FRAME_SYNC0_INGRESS   0x55
 #define FRAME_SYNC1_INGRESS   0xAA
-#define FRAME_SYNC0_TELEMETRY 0x55
-#define FRAME_SYNC1_TELEMETRY 0xBB
-
 #define TOTAL_INGRESS_BYTES   42
-#define TELEMETRY_BYTES       12
 
 uint8_t packetBuffer[TOTAL_INGRESS_BYTES];
-uint8_t rxBuffer[TELEMETRY_BYTES];
-
 uint32_t orderCounter = 1;
-bool streamingActive = false;
-unsigned long lastTickTime = 0;
-const unsigned long tickIntervalMs = 20; // 50 Hz default stream
 
 void buildItchPacket(uint8_t* buf, uint32_t orderRef, char side, uint32_t shares, const char* symbol, uint32_t priceDecicents) {
     buf[0] = FRAME_SYNC0_INGRESS;
@@ -64,12 +43,12 @@ void buildItchPacket(uint8_t* buf, uint32_t orderRef, char side, uint32_t shares
     buf[24] = (uint8_t)((shares >> 8) & 0xFF);
     buf[25] = (uint8_t)(shares & 0xFF);
 
-    // Beat 3: Symbol (padded to 8 chars)
+    // Beat 3: Symbol
     for (int i = 0; i < 8; i++) {
         buf[26 + i] = (i < strlen(symbol)) ? symbol[i] : ' ';
     }
 
-    // Beat 4: Price in decicents ($185.00 = 1,850,000 = 0x001C3A90)
+    // Beat 4: Price in decicents
     buf[34] = (uint8_t)((priceDecicents >> 24) & 0xFF);
     buf[35] = (uint8_t)((priceDecicents >> 16) & 0xFF);
     buf[36] = (uint8_t)((priceDecicents >> 8) & 0xFF);
@@ -79,25 +58,25 @@ void buildItchPacket(uint8_t* buf, uint32_t orderRef, char side, uint32_t shares
 
 void sendNormalTick() {
     digitalWrite(PIN_LED, HIGH);
-    // Normal retail order: 100 shares @ $185.00
     buildItchPacket(packetBuffer, orderCounter++, 'B', 100, "AAPL    ", 1850000);
     Serial.write(packetBuffer, TOTAL_INGRESS_BYTES);
+    delay(10);
     digitalWrite(PIN_LED, LOW);
 }
 
 void sendToxicSweep() {
     digitalWrite(PIN_LED, HIGH);
-    // Toxic institutional sweep: 5,000 shares @ $180.00 (triggers LIF spike LD2 & rate limit)
     buildItchPacket(packetBuffer, orderCounter++, 'S', 5000, "AAPL    ", 1800000);
     Serial.write(packetBuffer, TOTAL_INGRESS_BYTES);
+    delay(20);
     digitalWrite(PIN_LED, LOW);
 }
 
 void sendFatFingerViolation() {
     digitalWrite(PIN_LED, HIGH);
-    // Fat-finger price breach: $250.00 vs $185.00 mid (triggers Risk Collar LD4 RED)
     buildItchPacket(packetBuffer, orderCounter++, 'B', 100, "AAPL    ", 2500000);
     Serial.write(packetBuffer, TOTAL_INGRESS_BYTES);
+    delay(20);
     digitalWrite(PIN_LED, LOW);
 }
 
@@ -106,42 +85,30 @@ void setup() {
     digitalWrite(PIN_LED, LOW);
     Serial.begin(BAUD_RATE);
 
-    // Initial LED Blink sequence to signal Arduino Nano is alive
-    for (int i = 0; i < 3; i++) {
+    // Initial LED Blink sequence on boot
+    for (int i = 0; i < 5; i++) {
         digitalWrite(PIN_LED, HIGH); delay(100);
         digitalWrite(PIN_LED, LOW);  delay(100);
     }
 }
 
-void loop() {
-    // 1. Process serial commands from PC USB
-    if (Serial.available() > 0) {
-        char cmd = Serial.read();
-        switch (cmd) {
-            case 't': // Single Normal Tick
-                sendNormalTick();
-                break;
-            case 'f': // Toxic Sweep (Spikes LIF LD2)
-                sendToxicSweep();
-                break;
-            case 'k': // Collar Violation (Trips RGB0 RED)
-                sendFatFingerViolation();
-                break;
-            case 's': // Start Continuous Stream
-                streamingActive = true;
-                break;
-            case 'h': // Halt Continuous Stream
-                streamingActive = false;
-                break;
-        }
-    }
+unsigned long cycleCounter = 0;
 
-    // 2. Continuous wire-speed streaming mode
-    if (streamingActive) {
-        unsigned long currentMillis = millis();
-        if (currentMillis - lastTickTime >= tickIntervalMs) {
-            lastTickTime = currentMillis;
-            sendNormalTick();
-        }
+void loop() {
+    cycleCounter++;
+
+    // Automatic Autonomous Hardware LED Demonstration:
+    // Every 10 ticks, inject a toxic sweep (triggers LD2 LIF Spike)
+    // Every 25 ticks, inject a fat-finger breach (triggers RGB0 Red Alert)
+    // Otherwise, send normal compliant ticks (triggers LD1 Sync & LD3 Approved)
+    if (cycleCounter % 25 == 0) {
+        sendFatFingerViolation(); // LD4 flashes RED!
+        delay(300);
+    } else if (cycleCounter % 10 == 0) {
+        sendToxicSweep();         // LD2 flashes GREEN!
+        delay(150);
+    } else {
+        sendNormalTick();          // LD1 & LD3 flash GREEN!
+        delay(120);
     }
 }

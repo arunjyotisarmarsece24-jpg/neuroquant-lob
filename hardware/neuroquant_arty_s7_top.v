@@ -189,7 +189,7 @@ module neuroquant_arty_s7_top #(
     // -------------------------------------------------------------------------
     // 4. Human-Visible Pulse Stretchers (50ms @ 100MHz = 5,000,000 Cycles)
     // -------------------------------------------------------------------------
-    localparam STRETCH_CYCLES = 23'd5_000_000;
+    localparam STRETCH_CYCLES = 23'd8_000_000; // 80ms at 100MHz for vibrant visibility
 
     reg [22:0] stretch_sync;
     reg [22:0] stretch_spike;
@@ -203,8 +203,8 @@ module neuroquant_arty_s7_top #(
             stretch_approved  <= 23'd0;
             stretch_violation <= 23'd0;
         end else begin
-            // RX Sync Stretcher
-            if (rx_frame_sync)
+            // RX Activity & Frame Sync Stretcher
+            if (rx_frame_sync || rx_byte_valid)
                 stretch_sync <= STRETCH_CYCLES;
             else if (stretch_sync > 0)
                 stretch_sync <= stretch_sync - 1'b1;
