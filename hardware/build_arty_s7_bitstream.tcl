@@ -10,13 +10,12 @@
 set outputDir ./build_arty_s7
 file mkdir $outputDir
 
-# Target part: default to xc7s50csga324-1 (Arty S7-50)
-# Change to xc7s25csga324-1 if using Arty S7-25
-set_part xc7s50csga324-1
+# Target part: xc7s25csga324-1 (Digilent Arty S7-25)
+set_part xc7s25csga324-1
 
 puts "================================================================================"
-puts "  NEUROQUANT-LOB: COMPILING ARTY S7 BITSTREAM VIA VIVADO"
-puts "  Target Architecture: Xilinx Spartan-7 (xc7s50csga324-1)"
+puts "  NEUROQUANT-LOB: COMPILING ARTY S7-25 BITSTREAM VIA VIVADO"
+puts "  Target Architecture: AMD Xilinx Spartan-7 (xc7s25csga324-1)"
 puts "================================================================================"
 
 # Read Verilog Design Sources
@@ -33,7 +32,7 @@ read_xdc hardware/neuroquant_arty_s7.xdc
 
 # 1. Synthesis
 puts "\n[*] STEP 1: Running Synthesis (Top: neuroquant_arty_s7_top)..."
-synth_design -top neuroquant_arty_s7_top -part xc7s50csga324-1 -flatten_hierarchy rebuilt
+synth_design -top neuroquant_arty_s7_top -part xc7s25csga324-1 -flatten_hierarchy rebuilt
 write_checkpoint -force $outputDir/post_synth.dcp
 report_utilization -file $outputDir/post_synth_utilization.rpt
 
