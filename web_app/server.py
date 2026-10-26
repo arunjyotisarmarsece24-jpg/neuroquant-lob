@@ -659,6 +659,27 @@ def run_ofi_api():
         "results": sanitize_for_json(data)
     })
 
+# ==============================================================================
+# DAY 3: ALMGREN-CHRISS IMPACT & EXECUTION OPTIMIZATION REST APIS
+# ==============================================================================
+@app.route("/api/almgren/status", methods=["GET"])
+def get_almgren_calibration_status():
+    """Returns latest Day 3 Almgren-Chriss impact parameter calibration results."""
+    json_path = os.path.join(PROJECT_ROOT, "benchmarks", "almgren_chriss_calibration_results.json")
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                return jsonify(sanitize_for_json(json.load(f)))
+        except Exception as e:
+            return jsonify({"status": "ERROR", "message": str(e)})
+    return jsonify({"status": "NOT_CALIBRATED"})
+
+@app.route("/api/almgren/chart", methods=["GET"])
+def get_almgren_calibration_chart():
+    """Serves high-resolution publication 4-panel Almgren-Chriss calibration figure."""
+    benchmarks_dir = os.path.join(PROJECT_ROOT, "benchmarks")
+    return send_from_directory(benchmarks_dir, "almgren_chriss_calibration_analysis.png", mimetype="image/png")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False, threaded=True)

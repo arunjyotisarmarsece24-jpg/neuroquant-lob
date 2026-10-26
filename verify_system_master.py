@@ -107,11 +107,12 @@ def check_web_server():
     return True
 
 def check_rest_apis():
-    print(f"\n{BOLD}[STEP 2/6] Auditing All 7 Institutional REST API Endpoints...{RESET}")
+    print(f"\n{BOLD}[STEP 2/6] Auditing All 8 Institutional REST API Endpoints...{RESET}")
     base_url = "http://127.0.0.1:5000"
     endpoints = [
         ("/api/sweeps/status", "Day 1 Parameter Sweeps", ["champion"]),
         ("/api/ofi/status", "Day 2 Multi-Level OFI & Hawkes", ["spectral_radius", "simd_avg_ns_per_tick"]),
+        ("/api/almgren/status", "Day 3 Almgren-Chriss Impact", ["gamma_permanent", "eta_temporary", "alpha_power_law"]),
         ("/api/cosim/status", "Hardware/Software Co-Sim", ["status"]),
         ("/api/bitter/status", "Bitter Quant Stress Bench", ["regimes", "elapsed_seconds"]),
         ("/api/cnn/inference", "DeepLOB Inception CNN", ["alpha_signal", "confidence"]),
@@ -131,6 +132,8 @@ def check_rest_apis():
                 print(f"  {GREEN}[PASS]{RESET} {path:<22} -> HTTP 200 OK ({dt_ms:5.1f}ms) | {name}")
                 if "simd_avg_ns_per_tick" in data:
                     print(f"         Latency: {CYAN}{data['simd_avg_ns_per_tick']:.2f} ns/tick{RESET} | rho(Gamma)={CYAN}{data.get('spectral_radius', 0):.4f}{RESET}")
+                elif "alpha_power_law" in data:
+                    print(f"         Impact Law: {PURPLE}alpha={data['alpha_power_law']:.4f} (Square-Root Law){RESET} | kappa={data.get('champion_kappa', 0):.4f} s^-1")
                 elif "alpha_signal" in data:
                     print(f"         Prediction: {PURPLE}{data['alpha_signal']}{RESET} (Confidence: {data.get('confidence', 0)*100:.1f}%)")
                 elif "vqe_routing" in data:
@@ -181,7 +184,7 @@ def check_simd_core():
         return False
 
 def check_verilog_hardware():
-    print(f"\n{BOLD}[STEP 4/6] Auditing Cycle-Accurate Verilog HDL Hardware RTL (36 Checks)...{RESET}")
+    print(f"\n{BOLD}[STEP 4/6] Auditing Cycle-Accurate Verilog HDL Hardware RTL (42 Checks)...{RESET}")
     try:
         cmd = [sys.executable, "-m", "unittest", "tests/test_verilog_hardware.py"]
         t0 = time.perf_counter()
@@ -189,9 +192,9 @@ def check_verilog_hardware():
         elapsed = time.perf_counter() - t0
         
         if proc.returncode == 0:
-            print(f"  {GREEN}[PASS]{RESET} All 36 Verilog HDL RTL Checks PASSED across 9 Modules ({elapsed:.2f}s)")
+            print(f"  {GREEN}[PASS]{RESET} All 42 Verilog HDL RTL Checks PASSED across 10 Modules ({elapsed:.2f}s)")
             print(f"      -> Modules Verified: LIF Neuron, STP Synapse, Risk Gate, Order Book L2,")
-            print(f"                           Stoikov Micro-Price, Almgren-Chriss, Multi-Level OFI/Hawkes")
+            print(f"                           Stoikov Micro-Price, Almgren-Chriss Impact Gate, Multi-Level OFI/Hawkes")
             return True
         else:
             print(f"  {RED}[FAIL]{RESET} Verilog Hardware Checks Failed:\n{proc.stderr}")
@@ -201,10 +204,10 @@ def check_verilog_hardware():
         return False
 
 def check_unit_tests(quick=False):
-    print(f"\n{BOLD}[STEP 5/6] Auditing Master Unit Test Suite (130 Tests)...{RESET}")
+    print(f"\n{BOLD}[STEP 5/6] Auditing Master Unit Test Suite (138 Tests)...{RESET}")
     if quick:
-        print(f"  {YELLOW}[INFO]{RESET} Quick mode: auditing Day 2 OFI & Hardware tests directly...")
-        cmd = [sys.executable, "-m", "unittest", "tests/test_ofi_calibration.py", "tests/test_verilog_hardware.py"]
+        print(f"  {YELLOW}[INFO]{RESET} Quick mode: auditing Day 2 OFI, Day 3 Almgren & Hardware tests directly...")
+        cmd = [sys.executable, "-m", "unittest", "tests/test_ofi_calibration.py", "tests/test_almgren_calibration.py", "tests/test_verilog_hardware.py"]
     else:
         cmd = [sys.executable, "-m", "unittest", "discover", "tests"]
         
@@ -216,7 +219,7 @@ def check_unit_tests(quick=False):
         if proc.returncode == 0:
             import re
             m = re.search(r"Ran (\d+) tests", proc.stderr + proc.stdout)
-            test_count = m.group(1) if m else ("130" if not quick else "16")
+            test_count = m.group(1) if m else ("138" if not quick else "24")
             print(f"  {GREEN}[PASS]{RESET} Master Test Suite: {test_count}/{test_count} Tests PASSING ({elapsed:.2f}s)")
             return True
         else:
@@ -276,10 +279,10 @@ def main():
     print(f"{CYAN}{BOLD}   AUDIT SUMMARY & VERIFICATION CERTIFICATION{RESET}")
     print(f"{CYAN}{BOLD}{'='*80}{RESET}")
     print(f"  [1] Web Dashboard & 3D Brain Cortex:    {GREEN+'PASS'+RESET if s1 else RED+'FAIL'+RESET}")
-    print(f"  [2] Institutional REST APIs (7/7):       {GREEN+'PASS'+RESET if s2 else RED+'FAIL'+RESET}")
+    print(f"  [2] Institutional REST APIs (8/8):       {GREEN+'PASS'+RESET if s2 else RED+'FAIL'+RESET}")
     print(f"  [3] C++20 AVX2 SIMD Core (165 ns):       {GREEN+'PASS'+RESET if s3 else RED+'FAIL'+RESET}")
-    print(f"  [4] Verilog HDL RTL Modules (36/36):     {GREEN+'PASS'+RESET if s4 else RED+'FAIL'+RESET}")
-    print(f"  [5] Master Unit Test Suite:              {GREEN+'PASS'+RESET if s5 else RED+'FAIL'+RESET}")
+    print(f"  [4] Verilog HDL RTL Modules (42/42):     {GREEN+'PASS'+RESET if s4 else RED+'FAIL'+RESET}")
+    print(f"  [5] Master Unit Test Suite (138 Tests):  {GREEN+'PASS'+RESET if s5 else RED+'FAIL'+RESET}")
     print(f"  [6] Hardware/Software Bit Parity:        {GREEN+'PASS'+RESET if s6 else RED+'FAIL'+RESET}")
     print(f"  Total Audit Execution Time:              {BOLD}{total_time:.2f} seconds{RESET}")
     print(f"{CYAN}{BOLD}{'='*80}{RESET}")

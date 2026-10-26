@@ -331,6 +331,42 @@ class TestVerilogHardwareSimulation(unittest.TestCase):
         self.assertTrue(os.path.exists(vcd_path), "OFI VCD trace was not generated!")
         self.assertGreater(os.path.getsize(vcd_path), 500, "OFI VCD trace is empty!")
 
+    def test_iverilog_almgren_risk_gate_simulation(self):
+        """Test Day 3 Almgren-Chriss pre-trade hardware execution gate compiles and passes all 6 checks."""
+        rtl_file = os.path.join(HARDWARE_DIR, "almgren_chriss_risk_gate.v")
+        header_file = os.path.join(HARDWARE_DIR, "optimal_almgren_params.vh")
+        tb_file = os.path.join(HARDWARE_DIR, "tb_almgren_chriss_risk_gate.v")
+        out_vvp = os.path.join(HARDWARE_DIR, "almgren_sim.vvp")
+
+        self.assertTrue(os.path.exists(rtl_file), "almgren_chriss_risk_gate.v missing!")
+        self.assertTrue(os.path.exists(header_file), "optimal_almgren_params.vh missing!")
+        self.assertTrue(os.path.exists(tb_file), "tb_almgren_chriss_risk_gate.v missing!")
+
+        # 1. Compile with SystemVerilog switch and include directory
+        res_compile = subprocess.run(
+            [IVERILOG_BIN, "-g2005-sv", "-I", HARDWARE_DIR, "-o", out_vvp, rtl_file, tb_file],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_compile.returncode, 0, f"iverilog compilation failed:\n{res_compile.stderr}")
+
+        # 2. Run simulation
+        res_sim = subprocess.run(
+            [VVP_BIN, out_vvp],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(res_sim.returncode, 0, f"vvp simulation failed:\n{res_sim.stderr}")
+        self.assertIn("ALL ALMGREN-CHRISS HARDWARE RTL CHECKS PASSED (100.0%)", res_sim.stdout)
+        self.assertIn("6 / 6 CHECKS PASSED", res_sim.stdout)
+
+        # 3. Check VCD trace
+        vcd_path = os.path.join(HARDWARE_DIR, "neuroquant_almgren_trace.vcd")
+        self.assertTrue(os.path.exists(vcd_path), "Almgren VCD trace was not generated!")
+        self.assertGreater(os.path.getsize(vcd_path), 500, "Almgren VCD trace is empty!")
+
 
 if __name__ == "__main__":
     unittest.main()

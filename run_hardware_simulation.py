@@ -104,6 +104,13 @@ MODULE_CONFIGS = {
         "tb": "tb_multilevel_ofi_hawkes.v",
         "out": "ofi_sim.vvp",
         "vcd": "neuroquant_ofi_trace.vcd"
+    },
+    "almgren": {
+        "name": "Day 3 Almgren-Chriss Impact & Optimal Execution Pre-Trade Risk Gate",
+        "rtl": "almgren_chriss_risk_gate.v",
+        "tb": "tb_almgren_chriss_risk_gate.v",
+        "out": "almgren_sim.vvp",
+        "vcd": "neuroquant_almgren_trace.vcd"
     }
 }
 
@@ -160,19 +167,19 @@ def run_hardware_sim(module: str = "all", open_waveforms: bool = False) -> bool:
         return run_single_module(module, open_waveforms)
     elif module == "all":
         success = True
-        for k in ["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi"]:
+        for k in ["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi", "almgren"]:
             ok = run_single_module(k, open_waveforms and (k == "lif"))
             if not ok:
                 success = False
         return success
     else:
-        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, champion_lif, itch, risk, top, formal, uart, cosim, ofi, all.")
+        print(f"[FAIL] Invalid module selection: '{module}'. Choose from: lif, champion_lif, itch, risk, top, formal, uart, cosim, ofi, almgren, all.")
         return False
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NeuroQuant-LOB Hardware RTL Simulation Suite")
-    parser.add_argument("--module", "-m", choices=["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi", "all"], default="all",
+    parser.add_argument("--module", "-m", choices=["lif", "champion_lif", "itch", "risk", "top", "formal", "uart", "cosim", "ofi", "almgren", "all"], default="all",
                         help="Select module to simulate (default: all)")
     parser.add_argument("--waveforms", "-w", action="store_true",
                         help="Launch GTKWave to inspect signal waveforms")
