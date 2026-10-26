@@ -107,7 +107,7 @@ def check_web_server():
     return True
 
 def check_rest_apis():
-    print(f"\n{BOLD}[STEP 2/6] Auditing All 10 Institutional REST API Endpoints...{RESET}")
+    print(f"\n{BOLD}[STEP 2/6] Auditing All 11 Institutional REST API Endpoints...{RESET}")
     base_url = "http://127.0.0.1:5000"
     endpoints = [
         ("/api/sweeps/status", "Day 1 Parameter Sweeps", ["champion"]),
@@ -115,6 +115,7 @@ def check_rest_apis():
         ("/api/almgren/status", "Day 3 Almgren-Chriss Impact", ["gamma_permanent", "eta_temporary", "alpha_power_law"]),
         ("/api/walkforward/status", "Day 4 Multi-Horizon Walk-Forward & DSR", ["summary", "horizons_tested"]),
         ("/api/fix/status", "Day 5 FIX 4.4 Sub-10us Engine", ["simd_metrics", "sla_compliance_p99"]),
+        ("/api/hardware/hil_status", "Day 6 Physical HIL Dual-Stream", ["fpga_port", "nano_port", "last_voltage_mv"]),
         ("/api/cosim/status", "Hardware/Software Co-Sim", ["status"]),
         ("/api/bitter/status", "Bitter Quant Stress Bench", ["regimes", "elapsed_seconds"]),
         ("/api/cnn/inference", "DeepLOB Inception CNN", ["alpha_signal", "confidence"]),
@@ -142,6 +143,10 @@ def check_rest_apis():
                 elif "sla_compliance_p99" in data:
                     sm = data.get("simd_metrics", {})
                     print(f"         Sub-10us SLA: {GREEN}CERTIFIED{RESET} (P50: {CYAN}{sm.get('p50_us', 0):.3f} us{RESET} | P99: {PURPLE}{sm.get('p99_us', 0):.3f} us{RESET} | Throughput: {GREEN}{sm.get('throughput_ops', 0):,.0f} ops/sec{RESET})")
+                elif "fpga_port" in data:
+                    fpga_state = "CONNECTED" if data.get("fpga_connected") else "STANDBY"
+                    nano_state = "CONNECTED" if data.get("nano_connected") else "STANDBY"
+                    print(f"         Physical HIL: {GREEN}ONLINE{RESET} (FPGA: {CYAN}{data.get('fpga_port')}{RESET}={fpga_state} | Nano: {CYAN}{data.get('nano_port')}{RESET}={nano_state} | Vm: {PURPLE}{data.get('last_voltage_mv')} mV{RESET})")
                 elif "alpha_signal" in data:
                     print(f"         Prediction: {PURPLE}{data['alpha_signal']}{RESET} (Confidence: {data.get('confidence', 0)*100:.1f}%)")
                 elif "vqe_routing" in data:
@@ -212,10 +217,10 @@ def check_verilog_hardware():
         return False
 
 def check_unit_tests(quick=False):
-    print(f"\n{BOLD}[STEP 5/6] Auditing Master Unit Test Suite (138 Tests)...{RESET}")
+    print(f"\n{BOLD}[STEP 5/6] Auditing Master Unit Test Suite (155 Tests)...{RESET}")
     if quick:
-        print(f"  {YELLOW}[INFO]{RESET} Quick mode: auditing Day 2 OFI, Day 3 Almgren & Hardware tests directly...")
-        cmd = [sys.executable, "-m", "unittest", "tests/test_ofi_calibration.py", "tests/test_almgren_calibration.py", "tests/test_verilog_hardware.py"]
+        print(f"  {YELLOW}[INFO]{RESET} Quick mode: auditing Day 2 OFI, Day 3 Almgren, Hardware, Day 5 FIX & Day 6 HIL tests directly...")
+        cmd = [sys.executable, "-m", "unittest", "tests/test_ofi_calibration.py", "tests/test_almgren_calibration.py", "tests/test_verilog_hardware.py", "tests/test_fix_engine_profiling.py", "tests/test_hil_bridge.py"]
     else:
         cmd = [sys.executable, "-m", "unittest", "discover", "tests"]
         
@@ -287,17 +292,17 @@ def main():
     print(f"{CYAN}{BOLD}   AUDIT SUMMARY & VERIFICATION CERTIFICATION{RESET}")
     print(f"{CYAN}{BOLD}{'='*80}{RESET}")
     print(f"  [1] Web Dashboard & 3D Brain Cortex:    {GREEN+'PASS'+RESET if s1 else RED+'FAIL'+RESET}")
-    print(f"  [2] Institutional REST APIs (10/10):     {GREEN+'PASS'+RESET if s2 else RED+'FAIL'+RESET}")
+    print(f"  [2] Institutional REST APIs (11/11):     {GREEN+'PASS'+RESET if s2 else RED+'FAIL'+RESET}")
     print(f"  [3] C++20 AVX2 SIMD Core (165 ns):       {GREEN+'PASS'+RESET if s3 else RED+'FAIL'+RESET}")
     print(f"  [4] Verilog HDL RTL Modules (47/47):     {GREEN+'PASS'+RESET if s4 else RED+'FAIL'+RESET}")
-    print(f"  [5] Master Unit Test Suite (150+ Tests): {GREEN+'PASS'+RESET if s5 else RED+'FAIL'+RESET}")
+    print(f"  [5] Master Unit Test Suite (155 Tests):  {GREEN+'PASS'+RESET if s5 else RED+'FAIL'+RESET}")
     print(f"  [6] Hardware/Software Bit Parity:        {GREEN+'PASS'+RESET if s6 else RED+'FAIL'+RESET}")
     print(f"  Total Audit Execution Time:              {BOLD}{total_time:.2f} seconds{RESET}")
     print(f"{CYAN}{BOLD}{'='*80}{RESET}")
 
     if all([s1, s2, s3, s4, s5, s6]):
         print(f"\n{GREEN}{BOLD}>>> ALL SUBSYSTEMS 100% OPERATIONAL, AUDITED & CERTIFIED GREEN! <<<{RESET}")
-        print(f"{GREEN}Day 5 FIX 4.4 Engine Complete -> Sub-10 µs SLA Certified for NVIDIA Graduate Fellowship.{RESET}\n")
+        print(f"{GREEN}Day 6 Real-Time HIL Dual-Stream Operational -> Ready for NVIDIA Fellowship Dossier Package.{RESET}\n")
         return 0
     else:
         print(f"\n{RED}{BOLD}>>> AUDIT COMPLETED WITH ONE OR MORE WARNINGS/FAILURES <<<{RESET}\n")

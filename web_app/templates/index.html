@@ -1133,6 +1133,105 @@
           </div>
         </div>
 
+        <!-- DAY 6: PHYSICAL HARDWARE-IN-THE-LOOP (HIL) DUAL-STREAM MONITOR -->
+        <div class="interactive-box" style="border:1px solid rgba(0,242,254,0.4); background:rgba(10,13,20,0.85); box-shadow:0 0 20px rgba(0,242,254,0.1); margin-bottom:16px;">
+          <div class="box-header" style="border-bottom:1px solid rgba(0,242,254,0.2); padding-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:1.3rem;">🔌</span>
+              <div>
+                <h4 style="color:var(--accent-cyan); margin:0;">Day 6: Physical Hardware-in-the-Loop (HIL) Dual-Stream Co-Processor Monitor</h4>
+                <div style="font-size:0.75rem; color:var(--text-muted);">
+                  Digilent Arty S7-25 (AMD Spartan-7 COM9) ↔ Arduino Nano Sidecar (ATmega328P COM5) @ 115,200 Baud
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <span id="hil-status-pill" class="badge" style="background:rgba(0,255,135,0.15); color:var(--accent-green); border:1px solid var(--accent-green);">● HIL ACTIVE</span>
+              <button class="btn-sm secondary" onclick="refreshHILStatus()" title="Poll Live Telemetry">🔄 Poll</button>
+              <button id="btn-hil-toggle" class="btn-sm primary" onclick="toggleHILForwarder()">⚡ Start Forwarder</button>
+            </div>
+          </div>
+
+          <!-- Physical LED Illumination Status Grid (Exact Digilent Arty S7-25 SilkScreen) -->
+          <div style="margin-top:14px; background:rgba(0,0,0,0.4); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+              Physical Arty S7-25 On-Board LED Telemetry Mirror
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px;">
+              <div class="hil-led-card" style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px; text-align:center;">
+                <div id="led-indicator-ld0" style="width:14px; height:14px; border-radius:50%; background:#00f2fe; margin:0 auto 4px auto; box-shadow:0 0 10px #00f2fe;"></div>
+                <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#00f2fe;">LD0 (RGB)</div>
+                <div id="led-desc-ld0" style="font-size:0.68rem; color:var(--text-muted);">Blue (UART RX Active)</div>
+              </div>
+              <div class="hil-led-card" style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px; text-align:center;">
+                <div id="led-indicator-ld1" style="width:14px; height:14px; border-radius:50%; background:#ffd166; margin:0 auto 4px auto; box-shadow:0 0 10px #ffd166;"></div>
+                <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#ffd166;">LD1 (RGB)</div>
+                <div id="led-desc-ld1" style="font-size:0.68rem; color:var(--text-muted);">Cyan (Ready / Spike)</div>
+              </div>
+              <div class="hil-led-card" style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px; text-align:center;">
+                <div id="led-indicator-ld2" style="width:14px; height:14px; border-radius:50%; background:#ffd166; margin:0 auto 4px auto; box-shadow:0 0 10px #ffd166;"></div>
+                <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#ffd166;">LD2 (Yellow)</div>
+                <div id="led-desc-ld2" style="font-size:0.68rem; color:var(--text-muted);">Solid (PLL Lock 100MHz)</div>
+              </div>
+              <div class="hil-led-card" style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px; text-align:center;">
+                <div id="led-indicator-ld3" style="width:14px; height:14px; border-radius:50%; background:#ffd166; margin:0 auto 4px auto; box-shadow:0 0 10px #ffd166;"></div>
+                <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#ffd166;">LD3 (Yellow)</div>
+                <div id="led-desc-ld3" style="font-size:0.68rem; color:var(--text-muted);">Blinking (1Hz Heartbeat)</div>
+              </div>
+              <div class="hil-led-card" style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px; text-align:center;">
+                <div id="led-indicator-ld4" style="width:14px; height:14px; border-radius:50%; background:#ffd166; margin:0 auto 4px auto; box-shadow:0 0 10px #ffd166;"></div>
+                <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#ffd166;">LD4 (Yellow)</div>
+                <div id="led-desc-ld4" style="font-size:0.68rem; color:var(--text-muted);">Pulse (ITCH Decoded)</div>
+              </div>
+              <div class="hil-led-card" style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px; text-align:center;">
+                <div id="led-indicator-ld5" style="width:14px; height:14px; border-radius:50%; background:#ffd166; margin:0 auto 4px auto; box-shadow:0 0 10px #ffd166;"></div>
+                <div style="font-family:var(--font-mono); font-size:0.75rem; font-weight:700; color:#ffd166;">LD5 (Yellow)</div>
+                <div id="led-desc-ld5" style="font-size:0.68rem; color:var(--text-muted);">Pulse (Risk Clearance)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Real-Time Hardware Readouts -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; margin-top:12px;">
+            <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:10px; border:1px solid rgba(255,255,255,0.05);">
+              <div style="font-size:0.75rem; color:var(--text-muted);">FPGA Membrane Voltage</div>
+              <div id="hil-voltage-val" style="font-size:1.3rem; font-weight:700; font-family:var(--font-mono); color:#00f2fe;">-75.0 mV</div>
+              <div style="font-size:0.68rem; color:var(--text-muted);">Reset: -75mV | Thresh: -55mV</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:10px; border:1px solid rgba(255,255,255,0.05);">
+              <div style="font-size:0.75rem; color:var(--text-muted);">Hardware Latency</div>
+              <div id="hil-latency-val" style="font-size:1.3rem; font-weight:700; font-family:var(--font-mono); color:#10b981;">12.30 µs</div>
+              <div id="hil-cycles-val" style="font-size:0.68rem; color:var(--text-muted);">1,230 cycles @ 100MHz</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:10px; border:1px solid rgba(255,255,255,0.05);">
+              <div style="font-size:0.75rem; color:var(--text-muted);">Orders Bridged (Nano→FPGA)</div>
+              <div id="hil-orders-val" style="font-size:1.3rem; font-weight:700; font-family:var(--font-mono); color:#f59e0b;">0</div>
+              <div id="hil-throughput-val" style="font-size:0.68rem; color:var(--text-muted);">Rate: 0.0 orders/sec</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.3); border-radius:6px; padding:10px; border:1px solid rgba(255,255,255,0.05);">
+              <div style="font-size:0.75rem; color:var(--text-muted);">FPGA Status Register</div>
+              <div id="hil-flags-val" style="font-size:1.3rem; font-weight:700; font-family:var(--font-mono); color:#a855f7;">0x8000</div>
+              <div style="font-size:0.68rem; color:var(--text-muted);">Bit 15=PLL, 13=Spike, 10=Kill</div>
+            </div>
+          </div>
+
+          <!-- Interactive HIL Injection Actions -->
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+            <button class="sim-btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="injectHILOrder(100, 'B')">
+              ⚡ Inject 100 Shares (Normal Order)
+            </button>
+            <button class="sim-btn" style="border-color:var(--accent-yellow); color:var(--accent-yellow);" onclick="injectHILOrder(800, 'B')">
+              ⚡ Inject 800 Shares (Trigger LIF Spike)
+            </button>
+            <button class="sim-btn" style="border-color:#ff3366; color:#ff3366;" onclick="injectHILOrder(5000, 'B')">
+              🚨 Trip Pre-Trade Killswitch (5000 Shares)
+            </button>
+            <button class="sim-btn" onclick="injectHILOrder(100, 'S')">
+              📉 Inject 100 Shares SELL
+            </button>
+          </div>
+        </div>
+
         <!-- Interactive Hardware Simulation Control Panel -->
         <div class="interactive-box">
           <div class="box-header">
@@ -1161,6 +1260,9 @@
             <button id="btn-hw-risk" class="sim-btn" onclick="triggerHardwareSim('risk')">
               🛡️ Simulate Risk Gate (8 Checks)
             </button>
+            <button id="btn-hw-fix" class="sim-btn" style="border-color:var(--accent-green); color:var(--accent-green);" onclick="triggerHardwareSim('fix')">
+              ⚡ Simulate FIX 4.4 Engine (5 Checks)
+            </button>
           </div>
         </div>
 
@@ -1187,6 +1289,9 @@
             </button>
             <button id="hw-tab-top" class="thumb-btn" onclick="selectHardwareWaveform('top')">
               🌐 End-to-End Pipeline Timing
+            </button>
+            <button id="hw-tab-fix" class="thumb-btn" onclick="selectHardwareWaveform('fix')">
+              ⚡ FIX 4.4 Engine (Sub-10 µs Bridge)
             </button>
           </div>
 

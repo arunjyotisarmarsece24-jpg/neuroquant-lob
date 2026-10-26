@@ -78,7 +78,22 @@ def get_telemetry():
                 "motor_firing_indices": system.brain.motor_spikes.tolist() if hasattr(system.brain, "motor_spikes") else []
             }
         }
-    return jsonify(data)
+    try:
+        from hardware.hil_dual_stream_bridge import get_hil_bridge
+        bridge = get_hil_bridge()
+        data["hardware_hil"] = {
+            "fpga_connected": bridge.fpga_connected,
+            "nano_connected": bridge.nano_connected,
+            "voltage_mv": bridge.last_voltage_mv,
+            "latency_us": bridge.last_latency_us,
+            "cycles": bridge.last_latency_cycles,
+            "spike": bridge.spike_detected,
+            "killswitch": bridge.killswitch_tripped,
+            "flags": f"0x{bridge.last_status_flags:04X}"
+        }
+    except Exception:
+        pass
+    return jsonify(sanitize_for_json(data))
 
 @app.route("/api/stream")
 def stream():
@@ -814,6 +829,67 @@ def inject_fix_order():
         "sub_10us_sla": latency_us < 10.0,
         "exec_report_wire": exec_wire.decode("latin1", errors="replace")
     })
+
+# ==============================================================================
+# DAY 6: REAL-TIME HARDWARE-IN-THE-LOOP (HIL) DUAL-STREAM REST APIS
+# ==============================================================================
+@app.route("/api/hardware/hil_status", methods=["GET"])
+def get_hil_status():
+    """Returns real-time physical telemetry from Spartan-7 FPGA (COM9) & Arduino Nano (COM5)."""
+    from hardware.hil_dual_stream_bridge import get_hil_bridge
+    bridge = get_hil_bridge()
+    status = bridge.get_status_dict()
+    return jsonify(sanitize_for_json(status))
+
+@app.route("/api/hardware/hil_inject", methods=["POST"])
+def inject_hil_order():
+    """Injects a physical ITCH order frame into the Spartan-7 FPGA."""
+    from hardware.hil_dual_stream_bridge import get_hil_bridge
+    bridge = get_hil_bridge()
+    req = request.json or {}
+    shares = int(req.get("shares", 100))
+    price_cents = int(float(req.get("price", 185.0)) * 10000.0)
+    side = req.get("side", "B").upper()
+    
+    t0 = time.perf_counter()
+    ok = bridge.inject_order(shares=shares, price_cents=price_cents, side=side)
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    
+    return jsonify({
+        "status": "DISPATCHED" if ok else "PORT_UNAVAILABLE",
+        "shares": shares,
+        "side": side,
+        "elapsed_ms": round(elapsed_ms, 2),
+        "telemetry": sanitize_for_json(bridge.get_status_dict())
+    })
+
+@app.route("/api/hardware/hil_control", methods=["POST"])
+def control_hil_bridge():
+    """Starts, stops, or reconnects the physical HIL dual-stream background bridge."""
+    from hardware.hil_dual_stream_bridge import get_hil_bridge
+    bridge = get_hil_bridge()
+    req = request.json or {}
+    action = req.get("action", "start")
+    
+    if action == "start":
+        bridge.start_background_forwarder()
+        msg = "HIL Dual-Stream background forwarder started"
+    elif action == "stop":
+        bridge.stop_background_forwarder()
+        msg = "HIL Dual-Stream background forwarder stopped"
+    elif action == "reconnect":
+        bridge.disconnect()
+        bridge.connect()
+        msg = "HIL Dual-Stream serial ports reconnected"
+    else:
+        return jsonify({"status": "error", "message": f"Unknown action: {action}"}), 400
+        
+    return jsonify({
+        "status": "ok",
+        "message": msg,
+        "telemetry": sanitize_for_json(bridge.get_status_dict())
+    })
+
 
 
 

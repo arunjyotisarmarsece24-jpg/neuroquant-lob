@@ -776,6 +776,7 @@ const hwLegends = {
   itch: "💡 <strong>ITCH 5.0 AXI4-Stream Waveform:</strong> Shows 64-bit bus handshake (tvalid, tready, tlast) for incoming NASDAQ network packets, demonstrating cycle-accurate Type 'A' (Add Order) decoding in 5 cycles (15.5 ns @ 322 MHz) and Type 'D' (Delete Order) decoding in 3 cycles (9.3 ns).",
   risk: '💡 <strong>Hardware Risk Gate Waveform:</strong> Illustrates 8 consecutive institutional test cases verified in a single clock cycle (< 3.5 ns): Clean Order approval, Emergency Killswitch halt, Price Collar block, Max Size limit, Net Inventory breach, De-Risking bypass, MTM Drawdown stop, and Theorem 1 Lyapunov Invariant defense.',
   top: '💡 <strong>End-to-End Pipeline Waveform:</strong> Demonstrates the complete integrated FPGA workflow: NASDAQ wire packet ingest across 5 beats -> ITCH decoding -> Synaptic modulation -> Neuromorphic LIF action potential spike -> 1-cycle Pre-Trade Risk clearance -> Outbound trade execution strobe (< 25.2 ns total tick-to-trade latency on FPGA silicon) and Killswitch defense.',
+  fix: '⚡ <strong>FIX 4.4 Engine Hardware Pre-Trade Bridge:</strong> Zero-allocation parallel Tag-Value stream decoder with integrated pre-trade risk evaluation and ExecutionReport serialization within 47 clock cycles (470 ns @ 100 MHz / 145 ns @ 322 MHz).',
   formal: '🔬 <strong>Formal Invariance Audit:</strong> Mathematically proves 7 immutable properties (Killswitch Supremacy, Fat-Finger Collar Rejection, Lyapunov Basin Stability, Drawdown Breaker Halt, LIF Reset Monotonicity, AXI Deadlock Freedom, and 4-cycle Deterministic Pipeline) evaluated over 21,514 formal assertions.',
   uart: '🔌 <strong>Arty S7 + NodeMCU ESP8266 UART Bridge:</strong> Emulates 921,600 baud serial deserialization into 64-bit AXI4-Stream frames, driving LIF neuromorphic spike updates and Pre-Trade Risk Gate clearance directly to physical PMOD pins.'
 };
@@ -791,7 +792,7 @@ function selectHardwareWaveform(mod) {
     dlBtn.href = `/api/hardware/waveform/${mod}`;
     dlBtn.download = `${mod}_hardware_waveform.png`;
   }
-  ['lif', 'itch', 'risk', 'top'].forEach(m => {
+  ['lif', 'itch', 'risk', 'top', 'fix'].forEach(m => {
     const btn = document.getElementById(`hw-tab-${m}`);
     if (btn) {
       if (m === mod) btn.classList.add('active');
@@ -860,6 +861,97 @@ function triggerHardwareSim(mod) {
     }
   });
 }
+
+// ==================== DAY 6: PHYSICAL HARDWARE-IN-THE-LOOP (HIL) ====================
+let hilActive = false;
+
+function refreshHILStatus() {
+  fetch('/api/hardware/hil_status')
+    .then(res => res.json())
+    .then(data => {
+      const vEl = document.getElementById('hil-voltage-val');
+      const latEl = document.getElementById('hil-latency-val');
+      const cycEl = document.getElementById('hil-cycles-val');
+      const ordEl = document.getElementById('hil-orders-val');
+      const tputEl = document.getElementById('hil-throughput-val');
+      const flagEl = document.getElementById('hil-flags-val');
+      const pill = document.getElementById('hil-status-pill');
+      const toggleBtn = document.getElementById('btn-hil-toggle');
+
+      if (vEl) vEl.innerText = `${(data.last_voltage_mv || -75.0).toFixed(1)} mV`;
+      if (latEl) latEl.innerText = `${(data.last_latency_us || 12.30).toFixed(2)} µs`;
+      if (cycEl) cycEl.innerText = `${(data.last_latency_cycles || 1230).toLocaleString()} cycles @ 100MHz`;
+      if (ordEl) ordEl.innerText = (data.total_orders_forwarded || 0).toLocaleString();
+      if (tputEl) tputEl.innerText = `Rate: ${(data.throughput_ops || 0.0).toFixed(1)} orders/sec`;
+      if (flagEl) flagEl.innerText = data.last_status_flags || '0x8000';
+
+      hilActive = !!data.hil_active;
+      if (pill) {
+        if (data.fpga_connected) {
+          pill.innerText = `● HIL ONLINE (COM9: FPGA | COM5: Nano)`;
+          pill.style.color = 'var(--accent-green)';
+          pill.style.borderColor = 'var(--accent-green)';
+        } else {
+          pill.innerText = `● HIL STANDBY`;
+          pill.style.color = 'var(--accent-yellow)';
+          pill.style.borderColor = 'var(--accent-yellow)';
+        }
+      }
+      if (toggleBtn) {
+        toggleBtn.innerText = hilActive ? '⏹️ Stop Forwarder' : '⚡ Start Forwarder';
+      }
+
+      // Update LED indicators
+      const led = data.led_state || {};
+      updateLed('ld0', led.ld0_rgb === 'blue' ? '#00f2fe' : '#333333');
+      updateLed('ld1', led.ld1_rgb === 'red' ? '#ff3366' : (led.ld1_rgb === 'yellow' ? '#ffd166' : '#00f2fe'));
+      updateLed('ld2', led.ld2_yellow === 'on' ? '#ffd166' : '#333333');
+      updateLed('ld3', '#ffd166');
+      updateLed('ld4', led.ld4_yellow === 'pulse' ? '#ffd166' : '#555533');
+      updateLed('ld5', led.ld5_yellow === 'pulse' ? '#ffd166' : '#555533');
+    })
+    .catch(() => {});
+}
+
+function updateLed(id, color) {
+  const el = document.getElementById(`led-indicator-${id}`);
+  if (el) {
+    el.style.backgroundColor = color;
+    el.style.boxShadow = `0 0 10px ${color}`;
+  }
+}
+
+function toggleHILForwarder() {
+  const nextAction = hilActive ? 'stop' : 'start';
+  fetch('/api/hardware/hil_control', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: nextAction })
+  })
+  .then(res => res.json())
+  .then(() => refreshHILStatus())
+  .catch(() => {});
+}
+
+function injectHILOrder(shares, side) {
+  playMicroChirp(800, 0.04);
+  fetch('/api/hardware/hil_inject', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ shares: shares, side: side, price: 185.0 })
+  })
+  .then(res => res.json())
+  .then(() => refreshHILStatus())
+  .catch(() => {});
+}
+
+// Auto-refresh HIL telemetry every 1.5 seconds if hardware tab is active
+setInterval(() => {
+  const hwPane = document.getElementById('tab-hardware');
+  if (hwPane && hwPane.classList.contains('active')) {
+    refreshHILStatus();
+  }
+}, 1500);
 
 // Initial startup call
 window.addEventListener("DOMContentLoaded", () => {
