@@ -1,9 +1,9 @@
 ## ==============================================================================
-## NEUROQUANT-LOB: DIGILENT ARTY S7 (SPARTAN-7) MASTER CONSTRAINTS (.XDC)
+## NEUROQUANT-LOB: DIGILENT ARTY S7-25 (SPARTAN-7) MASTER CONSTRAINTS (.XDC)
 ## ==============================================================================
-## Board Target:   Digilent Arty S7-50 / Arty S7-25 (XC7S50-CSGA324 / XC7S25)
-## External Node:  NodeMCU ESP8266 Wi-Fi Gateway connected via PMOD JA
-## Standard:       IEEE 1364-2001 / Vivado Design Suite 2020.2 - 2024.1+
+## Board Target:   Digilent Arty S7-25 (XC7S25-CSGA324-1)
+## Dual Interface: FTDI FT2232H USB-UART (COM9) + Arduino Nano PMOD JA (COM5)
+## Standard:       IEEE 1364-2001 / Vivado Design Suite 2024.2+
 ## ==============================================================================
 
 ## -----------------------------------------------------------------------------
@@ -19,7 +19,7 @@ create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports { c
 set_property -dict { PACKAGE_PIN C18   IOSTANDARD LVCMOS33 } [get_ports { btn_rst_n }];
 
 # Button 1: Manual Neuromorphic Tick Injection
-set_property -dict { PACKAGE_PIN G15   IOSTANDARD LVCMOS33 } [get_ports { btn_manual_tick }];
+set_property -dict { PACKAGE_PIN K16   IOSTANDARD LVCMOS33 } [get_ports { btn_manual_tick }];
 
 # Switch 0: Emergency Hardware System Killswitch Circuit Breaker
 set_property -dict { PACKAGE_PIN H14   IOSTANDARD LVCMOS33 } [get_ports { sw_killswitch }];
@@ -33,7 +33,7 @@ set_property -dict { PACKAGE_PIN H18   IOSTANDARD LVCMOS33 } [get_ports { sw_byp
 # LD0: Accelerator Ready
 set_property -dict { PACKAGE_PIN E18   IOSTANDARD LVCMOS33 } [get_ports { led0_ready }];
 
-# LD1: ESP8266 Frame Synchronized (0x55AA Locked)
+# LD1: ESP8266 / Arduino Frame Synchronized (0x55AA Locked)
 set_property -dict { PACKAGE_PIN F13   IOSTANDARD LVCMOS33 } [get_ports { led1_rx_sync }];
 
 # LD2: Neuromorphic LIF Action Potential Spike Fired
@@ -43,29 +43,37 @@ set_property -dict { PACKAGE_PIN E13   IOSTANDARD LVCMOS33 } [get_ports { led2_s
 set_property -dict { PACKAGE_PIN H15   IOSTANDARD LVCMOS33 } [get_ports { led3_approved }];
 
 ## -----------------------------------------------------------------------------
-## 4. RGB LED 0 (LD4): Breaker Violation & Telemetry Status
+## 4. RGB LED 0 (LD4 on Arty S7-25): J15=Red, G17=Green, F15=Blue
 ## -----------------------------------------------------------------------------
-set_property -dict { PACKAGE_PIN F15   IOSTANDARD LVCMOS33 } [get_ports { rgb0_r }]; # Red: Breaker Tripped
-set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { rgb0_g }]; # Green: System Normal
-set_property -dict { PACKAGE_PIN G17   IOSTANDARD LVCMOS33 } [get_ports { rgb0_b }]; # Blue: Ingress Active
+set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { rgb0_r }]; # Red: Breaker Tripped / Violation
+set_property -dict { PACKAGE_PIN G17   IOSTANDARD LVCMOS33 } [get_ports { rgb0_g }]; # Green: System Normal / Ready
+set_property -dict { PACKAGE_PIN F15   IOSTANDARD LVCMOS33 } [get_ports { rgb0_b }]; # Blue: Ingress Active
 
 ## -----------------------------------------------------------------------------
-## 5. PMOD Header JA: High-Speed Serial Interface to NodeMCU ESP8266
+## 5. On-Board USB-UART Bridge (FTDI FT2232H Channel B -> Host PC COM9)
 ## -----------------------------------------------------------------------------
-# JA Pin 1 (Pin L17): UART RX from NodeMCU ESP8266 TX (GPIO1 / TXD0)
-set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 } [get_ports { ja_uart_rx }];
+# V12: PC TX -> FPGA RX
+set_property -dict { PACKAGE_PIN V12   IOSTANDARD LVCMOS33 PULLUP true } [get_ports { usb_uart_rx }];
+# R12: FPGA TX -> PC RX
+set_property -dict { PACKAGE_PIN R12   IOSTANDARD LVCMOS33 } [get_ports { usb_uart_tx }];
 
-# JA Pin 2 (Pin L18): UART TX to NodeMCU ESP8266 RX (GPIO3 / RXD0)
+## -----------------------------------------------------------------------------
+## 6. PMOD Header JA: High-Speed Serial Interface to Arduino Nano
+## -----------------------------------------------------------------------------
+# JA Pin 1 (Pin L17): UART RX from Arduino Nano TX (Pin D1)
+set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 PULLUP true } [get_ports { ja_uart_rx }];
+
+# JA Pin 2 (Pin L18): UART TX to Arduino Nano RX (Pin D0)
 set_property -dict { PACKAGE_PIN L18   IOSTANDARD LVCMOS33 } [get_ports { ja_uart_tx }];
 
-# JA Pin 3 (Pin M14): Outbound Trade Execution Strobe (To Network MAC / Scope)
+# JA Pin 3 (Pin M14): Outbound Trade Execution Strobe
 set_property -dict { PACKAGE_PIN M14   IOSTANDARD LVCMOS33 } [get_ports { ja_exec_strobe }];
 
 # JA Pin 4 (Pin N14): Neuromorphic Spike Pulse Output
 set_property -dict { PACKAGE_PIN N14   IOSTANDARD LVCMOS33 } [get_ports { ja_spike_strobe }];
 
 ## -----------------------------------------------------------------------------
-## 6. Timing Exceptions & Configuration Constraints
+## 7. Timing Exceptions & Configuration Constraints
 ## -----------------------------------------------------------------------------
 set_false_path -from [get_ports { sw_killswitch }]
 set_false_path -from [get_ports { sw_bypass_parser }]

@@ -4,7 +4,7 @@
 // Calibrated from 1,000 realistic L2 ticks across 5 depth levels.
 // Target Hardware: AMD Xilinx UltraScale+ / Spartan-7 / Artix-7
 // Arithmetic: Signed Q16.16 Fixed-Point (Scale: 1.0 = 65,536)
-// Generated: 2026-10-26 05:52:49 UTC
+// Generated: 2026-10-26 06:32:42 UTC
 // ==============================================================================
 
 `ifndef OPTIMAL_OFI_PARAMS_VH

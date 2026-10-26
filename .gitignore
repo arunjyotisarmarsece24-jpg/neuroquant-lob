@@ -56,3 +56,13 @@ scratch/
 data/
 *.vvp
 *.vcd
+
+# Vivado EDA synthesis & temporary files
+.Xil/
+*.jou
+*.pb
+*.dcp
+clockInfo.txt
+tight_setup_hold_pins.txt
+build_arty_s7/*.dcp
+

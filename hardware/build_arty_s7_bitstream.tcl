@@ -64,7 +64,7 @@ write_bitstream -force $outputDir/neuroquant_arty_s7.bit
 write_cfgmem -format bin -size 16 -interface SPIx4 -loadbit "up 0x00000000 $outputDir/neuroquant_arty_s7.bit" -file $outputDir/neuroquant_arty_s7.bin -force
 
 puts "================================================================================"
-puts "  [SUCCESS] ARTY S7 BITSTREAM BUILD COMPLETE!"
+puts "  SUCCESS: ARTY S7 BITSTREAM BUILD COMPLETE!"
 puts "  FPGA Bitstream:       $outputDir/neuroquant_arty_s7.bit"
 puts "  Quad-SPI Flash Image: $outputDir/neuroquant_arty_s7.bin"
 puts "  Timing Report:        $outputDir/timing_summary.rpt"
