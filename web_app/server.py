@@ -43,6 +43,41 @@ def index():
 def gallery():
     return render_template("gallery.html")
 
+@app.route("/dossier")
+def dossier_view():
+    """Serves the institutional NVIDIA Graduate Fellowship Production Dossier."""
+    dossier_dir = os.path.join(PROJECT_ROOT, "dossier")
+    dossier_file = os.path.join(dossier_dir, "NVIDIA_FELLOWSHIP_PRODUCTION_DOSSIER.html")
+    if not os.path.exists(dossier_file):
+        try:
+            from generate_fellowship_production_dossier import generate_dossier
+            generate_dossier()
+        except Exception as e:
+            return f"Error generating fellowship dossier: {e}", 500
+    return send_from_directory(dossier_dir, "NVIDIA_FELLOWSHIP_PRODUCTION_DOSSIER.html")
+
+@app.route("/api/dossier/generate", methods=["POST"])
+def api_generate_dossier():
+    """Triggers real-time compilation of the Fellowship Production Dossier."""
+    try:
+        from generate_fellowship_production_dossier import generate_dossier
+        path = generate_dossier()
+        return jsonify({"status": "SUCCESS", "path": path, "size": os.path.getsize(path)})
+    except Exception as e:
+        return jsonify({"status": "ERROR", "message": str(e)}), 500
+
+@app.route("/api/benchmark/report/master", methods=["GET"])
+def get_master_report_chart():
+    """Serves full 6518x3726 master architecture and verification infographic."""
+    benchmarks_dir = os.path.join(PROJECT_ROOT, "benchmarks")
+    return send_from_directory(benchmarks_dir, "brutal_verification_report.png", mimetype="image/png")
+
+@app.route("/api/benchmark/report/execution", methods=["GET"])
+def get_execution_report_chart():
+    """Serves institutional execution and market impact slippage benchmark report."""
+    benchmarks_dir = os.path.join(PROJECT_ROOT, "benchmarks")
+    return send_from_directory(benchmarks_dir, "execution_benchmark_report.png", mimetype="image/png")
+
 @app.route("/manifest.json")
 def manifest():
     return send_from_directory(os.path.join(PROJECT_ROOT, "web_app", "static"), "manifest.json")
