@@ -54,6 +54,8 @@ module tb_uart_bridge;
         .btn_manual_tick  (btn_manual),
         .usb_uart_rx      (1'b1),
         .usb_uart_tx      (),
+        .ck_io0_rx        (1'b1),
+        .ck_io1_tx        (),
         .ja_uart_rx       (ja_uart_rx),
         .ja_uart_tx       (ja_uart_tx),
         .ja_exec_strobe   (ja_exec_strobe),

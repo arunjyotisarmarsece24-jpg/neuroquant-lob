@@ -58,12 +58,12 @@ set_property -dict { PACKAGE_PIN V12   IOSTANDARD LVCMOS33 PULLUP true } [get_po
 set_property -dict { PACKAGE_PIN R12   IOSTANDARD LVCMOS33 } [get_ports { usb_uart_tx }];
 
 ## -----------------------------------------------------------------------------
-## 6. PMOD Header JA: High-Speed Serial Interface to Arduino Nano
+## 6. PMOD Header JA: High-Speed Serial Interface Option 1 (Arduino Nano)
 ## -----------------------------------------------------------------------------
-# JA Pin 1 (Pin L17): UART RX from Arduino Nano TX (Pin D1)
+# JA Pin 1 (Pin L17): UART RX from Arduino Nano TX
 set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 PULLUP true } [get_ports { ja_uart_rx }];
 
-# JA Pin 2 (Pin L18): UART TX to Arduino Nano RX (Pin D0)
+# JA Pin 2 (Pin L18): UART TX to Arduino Nano RX
 set_property -dict { PACKAGE_PIN L18   IOSTANDARD LVCMOS33 } [get_ports { ja_uart_tx }];
 
 # JA Pin 3 (Pin M14): Outbound Trade Execution Strobe
@@ -73,7 +73,16 @@ set_property -dict { PACKAGE_PIN M14   IOSTANDARD LVCMOS33 } [get_ports { ja_exe
 set_property -dict { PACKAGE_PIN N14   IOSTANDARD LVCMOS33 } [get_ports { ja_spike_strobe }];
 
 ## -----------------------------------------------------------------------------
-## 7. Timing Exceptions & Configuration Constraints
+## 7. Arduino / ChipKit Shield Female Header: Serial Interface Option 2 (Arduino Nano)
+## -----------------------------------------------------------------------------
+# Header IO0 (Pin L13): RX from Arduino Nano TX (Pin D1)
+set_property -dict { PACKAGE_PIN L13   IOSTANDARD LVCMOS33 PULLUP true } [get_ports { ck_io0_rx }];
+
+# Header IO1 (Pin N13): TX to Arduino Nano RX (Pin D0)
+set_property -dict { PACKAGE_PIN N13   IOSTANDARD LVCMOS33 } [get_ports { ck_io1_tx }];
+
+## -----------------------------------------------------------------------------
+## 8. Timing Exceptions & Configuration Constraints
 ## -----------------------------------------------------------------------------
 set_false_path -from [get_ports { sw_killswitch }]
 set_false_path -from [get_ports { sw_bypass_parser }]

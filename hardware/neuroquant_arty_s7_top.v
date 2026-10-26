@@ -5,8 +5,9 @@
 // Target Architecture: AMD / Xilinx Spartan-7 (XC7S25-CSGA324 / XC7S50)
 // Physical Board:      Digilent Arty S7-25
 // Hardware Interfaces:
-//   [1] USB-UART Bridge:  FTDI FT2232H (Channel B) direct to Host PC (COM9)
-//   [2] PMOD Header JA:   Serial Interface to Arduino Nano (COM5)
+//   [1] Onboard USB-UART: FTDI FT2232H (Channel B) direct to Host PC (COM9)
+//   [2] PMOD Header JA:   Serial Interface Option 1 to Arduino Nano (Pins 1, 2, 5)
+//   [3] Shield Header:    Serial Interface Option 2 to Arduino Nano (IO0, IO1, GND)
 // Standard:            IEEE 1364-2001 Verilog HDL
 // ==============================================================================
 
@@ -14,7 +15,7 @@
 
 module neuroquant_arty_s7_top #(
     parameter CLK_FREQ_HZ = 100_000_000,
-    parameter BAUD_RATE   = 921_600
+    parameter BAUD_RATE   = 115_200
 )(
     // Master Oscillator: 100 MHz onboard clock (Pin R2 on Arty S7)
     input  wire                   clk_100mhz,
@@ -33,11 +34,15 @@ module neuroquant_arty_s7_top #(
     input  wire                   usb_uart_rx,         // Pin V12: RX from Host PC COM9
     output wire                   usb_uart_tx,         // Pin R12: TX to Host PC COM9
 
-    // PMOD Header JA (Serial Interface to Arduino Nano)
+    // PMOD Header JA (Serial Interface Option 1 to Arduino Nano)
     input  wire                   ja_uart_rx,          // JA Pin 1 (Pin L17): RX from Arduino Nano TX
     output wire                   ja_uart_tx,          // JA Pin 2 (Pin L18): TX to Arduino Nano RX
     output wire                   ja_exec_strobe,      // JA Pin 3 (Pin M14): Outbound Trade Execution Strobe
     output wire                   ja_spike_strobe,     // JA Pin 4 (Pin N14): Neuromorphic Action Potential Spike
+
+    // Arduino / ChipKit Shield Female Header (Serial Interface Option 2 to Arduino Nano)
+    input  wire                   ck_io0_rx,           // Socket IO0 (Pin L13): RX from Arduino Nano TX
+    output wire                   ck_io1_tx,           // Socket IO1 (Pin N13): TX to Arduino Nano RX
 
     // Physical Diagnostic Green LEDs (LD0 - LD3)
     output wire                   led0_ready,          // LD0 (Pin E18): Accelerator System Initialized
@@ -52,13 +57,16 @@ module neuroquant_arty_s7_top #(
 );
 
     // -------------------------------------------------------------------------
-    // Dual UART RX Ingress Multiplexer:
+    // Triple UART RX Ingress Multiplexer:
     // UART idle state is logic HIGH (Mark = 1, Space = 0).
-    // Combining both inputs with an AND gate allows either USB-UART (PC COM9)
-    // or PMOD JA (Arduino Nano COM5) to stream packets to the hardware engine.
+    // Combining inputs with an AND gate allows:
+    //   [1] Direct USB-UART cable from Host PC (COM9)
+    //   [2] Arduino Nano jumper into Pmod JA (Pin 1)
+    //   [3] Arduino Nano jumper into Arduino Shield Header (IO0)
+    // to stream packets directly into the hardware engine!
     // -------------------------------------------------------------------------
     wire uart_rx_combined;
-    assign uart_rx_combined = usb_uart_rx & ja_uart_rx;
+    assign uart_rx_combined = usb_uart_rx & ja_uart_rx & ck_io0_rx;
 
     // -------------------------------------------------------------------------
     // Internal AXI4-Stream Interconnect: UART RX -> Core Engine
@@ -169,9 +177,10 @@ module neuroquant_arty_s7_top #(
         .tx_busy          ()
     );
 
-    // Transmit telemetry to both Host PC (COM9) and PMOD JA (Arduino Nano)
+    // Transmit telemetry to Host PC (COM9), PMOD JA, and Shield Header IO1
     assign usb_uart_tx = uart_tx_serial;
     assign ja_uart_tx  = uart_tx_serial;
+    assign ck_io1_tx   = uart_tx_serial;
 
     // PMOD JA diagnostic strobe outputs
     assign ja_exec_strobe  = core_trade_out_valid;
@@ -179,9 +188,6 @@ module neuroquant_arty_s7_top #(
 
     // -------------------------------------------------------------------------
     // 4. Human-Visible Pulse Stretchers (50ms @ 100MHz = 5,000,000 Cycles)
-    // -------------------------------------------------------------------------
-    // 10ns single-cycle pulses are physically imperceptible to human retinas.
-    // Digital pulse stretchers hold pulses high for 50ms for vivid LED feedback.
     // -------------------------------------------------------------------------
     localparam STRETCH_CYCLES = 23'd5_000_000;
 

@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (win64) Build 5239630 Fri Nov 08 22:35:27 MST 2024
-| Date         : Mon Oct 26 11:55:08 2026
+| Date         : Mon Oct 26 12:13:20 2026
 | Host         : Admin running 64-bit major release  (build 9200)
 | Command      : report_utilization -file ./build_arty_s7/post_synth_utilization.rpt
 | Design       : neuroquant_arty_s7_top
@@ -95,9 +95,9 @@ Warning! For any ECO changes, please run place_design if there are unplaced inst
 +-----------------------------+------+-------+------------+-----------+-------+
 |          Site Type          | Used | Fixed | Prohibited | Available | Util% |
 +-----------------------------+------+-------+------------+-----------+-------+
-| Bonded IOB                  |   17 |    17 |          0 |       150 | 11.33 |
+| Bonded IOB                  |   19 |    19 |          0 |       150 | 12.67 |
 |   IOB Master Pads           |    6 |       |            |           |       |
-|   IOB Slave Pads            |   10 |       |            |           |       |
+|   IOB Slave Pads            |   11 |       |            |           |       |
 | Bonded IPADs                |    0 |     0 |          0 |         2 |  0.00 |
 | PHY_CONTROL                 |    0 |     0 |          0 |         3 |  0.00 |
 | PHASER_REF                  |    0 |     0 |          0 |         3 |  0.00 |
@@ -153,18 +153,18 @@ Warning! For any ECO changes, please run place_design if there are unplaced inst
 | Ref Name | Used | Functional Category |
 +----------+------+---------------------+
 | FDCE     |  373 |        Flop & Latch |
-| LUT2     |  303 |                 LUT |
-| LUT3     |  185 |                 LUT |
-| LUT6     |  178 |                 LUT |
-| LUT4     |  142 |                 LUT |
+| LUT2     |  301 |                 LUT |
+| LUT3     |  187 |                 LUT |
+| LUT6     |  175 |                 LUT |
+| LUT4     |  141 |                 LUT |
 | CARRY4   |  129 |          CarryLogic |
-| LUT5     |   96 |                 LUT |
+| LUT5     |   98 |                 LUT |
 | LUT1     |   92 |                 LUT |
 | FDRE     |   77 |        Flop & Latch |
 | FDPE     |   18 |        Flop & Latch |
-| OBUF     |   11 |                  IO |
+| OBUF     |   12 |                  IO |
 | SRL16E   |    8 |  Distributed Memory |
-| IBUF     |    6 |                  IO |
+| IBUF     |    7 |                  IO |
 | MUXF7    |    2 |               MuxFx |
 | MUXF8    |    1 |               MuxFx |
 | BUFG     |    1 |               Clock |

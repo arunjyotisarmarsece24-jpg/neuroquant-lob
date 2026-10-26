@@ -8,4 +8,4 @@ Start Address      0x00000000
 End Address        0x00FFFFFF
 
 Addr1         Addr2         Date                    File(s)
-0x00000000    0x0007344F    Oct 26 11:58:53 2026    ./build_arty_s7/neuroquant_arty_s7.bit
+0x00000000    0x0006ADA7    Oct 26 12:17:29 2026    ./build_arty_s7/neuroquant_arty_s7.bit
