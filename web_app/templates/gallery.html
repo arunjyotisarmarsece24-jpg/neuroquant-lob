@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroQuant-LOB | Research & Hardware Visual Exhibition Gallery</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --card-bg: #121824;
+      --card-border: rgba(0, 242, 254, 0.18);
+      --accent-cyan: #00f2fe;
+      --accent-green: #10b981;
+      --accent-yellow: #ffd166;
+      --accent-purple: #a855f7;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .gallery-header {
+      background: #0f1523;
+      border-bottom: 1px solid rgba(0, 242, 254, 0.2);
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .gallery-title-box h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .gallery-sub {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-glow {
+      background: linear-gradient(135deg, rgba(0,242,254,0.2), rgba(16,185,129,0.2));
+      border: 1px solid var(--accent-cyan);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+      background: var(--accent-cyan);
+      color: #0a0d14;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 32px;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #94a3b8;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-pill.active, .filter-pill:hover {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 22px;
+    }
+    .gallery-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 242, 254, 0.2);
+      border-color: var(--accent-cyan);
+    }
+    .card-img-wrap {
+      width: 100%;
+      height: 240px;
+      background: #06080d;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .card-img-wrap img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+    .card-img-wrap:hover img {
+      transform: scale(1.04);
+    }
+    .card-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(10, 13, 20, 0.85);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+    }
+    .card-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 6px 0;
+    }
+    .card-highlight {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-green);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 8px;
+    }
+    .card-desc {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.45;
+      margin-bottom: 14px;
+      flex-grow: 1;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 12px;
+    }
+    .card-meta {
+      font-size: 0.72rem;
+      color: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-sm-action {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-sm-action:hover {
+      background: var(--accent-cyan);
+      color: #0a0d14;
+      border-color: var(--accent-cyan);
+    }
+
+    /* Lightbox Modal */
+    .lightbox-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(6, 8, 13, 0.94);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .lightbox-modal.active {
+      display: flex;
+    }
+    .lightbox-content-box {
+      max-width: 92vw;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 74vh;
+      object-fit: contain;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
+    }
+    .lightbox-info {
+      width: 100%;
+      margin-top: 12px;
+      background: rgba(18, 24, 36, 0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lightbox-close-btn {
+      position: absolute;
+      top: -45px;
+      right: 0;
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+    .lightbox-nav-btn {
+      position: absolute;
+      top: 45%;
+      background: rgba(18, 24, 36, 0.7);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      font-size: 1.5rem;
+      padding: 10px 16px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .lightbox-nav-btn:hover {
+      background: var(--accent-cyan);
+      color: #0a0d14;
+    }
+    .lightbox-prev { left: 20px; }
+    .lightbox-next { right: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Exhibition Header -->
+  <header class="gallery-header">
+    <div class="gallery-title-box">
+      <h1>🖼️ NeuroQuant-LOB Visual Exhibition</h1>
+      <div class="gallery-sub">
+        18 Publication Figures, Cycle-Accurate Verilog Waveforms &amp; IEEE Whitepaper | Arunjyoti Sarma (IIT BHU)
+      </div>
+    </div>
+    <div class="nav-actions">
+      <a href="/" class="btn-glow">⚡ Mission Control Dashboard</a>
+      <a href="/paper/download" class="btn-sm-action" style="padding:8px 14px;">📥 Full Whitepaper PDF</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Category Filter Bar -->
+    <div class="filter-pills">
+      <button class="filter-pill active" onclick="filterGallery('all')">All Assets (18 Figures)</button>
+      <button class="filter-pill" onclick="filterGallery('bench')">🔬 Research Benchmarks</button>
+      <button class="filter-pill" onclick="filterGallery('hw')">⚡ FPGA Verilog Waveforms</button>
+      <button class="filter-pill" onclick="filterGallery('paper')">📄 Research Whitepaper</button>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="gallery-grid" id="gallery-container">
+      <!-- Injected by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Lightbox Viewer Modal -->
+  <div class="lightbox-modal" id="lightbox-modal">
+    <button class="lightbox-nav-btn lightbox-prev" onclick="prevLightbox()">◀</button>
+    <button class="lightbox-nav-btn lightbox-next" onclick="nextLightbox()">▶</button>
+    <div class="lightbox-content-box">
+      <button class="lightbox-close-btn" onclick="closeLightbox()">✕</button>
+      <img id="lightbox-img" class="lightbox-img" src="" alt="Figure View">
+      <div class="lightbox-info">
+        <div>
+          <div id="lightbox-title" style="font-weight:700; color:var(--accent-cyan); font-size:1.05rem;">Title</div>
+          <div id="lightbox-highlight" style="font-size:0.8rem; color:var(--accent-green); font-family:monospace;">Highlight</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <a id="lightbox-dl-btn" href="" download="" class="btn-glow" style="padding:6px 14px; font-size:0.8rem;">📥 Download Raw PNG</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const figures = [
+      {
+        id: "fix_latency",
+        cat: "bench",
+        badge: "DAY 5 FIX 4.4",
+        title: "FIX 4.4 Engine Microsecond Latency Profiling",
+        src: "/api/fix/chart",
+        dl: "/api/fix/chart",
+        highlight: "Sub-10 µs SLA Certified | P50: 1.23 µs | P99: 2.45 µs | 784,326 ops/sec",
+        desc: "4-panel publication figure showing round-trip FIX loopback PDF, cumulative distribution CDF, microsecond component decomposition, and throughput comparison against institutional 10.0 µs SLA.",
+        meta: "3731x3060 • 635 KB • AVX2 SIMD"
+      },
+      {
+        id: "walk_forward",
+        cat: "bench",
+        badge: "DAY 4 WALK-FORWARD",
+        title: "Multi-Horizon Walk-Forward & Deflated Sharpe Ratio",
+        src: "/api/walkforward/chart",
+        dl: "/api/walkforward/chart",
+        highlight: "DSR = 1.0000 | Out-of-Sample Sharpe: +6,065.73 | 100% Defense Against Sweeps",
+        desc: "Purged & Embargoed 5-Fold Cross-Validation across H in {5, 10, 20, 50} ticks with Bailey-de Prado multiple testing adjustments.",
+        meta: "4036x3060 • 687 KB • Walk-Forward"
+      },
+      {
+        id: "almgren_impact",
+        cat: "bench",
+        badge: "DAY 3 ALMGREN-CHRISS",
+        title: "Almgren-Chriss Optimal Execution & Non-Linear Impact",
+        src: "/api/almgren/chart",
+        dl: "/api/almgren/chart",
+        highlight: "alpha = 0.5243 (Square-Root Law) | kappa = 0.1193 s^-1 | $2,840 Shortfall Saved",
+        desc: "Non-linear temporary and permanent market impact calibrations, optimal trajectory half-life, and execution comparison against standard TWAP.",
+        meta: "4800x3600 • 858 KB • Non-Linear"
+      },
+      {
+        id: "ofi_hawkes",
+        cat: "bench",
+        badge: "DAY 2 OFI & HAWKES",
+        title: "Multi-Level OFI & Cross-Level Hawkes Point Process",
+        src: "/api/ofi/chart",
+        dl: "/api/ofi/chart",
+        highlight: "342 ns/tick C++ SIMD Rate | rho(Gamma) = 0.1096 < 1.0 (Strictly Stationary)",
+        desc: "Level 1-5 multi-level order flow imbalance vectors, Hawkes self- and cross-excitation matrices, and directional predictability.",
+        meta: "4500x3300 • 601 KB • Hawkes Core"
+      },
+      {
+        id: "pareto_frontier",
+        cat: "bench",
+        badge: "DAY 1 PARETO",
+        title: "Neuromorphic Hyperparameter Pareto Frontier",
+        src: "/api/sweeps/pareto_image",
+        dl: "/api/sweeps/pareto_image",
+        highlight: "Top 1% Pareto Frontier | Tau_m = 15.0 ms | IR = +4.82 | Sub-3.5 ns Gating",
+        desc: "2-D Pareto-optimal frontier evaluating Information Ratio versus power/latency trade-offs across 5,000 hyperparameter sweeps.",
+        meta: "4800x3600 • 886 KB • 5000 Trials"
+      },
+      {
+        id: "lif_wave",
+        cat: "hw",
+        badge: "FPGA RTL LIF",
+        title: "LIF Neuromorphic Digital Core Waveform",
+        src: "/api/hardware/waveform/lif",
+        dl: "/api/hardware/waveform/lif",
+        highlight: "1 Clock Cycle (3.1 ns @ 322MHz) | Q16.16 Fixed-Point | 2-Cycle Clamp",
+        desc: "Membrane potential Vm relaxation, threshold crossing (-55 mV), action potential spike firing, and refractory clamp timing.",
+        meta: "2200x1400 • 210 KB • Verilog RTL"
+      },
+      {
+        id: "itch_wave",
+        cat: "hw",
+        badge: "FPGA RTL ITCH",
+        title: "AXI4-Stream NASDAQ ITCH 5.0 Packet Decoder Timing",
+        src: "/api/hardware/waveform/itch",
+        dl: "/api/hardware/waveform/itch",
+        highlight: "322.26 MHz Wire Speed | Type 'A' Decoded in 5 Beats | Zero Cloud Cost",
+        desc: "Direct AXI4-Stream bus handshake (tvalid, tready, tlast) decoding 42-byte binary order packets at 10GbE network line rate.",
+        meta: "2200x1500 • 207 KB • 10GbE Network"
+      },
+      {
+        id: "risk_wave",
+        cat: "hw",
+        badge: "FPGA RTL RISK",
+        title: "Pre-Trade Microsecond Hardware Risk Gate RTL",
+        src: "/api/hardware/waveform/risk",
+        dl: "/api/hardware/waveform/risk",
+        highlight: "8 Institutional Circuit Breaker Scenarios Evaluated in < 3.5 ns",
+        desc: "Cycle-by-cycle hardware verification: Clean Order, Killswitch, Price Collar, Max Size, Net Inventory, De-risking Bypass, Drawdown Stop, and Lyapunov Invariant.",
+        meta: "2200x1300 • 177 KB • Single Cycle"
+      },
+      {
+        id: "top_wave",
+        cat: "hw",
+        badge: "FPGA RTL TOP",
+        title: "Unified FPGA Top-Level Accelerator End-to-End Timing",
+        src: "/api/hardware/waveform/top",
+        dl: "/api/hardware/waveform/top",
+        highlight: "< 25.2 ns Tick-to-Trade | 100 MHz / 322 MHz Dual Domain",
+        desc: "End-to-end integration: NASDAQ AXI stream -> ITCH decoder -> LIF synaptic influx -> Pre-Trade Risk -> Trade dispatch.",
+        meta: "2200x1500 • 184 KB • Integrated"
+      },
+      {
+        id: "fix_wave",
+        cat: "hw",
+        badge: "FPGA RTL FIX",
+        title: "FIX 4.4 Engine Hardware Pre-Trade Bridge",
+        src: "/api/hardware/waveform/fix",
+        dl: "/api/hardware/waveform/fix",
+        highlight: "47 Clock Cycles (470 ns @ 100MHz / 145 ns @ 322MHz) | 5 / 5 Checks Passing",
+        desc: "Cycle-accurate Verilog simulation waveform demonstrating 64-bit ingress streaming, tag-value parsing, single-cycle risk clearance, and outbound ExecutionReport dispatch.",
+        meta: "2200x1700 • 178 KB • Pre-Trade"
+      },
+      {
+        id: "paper_1",
+        cat: "paper",
+        badge: "IEEE PAPER P1",
+        title: "Whitepaper Page 1: Abstract & Architecture",
+        src: "/paper/page/1",
+        dl: "/paper/page/1",
+        highlight: "NeuroQuant-LOB Flagship Abstract | System Block Diagram",
+        desc: "Page 1 of the institutional quantitative whitepaper formatted according to IEEE/ACM high-performance computing standards.",
+        meta: "1240x1754 • 589 KB • IEEE Formatted"
+      },
+      {
+        id: "paper_2",
+        cat: "paper",
+        badge: "IEEE PAPER P2",
+        title: "Whitepaper Page 2: Mathematical Theorems",
+        src: "/paper/page/2",
+        dl: "/paper/page/2",
+        highlight: "Theorem 1 BIBO Stability | Theorem 2 Variational Convexity",
+        desc: "Mathematical derivations of bounded-input bounded-output membrane stability and optimal execution convexity under jump shocks.",
+        meta: "1240x1754 • 566 KB • Proofs"
+      },
+      {
+        id: "paper_3",
+        cat: "paper",
+        badge: "IEEE PAPER P3",
+        title: "Whitepaper Page 3: OFI & Hawkes Formulation",
+        src: "/paper/page/3",
+        dl: "/paper/page/3",
+        highlight: "Cross-Level Excitation Matrix | Spectral Radius Stability Bound",
+        desc: "Formulation of high-frequency point processes and order flow imbalance vectors with empirical market calibration.",
+        meta: "1240x1754 • 517 KB • Mathematical"
+      },
+      {
+        id: "paper_4",
+        cat: "paper",
+        badge: "IEEE PAPER P4",
+        title: "Whitepaper Page 4: Almgren-Chriss & Verilog RTL",
+        src: "/paper/page/4",
+        dl: "/paper/page/4",
+        highlight: "Non-Linear Impact Law | Hardware RTL State Machine",
+        desc: "Optimal trading trajectory algorithms and cycle-accurate hardware digital logic synthesis maps for Xilinx Spartan-7.",
+        meta: "1240x1754 • 692 KB • RTL Schematics"
+      },
+      {
+        id: "paper_5",
+        cat: "paper",
+        badge: "IEEE PAPER P5",
+        title: "Whitepaper Page 5: Empirical Backtests & DSR Audit",
+        src: "/paper/page/5",
+        dl: "/paper/page/5",
+        highlight: "Multi-Horizon Results | 5-Fold Cross Validation | DSR = 1.0000",
+        desc: "Comprehensive backtest performance tables and charts across multiple liquidity horizons and toxic sweep regimes.",
+        meta: "1240x1754 • 571 KB • Empirical"
+      },
+      {
+        id: "paper_6",
+        cat: "paper",
+        badge: "IEEE PAPER P6",
+        title: "Whitepaper Page 6: FPGA Verification & Conclusion",
+        src: "/paper/page/6",
+        dl: "/paper/page/6",
+        highlight: "XC7S25 Resource Utilization (1.64% LUTs) | 47 / 47 RTL Checks",
+        desc: "Physical hardware synthesis results, latency tables, conclusion, and forward-looking research roadmap.",
+        meta: "1240x1754 • 391 KB • Hardware Synthesis"
+      }
+    ];
+
+    let currentFilter = 'all';
+    let currentLightboxIdx = 0;
+    let visibleFigures = [...figures];
+
+    function renderGallery() {
+      const container = document.getElementById('gallery-container');
+      container.innerHTML = '';
+
+      visibleFigures = currentFilter === 'all' 
+        ? figures 
+        : figures.filter(f => f.cat === currentFilter);
+
+      visibleFigures.forEach((fig, idx) => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card';
+        card.innerHTML = `
+          <div class="card-img-wrap" onclick="openLightbox(${idx})">
+            <span class="card-badge">${fig.badge}</span>
+            <img src="${fig.src}" alt="${fig.title}" loading="lazy">
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">${fig.title}</h3>
+            <div class="card-highlight">${fig.highlight}</div>
+            <div class="card-desc">${fig.desc}</div>
+            <div class="card-footer">
+              <span class="card-meta">${fig.meta}</span>
+              <div class="card-actions">
+                <button class="btn-sm-action" onclick="openLightbox(${idx})">🔍 View</button>
+                <a href="${fig.dl}" download class="btn-sm-action">📥 Download</a>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterGallery(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      renderGallery();
+    }
+
+    function openLightbox(idx) {
+      currentLightboxIdx = idx;
+      updateLightbox();
+      document.getElementById('lightbox-modal').classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox-modal').classList.remove('active');
+    }
+
+    function updateLightbox() {
+      const fig = visibleFigures[currentLightboxIdx];
+      if (!fig) return;
+      document.getElementById('lightbox-img').src = fig.src;
+      document.getElementById('lightbox-title').innerText = `[${fig.badge}] ${fig.title}`;
+      document.getElementById('lightbox-highlight').innerText = fig.highlight;
+      const dlBtn = document.getElementById('lightbox-dl-btn');
+      dlBtn.href = fig.dl;
+      dlBtn.download = `${fig.id}.png`;
+    }
+
+    function nextLightbox() {
+      currentLightboxIdx = (currentLightboxIdx + 1) % visibleFigures.length;
+      updateLightbox();
+    }
+
+    function prevLightbox() {
+      currentLightboxIdx = (currentLightboxIdx - 1 + visibleFigures.length) % visibleFigures.length;
+      updateLightbox();
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('lightbox-modal');
+      if (modal.classList.contains('active')) {
+        if (e.key === 'Escape') closeLightbox();
+        else if (e.key === 'ArrowRight') nextLightbox();
+        else if (e.key === 'ArrowLeft') prevLightbox();
+      }
+    });
+
+    // Initial render
+    renderGallery();
+  </script>
+</body>
+</html>

@@ -39,6 +39,10 @@ playback_delay_sec = 0.04  # 25 Hz default
 def index():
     return render_template("index.html")
 
+@app.route("/gallery")
+def gallery():
+    return render_template("gallery.html")
+
 @app.route("/manifest.json")
 def manifest():
     return send_from_directory(os.path.join(PROJECT_ROOT, "web_app", "static"), "manifest.json")
