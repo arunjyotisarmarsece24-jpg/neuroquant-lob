@@ -1,9 +1,10 @@
 ## ==============================================================================
-## NEUROQUANT-LOB: DIGILENT ARTY S7-25 (SPARTAN-7) MASTER CONSTRAINTS (.XDC)
+## NEUROQUANT-LOB: DIGILENT ARTY S7-25 (SPARTAN-7 CSGA324) MASTER CONSTRAINTS (.XDC)
 ## ==============================================================================
+## Principal Architect: Arunjyoti Sarma (Research Scholar, IIT (BHU), Varanasi)
 ## Board Target:   Digilent Arty S7-25 (XC7S25-CSGA324-1)
-## Dual Interface: FTDI FT2232H USB-UART (COM9) + Arduino Nano PMOD JA (COM5)
-## Standard:       IEEE 1364-2001 / Vivado Design Suite 2024.2+
+## Reference:      Official Digilent Arty-S7-25-Master.xdc
+## Interfaces:     FTDI FT2232H USB-UART (COM9) + Arduino Nano Shield (COM5) + PMOD JA
 ## ==============================================================================
 
 ## -----------------------------------------------------------------------------
@@ -13,81 +14,109 @@ set_property -dict { PACKAGE_PIN R2    IOSTANDARD SSTL135 } [get_ports { clk_100
 create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports { clk_100mhz }];
 
 ## -----------------------------------------------------------------------------
-## 2. Push Buttons & Slide Switches
+## 2. Push Buttons & Reset
 ## -----------------------------------------------------------------------------
-# Active-Low Reset (Button 0 on Arty S7)
-set_property -dict { PACKAGE_PIN C18   IOSTANDARD LVCMOS33 } [get_ports { btn_rst_n }];
+# Red Push-Button labeled "RESET" on board (Active-Low logic reset, needs internal PULLUP)
+set_property -dict { PACKAGE_PIN C18   IOSTANDARD LVCMOS33 PULLUP true } [get_ports { btn_rst_n }];
 
-# Button 1: Manual Neuromorphic Tick Injection
-set_property -dict { PACKAGE_PIN K16   IOSTANDARD LVCMOS33 } [get_ports { btn_manual_tick }];
+# Push-Button 0 (BTN0): Manual Normal Tick Injection
+set_property -dict { PACKAGE_PIN G15   IOSTANDARD LVCMOS33 } [get_ports { btn_manual_tick }];
 
-# Switch 0: Emergency Hardware System Killswitch Circuit Breaker
+# Push-Button 1 (BTN1): Manual Fat-Finger Violation Injection (Triggers Red LED)
+set_property -dict { PACKAGE_PIN K16   IOSTANDARD LVCMOS33 } [get_ports { btn1_stress }];
+
+# Push-Button 2 (BTN2): Manual LIF Action Potential Spike
+set_property -dict { PACKAGE_PIN J16   IOSTANDARD LVCMOS33 } [get_ports { btn2_spike }];
+
+# Push-Button 3 (BTN3): Reset Hardware Statistics Counter
+set_property -dict { PACKAGE_PIN H13   IOSTANDARD LVCMOS33 } [get_ports { btn3_clear }];
+
+## -----------------------------------------------------------------------------
+## 3. Slide Switches (SW0 - SW3)
+## -----------------------------------------------------------------------------
+# Switch 0 (SW0): Emergency Hardware System Killswitch Circuit Breaker (Up = Tripped)
 set_property -dict { PACKAGE_PIN H14   IOSTANDARD LVCMOS33 } [get_ports { sw_killswitch }];
 
-# Switch 1: Bypass / Synthetic Tick Mode
+# Switch 1 (SW1): Autonomous Hardware Self-Test Mode (Up = 5Hz Autonomous Tick Generator)
 set_property -dict { PACKAGE_PIN H18   IOSTANDARD LVCMOS33 } [get_ports { sw_bypass_parser }];
 
+# Switch 2 (SW2): Risk Collar Stress Mode (Up = Tight $50 collar)
+set_property -dict { PACKAGE_PIN G18   IOSTANDARD LVCMOS33 } [get_ports { sw2_tight_collar }];
+
+# Switch 3 (SW3): Reserved Bank 34 Switch (SSTL135)
+set_property -dict { PACKAGE_PIN M5    IOSTANDARD SSTL135  } [get_ports { sw3_reserved }];
+
 ## -----------------------------------------------------------------------------
-## 3. Physical Diagnostic Green LEDs (LD0 - LD3)
+## 4. User Discrete Single-Color (Yellow) LEDs (Silkscreen LD2, LD3, LD4, LD5)
 ## -----------------------------------------------------------------------------
-# LD0: Accelerator Ready
+# LD2 (Schematic Sch=led[2]): Heartbeat / Accelerator Engine Ready (Steady Yellow)
 set_property -dict { PACKAGE_PIN E18   IOSTANDARD LVCMOS33 } [get_ports { led0_ready }];
 
-# LD1: ESP8266 / Arduino Frame Synchronized (0x55AA Locked)
+# LD3 (Schematic Sch=led[3]): Serial Ingress Stream Active & 0x55AA Lock (Flashing Yellow)
 set_property -dict { PACKAGE_PIN F13   IOSTANDARD LVCMOS33 } [get_ports { led1_rx_sync }];
 
-# LD2: Neuromorphic LIF Action Potential Spike Fired
+# LD4 (Schematic Sch=led[4]): Neuromorphic LIF Spike Fired (Flashing Yellow)
 set_property -dict { PACKAGE_PIN E13   IOSTANDARD LVCMOS33 } [get_ports { led2_spike }];
 
-# LD3: Pre-Trade Risk Gate Approved Order
+# LD5 (Schematic Sch=led[5]): Pre-Trade Risk Gate Approved Order (Flashing Yellow)
 set_property -dict { PACKAGE_PIN H15   IOSTANDARD LVCMOS33 } [get_ports { led3_approved }];
 
 ## -----------------------------------------------------------------------------
-## 4. RGB LED 0 (LD4 on Arty S7-25): J15=Red, G17=Green, F15=Blue
+## 5. RGB LED 0 (Silkscreen LD0): J15=Red, G17=Green, F15=Blue
 ## -----------------------------------------------------------------------------
-set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { rgb0_r }]; # Red: Breaker Tripped / Violation
-set_property -dict { PACKAGE_PIN G17   IOSTANDARD LVCMOS33 } [get_ports { rgb0_g }]; # Green: System Normal / Ready
-set_property -dict { PACKAGE_PIN F15   IOSTANDARD LVCMOS33 } [get_ports { rgb0_b }]; # Blue: Ingress Active
+# LD0 Red: Circuit Breaker Tripped / Fat-Finger Breach
+set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { rgb0_r }];
+# LD0 Green: Engine System Operational & Ready (Quiescent Calm Green)
+set_property -dict { PACKAGE_PIN G17   IOSTANDARD LVCMOS33 } [get_ports { rgb0_g }];
+# LD0 Blue: Serial Ingress Byte Ingestion (Pulses Blue on incoming byte)
+set_property -dict { PACKAGE_PIN F15   IOSTANDARD LVCMOS33 } [get_ports { rgb0_b }];
 
 ## -----------------------------------------------------------------------------
-## 5. On-Board USB-UART Bridge (FTDI FT2232H Channel B -> Host PC COM9)
+## 6. RGB LED 1 (Silkscreen LD1): E15=Red, F18=Green, E14=Blue
 ## -----------------------------------------------------------------------------
-# V12: PC TX -> FPGA RX
+# LD1 Red: Price Impact / Volatility Threshold Alert
+set_property -dict { PACKAGE_PIN E15   IOSTANDARD LVCMOS33 } [get_ports { rgb1_r }];
+# LD1 Green: Execution Approved Strobe
+set_property -dict { PACKAGE_PIN F18   IOSTANDARD LVCMOS33 } [get_ports { rgb1_g }];
+# LD1 Blue: Neuromorphic LIF Spike Strobe
+set_property -dict { PACKAGE_PIN E14   IOSTANDARD LVCMOS33 } [get_ports { rgb1_b }];
+
+## -----------------------------------------------------------------------------
+## 7. On-Board USB-UART Bridge (FTDI FT2232H Channel B -> Host PC COM9)
+## -----------------------------------------------------------------------------
+# V12: PC TX -> FPGA RX (Pullup ensures idle High)
 set_property -dict { PACKAGE_PIN V12   IOSTANDARD LVCMOS33 PULLUP true } [get_ports { usb_uart_rx }];
 # R12: FPGA TX -> PC RX
 set_property -dict { PACKAGE_PIN R12   IOSTANDARD LVCMOS33 } [get_ports { usb_uart_tx }];
 
 ## -----------------------------------------------------------------------------
-## 6. PMOD Header JA: High-Speed Serial Interface Option 1 (Arduino Nano)
+## 8. PMOD Header JA: High-Speed Serial Interface Option 1 (Arduino Nano)
 ## -----------------------------------------------------------------------------
-# JA Pin 1 (Pin L17): UART RX from Arduino Nano TX
+# JA Pin 1 (Pin L17): UART RX from Arduino Nano TX1
 set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 PULLUP true } [get_ports { ja_uart_rx }];
-
-# JA Pin 2 (Pin L18): UART TX to Arduino Nano RX
+# JA Pin 2 (Pin L18): UART TX to Arduino Nano RX0
 set_property -dict { PACKAGE_PIN L18   IOSTANDARD LVCMOS33 } [get_ports { ja_uart_tx }];
-
 # JA Pin 3 (Pin M14): Outbound Trade Execution Strobe
 set_property -dict { PACKAGE_PIN M14   IOSTANDARD LVCMOS33 } [get_ports { ja_exec_strobe }];
-
 # JA Pin 4 (Pin N14): Neuromorphic Spike Pulse Output
 set_property -dict { PACKAGE_PIN N14   IOSTANDARD LVCMOS33 } [get_ports { ja_spike_strobe }];
 
 ## -----------------------------------------------------------------------------
-## 7. Arduino / ChipKit Shield Female Header: Serial Interface Option 2 (Arduino Nano)
+## 9. Arduino / ChipKit Shield Female Header: Serial Interface Option 2 (Arduino Nano)
 ## -----------------------------------------------------------------------------
-# Header IO0 (Pin L13): RX from Arduino Nano TX (Pin D1)
+# Header IO0 (Pin L13): RX from Arduino Nano TX1 (Pin D1)
 set_property -dict { PACKAGE_PIN L13   IOSTANDARD LVCMOS33 PULLUP true } [get_ports { ck_io0_rx }];
-
-# Header IO1 (Pin N13): TX to Arduino Nano RX (Pin D0)
+# Header IO1 (Pin N13): TX to Arduino Nano RX0 (Pin D0)
 set_property -dict { PACKAGE_PIN N13   IOSTANDARD LVCMOS33 } [get_ports { ck_io1_tx }];
 
 ## -----------------------------------------------------------------------------
-## 8. Timing Exceptions & Configuration Constraints
+## 10. Timing Exceptions & Configuration Constraints
 ## -----------------------------------------------------------------------------
-set_false_path -from [get_ports { sw_killswitch }]
-set_false_path -from [get_ports { sw_bypass_parser }]
-set_false_path -from [get_ports { btn_manual_tick }]
-set_false_path -from [get_ports { btn_rst_n }]
+# Internal VREF for Bank 34 (SSTL135 switch / memory standard)
+set_property INTERNAL_VREF 0.675 [get_iobanks 34]
+
+set_false_path -from [get_ports { sw_killswitch sw_bypass_parser sw2_tight_collar sw3_reserved }]
+set_false_path -from [get_ports { btn_rst_n btn_manual_tick btn1_stress btn2_spike btn3_clear }]
 
 # Quad-SPI Non-Volatile Boot Flash Constraints (Spansion S25FL128S on Arty S7)
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]

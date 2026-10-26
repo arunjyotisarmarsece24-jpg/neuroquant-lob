@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 -------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2024.2 (win64) Build 5239630 Fri Nov 08 22:35:27 MST 2024
-| Date             : Mon Oct 26 14:04:06 2026
+| Date             : Mon Oct 26 14:44:30 2026
 | Host             : Admin running 64-bit major release  (build 9200)
 | Command          : report_power -file ./build_arty_s7/power_analysis.rpt
 | Design           : neuroquant_arty_s7_top
@@ -30,10 +30,10 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 0.077        |
+| Total On-Chip Power (W)  | 0.084        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 0.016        |
+| Dynamic (W)              | 0.023        |
 | Device Static (W)        | 0.061        |
 | Effective TJA (C/W)      | 5.3          |
 | Max Ambient (C)          | 84.6         |
@@ -52,17 +52,17 @@ Table of Contents
 +-------------------------+-----------+----------+-----------+-----------------+
 | On-Chip                 | Power (W) | Used     | Available | Utilization (%) |
 +-------------------------+-----------+----------+-----------+-----------------+
-| Clocks                  |     0.003 |        3 |       --- |             --- |
-| Slice Logic             |     0.005 |     1652 |       --- |             --- |
-|   LUT as Logic          |     0.004 |      814 |     14600 |            5.58 |
-|   CARRY4                |    <0.001 |      131 |      3650 |            3.59 |
-|   Register              |    <0.001 |      480 |     29200 |            1.64 |
-|   Others                |     0.000 |       10 |       --- |             --- |
+| Clocks                  |     0.004 |        3 |       --- |             --- |
+| Slice Logic             |     0.005 |     1716 |       --- |             --- |
+|   LUT as Logic          |     0.005 |      834 |     14600 |            5.71 |
+|   CARRY4                |    <0.001 |      137 |      3650 |            3.75 |
+|   Register              |    <0.001 |      506 |     29200 |            1.73 |
+|   Others                |     0.000 |       12 |       --- |             --- |
 |   LUT as Shift Register |     0.000 |        8 |      5000 |            0.16 |
-| Signals                 |     0.005 |     1254 |       --- |             --- |
-| I/O                     |     0.003 |       19 |       150 |           12.67 |
+| Signals                 |     0.006 |     1315 |       --- |             --- |
+| I/O                     |     0.008 |       25 |       150 |           16.67 |
 | Static Power            |     0.061 |          |           |                 |
-| Total                   |     0.077 |          |           |                 |
+| Total                   |     0.084 |          |           |                 |
 +-------------------------+-----------+----------+-----------+-----------------+
 
 
@@ -72,9 +72,9 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) | Powerup (A) | Budget (A)  | Margin (A) |
 +-----------+-------------+-----------+-------------+------------+-------------+-------------+------------+
-| Vccint    |       1.000 |     0.018 |       0.013 |      0.005 |       NA    | Unspecified | NA         |
+| Vccint    |       1.000 |     0.020 |       0.015 |      0.005 |       NA    | Unspecified | NA         |
 | Vccaux    |       1.800 |     0.010 |       0.000 |      0.009 |       NA    | Unspecified | NA         |
-| Vcco33    |       3.300 |     0.002 |       0.001 |      0.001 |       NA    | Unspecified | NA         |
+| Vcco33    |       3.300 |     0.003 |       0.002 |      0.001 |       NA    | Unspecified | NA         |
 | Vcco25    |       2.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco18    |       1.800 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco15    |       1.500 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
@@ -139,11 +139,12 @@ Table of Contents
 +------------------------+-----------+
 | Name                   | Power (W) |
 +------------------------+-----------+
-| neuroquant_arty_s7_top |     0.016 |
-|   u_neuroquant_core    |     0.009 |
+| neuroquant_arty_s7_top |     0.023 |
+|   u_neuroquant_core    |     0.010 |
 |     u_lif_neuron       |     0.008 |
 |     u_risk_gate        |     0.001 |
 |   u_uart_rx            |     0.002 |
+|   u_uart_tx            |     0.001 |
 +------------------------+-----------+
 
 

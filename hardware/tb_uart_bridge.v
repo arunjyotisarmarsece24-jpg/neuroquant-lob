@@ -51,7 +51,12 @@ module tb_uart_bridge;
         .btn_rst_n        (rst_n),
         .sw_killswitch    (sw_killswitch),
         .sw_bypass_parser (sw_bypass),
+        .sw2_tight_collar (1'b0),
+        .sw3_reserved     (1'b0),
         .btn_manual_tick  (btn_manual),
+        .btn1_stress      (1'b0),
+        .btn2_spike       (1'b0),
+        .btn3_clear       (1'b0),
         .usb_uart_rx      (1'b1),
         .usb_uart_tx      (),
         .ck_io0_rx        (1'b1),
@@ -66,7 +71,10 @@ module tb_uart_bridge;
         .led3_approved    (led3_approved),
         .rgb0_r           (rgb0_r),
         .rgb0_g           (rgb0_g),
-        .rgb0_b           (rgb0_b)
+        .rgb0_b           (rgb0_b),
+        .rgb1_r           (),
+        .rgb1_g           (),
+        .rgb1_b           ()
     );
 
     // 100 MHz Clock Generator
