@@ -208,7 +208,7 @@ module neuroquant_arty_s7_top #(
         .rst_n            (btn_rst_n),
         .send_trigger     (tx_trigger),
         .order_approved   (core_order_approved & !btn1_stress),
-        .violation_code   (btn1_stress ? 8'h01 : {4'b0000, core_violation_code}),
+        .violation_code   (btn1_stress ? 7'h01 : {4'b0000, core_violation_code}),
         .spike_fired      (core_spike),
         .membrane_voltage (core_membrane_voltage),
         .latency_cycles   (latency_counter),
@@ -226,79 +226,159 @@ module neuroquant_arty_s7_top #(
     assign ja_spike_strobe = core_spike;
 
     // -------------------------------------------------------------------------
-    // 4. Human-Visible Pulse Stretchers (80ms @ 100MHz = 8,000,000 Cycles)
+    // 4. Advanced Diagnostic LED Controller with Power-On Self-Test (POST)
     // -------------------------------------------------------------------------
-    localparam STRETCH_CYCLES = 23'd8_000_000; // 80ms at 100MHz for vibrant visibility
+    // Pulse Stretchers (Scaled for crisp, non-saturating human visibility):
+    // 100 MHz clock -> 1 ms = 100,000 cycles
+    localparam SYNC_PULSE_CYCLES  = 23'd3_000_000;  // 30ms sharp pulse on packet ingress
+    localparam SPIKE_PULSE_CYCLES = 23'd7_000_000;  // 70ms pulse on LIF neuromorphic spike
+    localparam APPR_PULSE_CYCLES  = 23'd4_000_000;  // 40ms pulse on order approval
+    localparam VIOL_PULSE_CYCLES  = 25'd20_000_000; // 200ms pulse on risk breach
 
     reg [22:0] stretch_sync;
     reg [22:0] stretch_spike;
     reg [22:0] stretch_approved;
-    reg [22:0] stretch_violation;
+    reg [24:0] stretch_violation;
+
+    // Heartbeat Generator (1.0 Hz double-blink: heartbeat alive indication)
+    // 100,000,000 cycles = 1 second
+    reg [26:0] heartbeat_cnt;
+    wire heartbeat_pulse;
+    // 0 to 70ms: ON, 70 to 180ms: OFF, 180 to 250ms: ON, 250 to 1000ms: OFF
+    assign heartbeat_pulse = (heartbeat_cnt < 27'd7_000_000) || 
+                             (heartbeat_cnt >= 27'd18_000_000 && heartbeat_cnt < 27'd25_000_000);
+
+    // 4 Hz Flasher for Critical Risk Breach Alert (Emergency Circuit Breaker)
+    // 25,000,000 cycles = 250ms period (125ms ON, 125ms OFF)
+    reg [24:0] flash_4hz_cnt;
+    wire flash_4hz;
+    assign flash_4hz = (flash_4hz_cnt < 25'd12_500_000);
+
+    // Power-On Self-Test (POST) / Knight Rider Demo Sweep:
+    // Runs on startup or whenever BTN3 (Pin H13) is pressed!
+    // 1.5 seconds total: 10 phases of 150ms (15,000,000 cycles each)
+    // Tests all single LEDs and all RGB LED channels sequentially!
+    reg [27:0] post_cnt;
+    reg        post_active;
 
     always @(posedge clk_100mhz or negedge btn_rst_n) begin
         if (!btn_rst_n) begin
+            post_cnt     <= 28'd0;
+            post_active  <= 1'b1;
+        end else if (btn3_clear) begin
+            post_cnt     <= 28'd0;
+            post_active  <= 1'b1;
+        end else if (post_active) begin
+            if (post_cnt < 28'd150_000_000) begin
+                post_cnt <= post_cnt + 1'b1;
+            end else begin
+                post_active <= 1'b0;
+            end
+        end
+    end
+
+    // POST LED Step Calculation
+    wire [3:0] post_step;
+    assign post_step = (post_cnt < 28'd15_000_000)  ? 4'd0 :
+                       (post_cnt < 28'd30_000_000)  ? 4'd1 :
+                       (post_cnt < 28'd45_000_000)  ? 4'd2 :
+                       (post_cnt < 28'd60_000_000)  ? 4'd3 :
+                       (post_cnt < 28'd75_000_000)  ? 4'd4 :
+                       (post_cnt < 28'd90_000_000)  ? 4'd5 :
+                       (post_cnt < 28'd105_000_000) ? 4'd6 :
+                       (post_cnt < 28'd120_000_000) ? 4'd7 :
+                       (post_cnt < 28'd135_000_000) ? 4'd8 : 4'd9;
+
+    wire post_led0   = post_active && (post_step == 4'd0); // LD2
+    wire post_led1   = post_active && (post_step == 4'd1); // LD3
+    wire post_led2   = post_active && (post_step == 4'd2); // LD4
+    wire post_led3   = post_active && (post_step == 4'd3); // LD5
+    wire post_rgb0_r = post_active && (post_step == 4'd4);
+    wire post_rgb0_g = post_active && (post_step == 4'd5);
+    wire post_rgb0_b = post_active && (post_step == 4'd6);
+    wire post_rgb1_r = post_active && (post_step == 4'd7);
+    wire post_rgb1_g = post_active && (post_step == 4'd8);
+    wire post_rgb1_b = post_active && (post_step == 4'd9);
+
+    // Operational Counters & Stretchers
+    always @(posedge clk_100mhz or negedge btn_rst_n) begin
+        if (!btn_rst_n) begin
+            heartbeat_cnt     <= 27'd0;
+            flash_4hz_cnt     <= 25'd0;
             stretch_sync      <= 23'd0;
             stretch_spike     <= 23'd0;
             stretch_approved  <= 23'd0;
-            stretch_violation <= 23'd0;
+            stretch_violation <= 25'd0;
         end else begin
-            // RX Activity & Frame Sync Stretcher (triggers on serial byte, packet, or self-test)
-            if (rx_frame_sync || rx_byte_valid || self_test_pulse)
-                stretch_sync <= STRETCH_CYCLES;
+            // Heartbeat counter (0 .. 99,999,999)
+            if (heartbeat_cnt >= 27'd99_999_999)
+                heartbeat_cnt <= 27'd0;
+            else
+                heartbeat_cnt <= heartbeat_cnt + 1'b1;
+
+            // 4Hz flasher counter (0 .. 24,999,999)
+            if (flash_4hz_cnt >= 25'd24_999_999)
+                flash_4hz_cnt <= 25'd0;
+            else
+                flash_4hz_cnt <= flash_4hz_cnt + 1'b1;
+
+            // Ingress Sync Pulse (Triggers ONLY on completed packet or self-test tick)
+            if ((s_axis_tvalid && s_axis_tlast) || self_test_pulse)
+                stretch_sync <= SYNC_PULSE_CYCLES;
             else if (stretch_sync > 0)
                 stretch_sync <= stretch_sync - 1'b1;
 
-            // LIF Spike Stretcher
-            if (core_spike || (self_test_pulse && sw_bypass_parser))
-                stretch_spike <= STRETCH_CYCLES;
+            // LIF Neuromorphic Spike Strobe
+            if (core_spike || btn2_spike)
+                stretch_spike <= SPIKE_PULSE_CYCLES;
             else if (stretch_spike > 0)
                 stretch_spike <= stretch_spike - 1'b1;
 
-            // Approved Order Stretcher
+            // Pre-Trade Order Approval Strobe
             if (sw_killswitch || btn1_stress)
                 stretch_approved <= 23'd0;
             else if (core_order_approved || (self_test_pulse && sw_bypass_parser))
-                stretch_approved <= STRETCH_CYCLES;
+                stretch_approved <= APPR_PULSE_CYCLES;
             else if (stretch_approved > 0)
                 stretch_approved <= stretch_approved - 1'b1;
 
-            // Risk Breach / Killswitch Stretcher
+            // Risk Breach / Killswitch Violation Stretcher
             if (core_risk_violated || sw_killswitch || btn1_stress)
-                stretch_violation <= STRETCH_CYCLES;
+                stretch_violation <= VIOL_PULSE_CYCLES;
             else if (stretch_violation > 0)
                 stretch_violation <= stretch_violation - 1'b1;
         end
     end
 
     // -------------------------------------------------------------------------
-    // 5. Physical Diagnostic LED Output Assignments (Matched to Silkscreen!)
+    // 5. Final Physical Diagnostic LED Driving Logic
     // -------------------------------------------------------------------------
-    // Silkscreen LD2 (User LED 0, Pin E18): Accelerator Engine Operational (Steady Yellow)
-    assign led0_ready    = core_ready;
+    // Silkscreen LD2 (User LED 0, Pin E18): Heartbeat (Rhythmic double-blink proves 100MHz clock is live)
+    assign led0_ready    = post_active ? post_led0 : (core_ready & heartbeat_pulse);
 
-    // Silkscreen LD3 (User LED 1, Pin F13): RX Frame Synchronized (Flashing Yellow)
-    assign led1_rx_sync  = rx_frame_sync | (stretch_sync > 0);
+    // Silkscreen LD3 (User LED 1, Pin F13): RX Frame Ingest Pulse (Sharp 30ms blink on packet)
+    assign led1_rx_sync  = post_active ? post_led1 : (stretch_sync > 0);
 
-    // Silkscreen LD4 (User LED 2, Pin E13): Neuromorphic LIF Spike Fired (Flashing Yellow)
-    assign led2_spike    = core_spike | (stretch_spike > 0);
+    // Silkscreen LD4 (User LED 2, Pin E13): Neuromorphic LIF Spike Fired (70ms strobe)
+    assign led2_spike    = post_active ? post_led2 : (stretch_spike > 0);
 
-    // Silkscreen LD5 (User LED 3, Pin H15): Pre-Trade Gate Approved Order (Flashing Yellow)
-    assign led3_approved = (core_order_approved | (stretch_approved > 0)) & !sw_killswitch & !btn1_stress;
+    // Silkscreen LD5 (User LED 3, Pin H15): Pre-Trade Gate Approved Trade (40ms strobe, disabled on breach)
+    assign led3_approved = post_active ? post_led3 : ((stretch_approved > 0) & !sw_killswitch & !btn1_stress & (stretch_violation == 0));
 
-    // Silkscreen LD0 (RGB LED 0, Pins J15, G17, F15):
-    // Red (J15): Risk Breached or Emergency Killswitch Tripped
-    assign rgb0_r        = core_risk_violated | (stretch_violation > 0) | sw_killswitch | btn1_stress;
-    // Green (G17): Clean State / System Operational (Active when normal)
-    assign rgb0_g        = core_ready & !sw_killswitch & !btn1_stress & (stretch_violation == 0);
-    // Blue (F15): Ingress Packet Stream Active
-    assign rgb0_b        = rx_frame_sync | (stretch_sync > 0);
+    // Silkscreen LD0 (RGB LED 0, Pins J15, G17, F15 - System Health & Circuit Breaker):
+    // Red (Pin J15): Blinding 4Hz Flashing RED on Risk Breach / Killswitch / Stress
+    assign rgb0_r        = post_active ? post_rgb0_r : ((stretch_violation > 0 || sw_killswitch || btn1_stress) & flash_4hz);
+    // Green (Pin G17): Solid Calm GREEN when Operational & Clean (Turns OFF completely during violation)
+    assign rgb0_g        = post_active ? post_rgb0_g : (core_ready & !sw_killswitch & !btn1_stress & (stretch_violation == 0));
+    // Blue (Pin F15): Ingress packet flash (only active when clean)
+    assign rgb0_b        = post_active ? post_rgb0_b : ((stretch_sync > 0) & (stretch_violation == 0));
 
-    // Silkscreen LD1 (RGB LED 1, Pins E15, F18, E14):
-    // Red (E15): Market Volatility / Price Deviation Alert
-    assign rgb1_r        = core_risk_violated | btn1_stress;
-    // Green (F18): Approved Order Execution Strobe
-    assign rgb1_g        = (core_order_approved | (stretch_approved > 0)) & !sw_killswitch & !btn1_stress;
-    // Blue (E14): Neuromorphic LIF Action Potential Spike Strobe
-    assign rgb1_b        = core_spike | (stretch_spike > 0);
+    // Silkscreen LD1 (RGB LED 1, Pins E15, F18, E14 - Neuromorphic Engine Activity):
+    // Red (Pin E15): Market Volatility / Risk Violation Warning
+    assign rgb1_r        = post_active ? post_rgb1_r : ((stretch_violation > 0 || core_risk_violated) & flash_4hz);
+    // Green (Pin F18): Trade Clearance Strobe (40ms)
+    assign rgb1_g        = post_active ? post_rgb1_g : ((stretch_approved > 0) & (stretch_violation == 0));
+    // Blue (Pin E14): Neuromorphic LIF Action Potential Spike Strobe (70ms vibrant Blue)
+    assign rgb1_b        = post_active ? post_rgb1_b : (stretch_spike > 0);
 
 endmodule

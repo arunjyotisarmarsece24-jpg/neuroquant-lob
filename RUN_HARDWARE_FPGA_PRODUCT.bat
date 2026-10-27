@@ -15,19 +15,19 @@ echo   - Arduino Nano RX0 (Pin D0)  ^<---  Arty S7 Shield IO1 (Pin N13) [FPGA TX
 echo   - Arduino Nano GND           ^<---^>  Arty S7 GND
 echo.
 echo [DIAGNOSTIC LED ILLUMINATION MAP]
-echo   - LD2 (Yellow):       Accelerator Engine Operational
-echo   - LD3 (Yellow Pulse): Ingress Stream 0x55AA Frame Lock
-echo   - LD4 (Yellow Pulse): Neuromorphic LIF Action Potential Spike
-echo   - LD5 (Yellow Pulse): Pre-Trade Gate Approved Trade Clearance
-echo   - LD0 (RGB):          Green = Normal ^| Blue = Data Ingest ^| Red = Risk Breach
-echo   - LD1 (RGB):          Green = Clearance ^| Blue = Neuromorphic Spike
+echo   - LD2 (Yellow):       1.0 Hz Double-Blink Heartbeat (100 MHz Alive)
+echo   - LD3 (Yellow Pulse): Ingress Stream 0x55AA Frame Lock Strobe
+echo   - LD4 (Yellow Pulse): Neuromorphic LIF Action Potential Spike Strobe
+echo   - LD5 (Yellow Pulse): Pre-Trade Gate Approved Trade Clearance Strobe
+echo   - LD0 (RGB):          Calm Green = Ready ^| Blinding 4Hz Flashing Red = Risk Breach
+echo   - LD1 (RGB):          Electric Blue = LIF Spike ^| Green = Clearance
 echo.
 echo ================================================================================
 echo Starting Hardware Telemetry ^& Injection Engine...
 echo ================================================================================
 echo.
 
-python hardware\run_live_hardware_product.py %*
+python hardware\interactive_hardware_suite.py %*
 
 echo.
 echo ================================================================================
