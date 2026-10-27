@@ -1,0 +1,49 @@
+================================================================================
+NEUROQUANT-LOB: CONVERSATION ID & RESUME CODES FOR TOMORROW'S SESSION
+================================================================================
+Date: 2026-10-27
+Principal Architect: Arunjyoti Sarma | IIT (BHU) Varanasi
+Project Root: C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project
+
+--------------------------------------------------------------------------------
+[1] TODAY'S OFFICIAL ACTIVE CONVERSATION ID:
+--------------------------------------------------------------------------------
+bc40779e-81e0-40c9-8955-9b3081b3598e
+
+Link: conversation://bc40779e-81e0-40c9-8955-9b3081b3598e
+
+--------------------------------------------------------------------------------
+[2] WHAT TO TYPE TOMORROW TO RESUME SEAMLESSLY:
+--------------------------------------------------------------------------------
+Copy and paste this exact prompt when starting tomorrow's session:
+
+"Resume project from Conversation ID: bc40779e-81e0-40c9-8955-9b3081b3598e. The project path is C:\Users\arunj\Desktop\Arunjyoti_Sarma_all_For_Research\My_Coding_Cool\My_Quant\Software_Project. Both the physical FPGA (Arty S7-25 on COM9) and Arduino Nano (COM8) are wired and verified with the web platform at http://localhost:5000. Give me the current status and let's proceed."
+
+--------------------------------------------------------------------------------
+[3] PHYSICAL CIRCUIT PINOUT (DIGILENT ARTY S7-25 <---> ARDUINO NANO):
+--------------------------------------------------------------------------------
+  1. Arduino Nano TX1 (Pin D1)  --->  Arty S7 Shield IO0 (Pin L13)  [FPGA RX Ingress]
+  2. Arduino Nano RX0 (Pin D0)  <---  Arty S7 Shield IO1 (Pin N13)  [FPGA TX Telemetry]
+  3. Arduino Nano GND           <--->  Arty S7 GND                  [Common Ground]
+
+--------------------------------------------------------------------------------
+[4] PHYSICAL BOARD DIAGNOSTIC LED MAP:
+--------------------------------------------------------------------------------
+  - LD2 (Yellow):       1.0 Hz Rhythmic Heartbeat (Proves 100MHz PLL Active)
+  - LD3 (Yellow Pulse): Packet Ingress Strobe (Sharp 30ms pulse on ITCH frame)
+  - LD4 (Yellow Pulse): Neuromorphic LIF Action Potential Spike Strobe
+  - LD5 (Yellow Pulse): Pre-Trade Gate Approved Trade Clearance Strobe
+  - LD0 (RGB LED):       Calm Green = Ready | Blinding 4Hz Flashing Red = Risk Breach
+  - LD1 (RGB LED):       Electric Blue = LIF Spike | Green = Clearance
+  - BTN3 (Push Button):  Press anytime to run a 1.5-second Knight Rider LED test sweep!
+
+--------------------------------------------------------------------------------
+[5] 1-CLICK LAUNCHERS & WEB PLATFORM:
+--------------------------------------------------------------------------------
+  - Master Platform Launcher:  LAUNCH_PRODUCT_AND_WEB.bat
+  - Hardware Interactive Runner: LAUNCH_NEUROQUANT_PRODUCT.bat
+  - Web Mission Control URL:   http://localhost:5000
+  - FPGA RTL & HIL Co-Processor Tab: http://localhost:5000 (Click 'FPGA RTL' tab)
+  - Production Dossier:        http://localhost:5000/dossier
+  - 18-Figure Visual Gallery:  http://localhost:5000/gallery
+================================================================================
