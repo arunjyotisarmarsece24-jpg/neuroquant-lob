@@ -10,6 +10,9 @@
 set outputDir ./build_arty_s7
 file mkdir $outputDir
 
+# Enable multithreaded synthesis & routing (8 threads)
+catch { set_param general.maxThreads 8 }
+
 # Target part: xc7s25csga324-1 (Digilent Arty S7-25)
 set_part xc7s25csga324-1
 

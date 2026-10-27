@@ -16,7 +16,7 @@
 module neuroquant_arty_s7_top #(
     parameter CLK_FREQ_HZ = 100_000_000,
     parameter BAUD_RATE   = 115_200,
-    parameter POST_ENABLE = 1
+    parameter POR_ENABLE  = 1
 )(
     // Master Oscillator: 100 MHz onboard clock (Pin R2 on Arty S7)
     input  wire                   clk_100mhz,
@@ -80,6 +80,35 @@ module neuroquant_arty_s7_top #(
     assign uart_rx_combined = usb_uart_rx & ja_uart_rx & ck_io0_rx;
 
     // -------------------------------------------------------------------------
+    // Unified Hardware Master Reset & Power-On Reset (POR) Circuitry
+    // -------------------------------------------------------------------------
+    // Dual Physical Reset Sources:
+    //   [1] Dedicated Red Button labeled "RESET" (Pin C18, active-low)
+    //   [2] User Push-Button BTN3 (Pin H13, active-high)
+    // Hardware Power-On Reset (POR):
+    //   Ensures rock-solid startup by holding reset asserted for ~20ms
+    //   (2,000,000 clock cycles @ 100MHz) upon FPGA bitstream loading.
+    reg [21:0] por_cnt = 22'd0;
+    reg        por_rst_n = (POR_ENABLE == 0);
+
+    always @(posedge clk_100mhz) begin
+        if (POR_ENABLE) begin
+            if (por_cnt < 22'd2_000_000) begin
+                por_cnt   <= por_cnt + 1'b1;
+                por_rst_n <= 1'b0;
+            end else begin
+                por_rst_n <= 1'b1;
+            end
+        end else begin
+            por_rst_n <= 1'b1;
+        end
+    end
+
+    // Master Active-Low Reset (Low when C18 pressed OR BTN3 pressed OR POR active)
+    wire master_rst_n;
+    assign master_rst_n = btn_rst_n & (!btn3_clear) & por_rst_n;
+
+    // -------------------------------------------------------------------------
     // Internal AXI4-Stream Interconnect: UART RX -> Core Engine
     // -------------------------------------------------------------------------
     wire [63:0] s_axis_tdata;
@@ -111,8 +140,8 @@ module neuroquant_arty_s7_top #(
     reg [24:0] self_test_counter;
     reg        self_test_pulse;
 
-    always @(posedge clk_100mhz or negedge btn_rst_n) begin
-        if (!btn_rst_n) begin
+    always @(posedge clk_100mhz or negedge master_rst_n) begin
+        if (!master_rst_n) begin
             self_test_counter <= 25'd0;
             self_test_pulse   <= 1'b0;
         end else if (sw_bypass_parser) begin
@@ -142,7 +171,7 @@ module neuroquant_arty_s7_top #(
         .DATA_WIDTH  (64)
     ) u_uart_rx (
         .clk             (clk_100mhz),
-        .rst_n           (btn_rst_n),
+        .rst_n           (master_rst_n),
         .uart_rx         (uart_rx_combined),
         .m_axis_tdata    (s_axis_tdata),
         .m_axis_tkeep    (s_axis_tkeep),
@@ -163,7 +192,7 @@ module neuroquant_arty_s7_top #(
         .DATA_WIDTH (64)
     ) u_neuroquant_core (
         .clk                     (clk_100mhz),
-        .rst_n                   (btn_rst_n),
+        .rst_n                   (master_rst_n),
         .s_axis_tdata            (s_axis_tdata),
         .s_axis_tkeep            (s_axis_tkeep),
         .s_axis_tvalid           (s_axis_tvalid),
@@ -185,8 +214,8 @@ module neuroquant_arty_s7_top #(
     // 3. Hardware UART Telemetry Transmitter
     // -------------------------------------------------------------------------
     reg [23:0] latency_counter;
-    always @(posedge clk_100mhz or negedge btn_rst_n) begin
-        if (!btn_rst_n) begin
+    always @(posedge clk_100mhz or negedge master_rst_n) begin
+        if (!master_rst_n) begin
             latency_counter <= 24'd0;
         end else begin
             if (s_axis_tvalid && s_axis_tlast) begin
@@ -206,7 +235,7 @@ module neuroquant_arty_s7_top #(
         .BAUD_RATE   (BAUD_RATE)
     ) u_uart_tx (
         .clk              (clk_100mhz),
-        .rst_n            (btn_rst_n),
+        .rst_n            (master_rst_n),
         .send_trigger     (tx_trigger),
         .order_approved   (core_order_approved & !btn1_stress),
         .violation_code   (btn1_stress ? 7'h01 : {4'b0000, core_violation_code}),
@@ -227,14 +256,14 @@ module neuroquant_arty_s7_top #(
     assign ja_spike_strobe = core_spike;
 
     // -------------------------------------------------------------------------
-    // 4. Advanced Diagnostic LED Controller with Power-On Self-Test (POST)
+    // 4. Institutional Diagnostic LED Timing & Pulse Stretchers
     // -------------------------------------------------------------------------
     // Pulse Stretchers (Scaled for crisp, non-saturating human visibility):
     // 100 MHz clock -> 1 ms = 100,000 cycles
     localparam SYNC_PULSE_CYCLES  = 23'd3_000_000;  // 30ms sharp pulse on packet ingress
     localparam SPIKE_PULSE_CYCLES = 23'd7_000_000;  // 70ms pulse on LIF neuromorphic spike
     localparam APPR_PULSE_CYCLES  = 23'd4_000_000;  // 40ms pulse on order approval
-    localparam VIOL_PULSE_CYCLES  = 25'd20_000_000; // 200ms pulse on risk breach
+    localparam VIOL_PULSE_CYCLES  = 25'd25_000_000; // 250ms pulse on risk breach
 
     reg [22:0] stretch_sync;
     reg [22:0] stretch_spike;
@@ -255,55 +284,9 @@ module neuroquant_arty_s7_top #(
     wire flash_4hz;
     assign flash_4hz = (flash_4hz_cnt < 25'd12_500_000);
 
-    // Power-On Self-Test (POST) / Knight Rider Demo Sweep:
-    // Runs on startup or whenever BTN3 (Pin H13) is pressed!
-    // 1.5 seconds total: 10 phases of 150ms (15,000,000 cycles each)
-    // Tests all single LEDs and all RGB LED channels sequentially!
-    reg [27:0] post_cnt;
-    reg        post_active;
-
-    always @(posedge clk_100mhz or negedge btn_rst_n) begin
-        if (!btn_rst_n) begin
-            post_cnt     <= 28'd0;
-            post_active  <= (POST_ENABLE != 0);
-        end else if (btn3_clear) begin
-            post_cnt     <= 28'd0;
-            post_active  <= (POST_ENABLE != 0);
-        end else if (post_active) begin
-            if (post_cnt < 28'd150_000_000) begin
-                post_cnt <= post_cnt + 1'b1;
-            end else begin
-                post_active <= 1'b0;
-            end
-        end
-    end
-
-    // POST LED Step Calculation
-    wire [3:0] post_step;
-    assign post_step = (post_cnt < 28'd15_000_000)  ? 4'd0 :
-                       (post_cnt < 28'd30_000_000)  ? 4'd1 :
-                       (post_cnt < 28'd45_000_000)  ? 4'd2 :
-                       (post_cnt < 28'd60_000_000)  ? 4'd3 :
-                       (post_cnt < 28'd75_000_000)  ? 4'd4 :
-                       (post_cnt < 28'd90_000_000)  ? 4'd5 :
-                       (post_cnt < 28'd105_000_000) ? 4'd6 :
-                       (post_cnt < 28'd120_000_000) ? 4'd7 :
-                       (post_cnt < 28'd135_000_000) ? 4'd8 : 4'd9;
-
-    wire post_led0   = post_active && (post_step == 4'd0); // LD2
-    wire post_led1   = post_active && (post_step == 4'd1); // LD3
-    wire post_led2   = post_active && (post_step == 4'd2); // LD4
-    wire post_led3   = post_active && (post_step == 4'd3); // LD5
-    wire post_rgb0_r = post_active && (post_step == 4'd4);
-    wire post_rgb0_g = post_active && (post_step == 4'd5);
-    wire post_rgb0_b = post_active && (post_step == 4'd6);
-    wire post_rgb1_r = post_active && (post_step == 4'd7);
-    wire post_rgb1_g = post_active && (post_step == 4'd8);
-    wire post_rgb1_b = post_active && (post_step == 4'd9);
-
     // Operational Counters & Stretchers
-    always @(posedge clk_100mhz or negedge btn_rst_n) begin
-        if (!btn_rst_n) begin
+    always @(posedge clk_100mhz or negedge master_rst_n) begin
+        if (!master_rst_n) begin
             heartbeat_cnt     <= 27'd0;
             flash_4hz_cnt     <= 25'd0;
             stretch_sync      <= 23'd0;
@@ -323,19 +306,19 @@ module neuroquant_arty_s7_top #(
             else
                 flash_4hz_cnt <= flash_4hz_cnt + 1'b1;
 
-            // Ingress Sync Pulse (Triggers ONLY on completed packet or self-test tick)
+            // Ingress Sync Pulse (Triggers on frame boundary or self-test tick)
             if ((s_axis_tvalid && s_axis_tlast) || self_test_pulse)
                 stretch_sync <= SYNC_PULSE_CYCLES;
             else if (stretch_sync > 0)
                 stretch_sync <= stretch_sync - 1'b1;
 
-            // LIF Neuromorphic Spike Strobe
+            // LIF Neuromorphic Action Potential Spike Strobe (70ms)
             if (core_spike || btn2_spike)
                 stretch_spike <= SPIKE_PULSE_CYCLES;
             else if (stretch_spike > 0)
                 stretch_spike <= stretch_spike - 1'b1;
 
-            // Pre-Trade Order Approval Strobe
+            // Pre-Trade Order Approval Strobe (40ms)
             if (sw_killswitch || btn1_stress)
                 stretch_approved <= 23'd0;
             else if (core_order_approved || (self_test_pulse && sw_bypass_parser))
@@ -343,7 +326,7 @@ module neuroquant_arty_s7_top #(
             else if (stretch_approved > 0)
                 stretch_approved <= stretch_approved - 1'b1;
 
-            // Risk Breach / Killswitch Violation Stretcher
+            // Risk Breach / Killswitch Violation Stretcher (250ms)
             if (core_risk_violated || sw_killswitch || btn1_stress)
                 stretch_violation <= VIOL_PULSE_CYCLES;
             else if (stretch_violation > 0)
@@ -354,32 +337,32 @@ module neuroquant_arty_s7_top #(
     // -------------------------------------------------------------------------
     // 5. Final Physical Diagnostic LED Driving Logic
     // -------------------------------------------------------------------------
-    // Silkscreen LD2 (User LED 0, Pin E18): Heartbeat (Rhythmic double-blink proves 100MHz clock is live)
-    assign led0_ready    = post_active ? post_led0 : (core_ready & heartbeat_pulse);
+    // Silkscreen LD2 (User LED 0, Pin E18): Heartbeat (1.0 Hz double-blink proves 100MHz clock is live)
+    assign led0_ready    = core_ready & heartbeat_pulse;
 
     // Silkscreen LD3 (User LED 1, Pin F13): RX Frame Ingest Pulse (Sharp 30ms blink on packet)
-    assign led1_rx_sync  = post_active ? post_led1 : (rx_frame_sync | (stretch_sync > 0));
+    assign led1_rx_sync  = rx_frame_sync | (stretch_sync > 0);
 
     // Silkscreen LD4 (User LED 2, Pin E13): Neuromorphic LIF Spike Fired (70ms strobe)
-    assign led2_spike    = post_active ? post_led2 : (stretch_spike > 0);
+    assign led2_spike    = stretch_spike > 0;
 
     // Silkscreen LD5 (User LED 3, Pin H15): Pre-Trade Gate Approved Trade (40ms strobe, disabled on breach)
-    assign led3_approved = post_active ? post_led3 : ((stretch_approved > 0) & !sw_killswitch & !btn1_stress & (stretch_violation == 0));
+    assign led3_approved = (stretch_approved > 0) & !sw_killswitch & !btn1_stress & (stretch_violation == 0);
 
-    // Silkscreen LD0 (RGB LED 0, Pins J15, G17, F15 - System Health & Circuit Breaker):
+    // Silkscreen LD0 (RGB LED 0, Pins J15, G17, F15 - System Health & Pre-Trade Risk Gate):
     // Red (Pin J15): Blinding 4Hz Flashing RED on Risk Breach / Killswitch / Stress
-    assign rgb0_r        = post_active ? post_rgb0_r : ((stretch_violation > 0 || sw_killswitch || btn1_stress) & flash_4hz);
+    assign rgb0_r        = (stretch_violation > 0 || sw_killswitch || btn1_stress) & flash_4hz;
     // Green (Pin G17): Solid Calm GREEN when Operational & Clean (Turns OFF completely during violation)
-    assign rgb0_g        = post_active ? post_rgb0_g : (core_ready & !sw_killswitch & !btn1_stress & (stretch_violation == 0));
-    // Blue (Pin F15): Ingress packet flash (only active when clean)
-    assign rgb0_b        = post_active ? post_rgb0_b : ((stretch_sync > 0) & (stretch_violation == 0));
+    assign rgb0_g        = core_ready & !sw_killswitch & !btn1_stress & (stretch_violation == 0);
+    // Blue (Pin F15): Ingress packet flash (sharp 30ms Cyan flash when combined with Green)
+    assign rgb0_b        = (stretch_sync > 0) & (stretch_violation == 0);
 
-    // Silkscreen LD1 (RGB LED 1, Pins E15, F18, E14 - Neuromorphic Engine Activity):
-    // Red (Pin E15): Market Volatility / Risk Violation Warning
-    assign rgb1_r        = post_active ? post_rgb1_r : ((stretch_violation > 0 || core_risk_violated) & flash_4hz);
-    // Green (Pin F18): Trade Clearance Strobe (40ms)
-    assign rgb1_g        = post_active ? post_rgb1_g : ((stretch_approved > 0) & (stretch_violation == 0));
-    // Blue (Pin E14): Neuromorphic LIF Action Potential Spike Strobe (70ms vibrant Blue)
-    assign rgb1_b        = post_active ? post_rgb1_b : (stretch_spike > 0);
+    // Silkscreen LD1 (RGB LED 1, Pins E15, F18, E14 - Dedicated Neuromorphic SNN Brain Activity):
+    // Red (Pin E15): Dark / OFF (Clean & unpolluted)
+    assign rgb1_r        = 1'b0;
+    // Green (Pin F18): Dark / OFF (Approval is cleanly signaled by LD5)
+    assign rgb1_g        = 1'b0;
+    // Blue (Pin E14): Neuromorphic LIF Action Potential Spike Strobe (70ms vibrant Electric Blue)
+    assign rgb1_b        = stretch_spike > 0;
 
 endmodule

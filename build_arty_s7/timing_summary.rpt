@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (win64) Build 5239630 Fri Nov 08 22:35:27 MST 2024
-| Date         : Tue Oct 27 14:59:08 2026
+| Date         : Wed Oct 28 00:01:19 2026
 | Host         : Admin running 64-bit major release  (build 9200)
 | Command      : report_timing_summary -file ./build_arty_s7/timing_summary.rpt
 | Design       : neuroquant_arty_s7_top
@@ -54,7 +54,7 @@ Table of Contents
 3. checking pulse_width_clock (0)
 4. checking unconstrained_internal_endpoints (0)
 5. checking no_input_delay (10)
-6. checking no_output_delay (15)
+6. checking no_output_delay (13)
 7. checking multiple_clock (0)
 8. checking generated_clocks (0)
 9. checking loops (0)
@@ -91,9 +91,9 @@ Table of Contents
  There are 7 input ports with no input delay but user has a false path constraint. (MEDIUM)
 
 
-6. checking no_output_delay (15)
+6. checking no_output_delay (13)
 --------------------------------
- There are 15 ports with no output delay specified. (HIGH)
+ There are 13 ports with no output delay specified. (HIGH)
 
  There are 0 ports with no output delay but user has a false path constraint
 
@@ -138,7 +138,7 @@ Table of Contents
 
     WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
     -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
-     -2.644      -92.425                     38                 1051        0.065        0.000                      0                 1051        4.020        0.000                       0                   597  
+     -2.760      -96.529                     38                 1521        0.070        0.000                      0                 1521        4.020        0.000                       0                   591  
 
 
 Timing constraints are not met.
@@ -161,7 +161,7 @@ sys_clk_pin  {0.000 5.000}      10.000          100.000
 
 Clock             WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
 -----             -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
-sys_clk_pin        -2.644      -92.425                     38                 1051        0.065        0.000                      0                 1051        4.020        0.000                       0                   597  
+sys_clk_pin        -2.760      -96.529                     38                 1038        0.070        0.000                      0                 1038        4.020        0.000                       0                   591  
 
 
 ------------------------------------------------------------------------------------------------
@@ -178,8 +178,9 @@ From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS
 | -----------------------
 ------------------------------------------------------------------------------------------------
 
-Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
-----------    ----------    --------          -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+Path Group         From Clock         To Clock               WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------         ----------         --------               -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+**async_default**  sys_clk_pin        sys_clk_pin              2.028        0.000                      0                  483        0.575        0.000                      0                  483  
 
 
 ------------------------------------------------------------------------------------------------
@@ -192,27 +193,27 @@ Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing 
 From Clock:  sys_clk_pin
   To Clock:  sys_clk_pin
 
-Setup :           38  Failing Endpoints,  Worst Slack       -2.644ns,  Total Violation      -92.425ns
-Hold  :            0  Failing Endpoints,  Worst Slack        0.065ns,  Total Violation        0.000ns
+Setup :           38  Failing Endpoints,  Worst Slack       -2.760ns,  Total Violation      -96.529ns
+Hold  :            0  Failing Endpoints,  Worst Slack        0.070ns,  Total Violation        0.000ns
 PW    :            0  Failing Endpoints,  Worst Slack        4.020ns,  Total Violation        0.000ns
 ---------------------------------------------------------------------------------------------------
 
 
 Max Delay Paths
 --------------------------------------------------------------------------------------
-Slack (VIOLATED) :        -2.644ns  (required time - arrival time)
-  Source:                 u_neuroquant_core/u_lif_neuron/o_v_mem_reg[0]/C
+Slack (VIOLATED) :        -2.760ns  (required time - arrival time)
+  Source:                 u_neuroquant_core/u_lif_neuron/o_v_mem_reg[1]/C
                             (rising edge-triggered cell FDCE clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
   Destination:            u_neuroquant_core/u_lif_neuron/o_v_mem_reg[6]/D
                             (rising edge-triggered cell FDCE clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
   Path Group:             sys_clk_pin
   Path Type:              Setup (Max at Slow Process Corner)
   Requirement:            10.000ns  (sys_clk_pin rise@10.000ns - sys_clk_pin rise@0.000ns)
-  Data Path Delay:        12.601ns  (logic 6.502ns (51.601%)  route 6.099ns (48.399%))
-  Logic Levels:           22  (CARRY4=15 LUT2=1 LUT3=3 LUT5=1 LUT6=2)
-  Clock Path Skew:        -0.039ns (DCD - SCD + CPR)
-    Destination Clock Delay (DCD):    4.231ns = ( 14.231 - 10.000 ) 
-    Source Clock Delay      (SCD):    4.498ns
+  Data Path Delay:        12.715ns  (logic 6.516ns (51.246%)  route 6.199ns (48.754%))
+  Logic Levels:           23  (CARRY4=16 LUT1=1 LUT2=1 LUT3=3 LUT5=1 LUT6=1)
+  Clock Path Skew:        -0.040ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    4.232ns = ( 14.232 - 10.000 ) 
+    Source Clock Delay      (SCD):    4.500ns
     Clock Pessimism Removal (CPR):    0.228ns
   Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
     Total System Jitter     (TSJ):    0.071ns
@@ -229,71 +230,74 @@ Slack (VIOLATED) :        -2.644ns  (required time - arrival time)
     R2                   IBUF (Prop_ibuf_I_O)         0.880     0.880 r  clk_100mhz_IBUF_inst/O
                          net (fo=1, routed)           1.962     2.841    clk_100mhz_IBUF
     BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.096     2.937 r  clk_100mhz_IBUF_BUFG_inst/O
-                         net (fo=596, routed)         1.560     4.498    u_neuroquant_core/u_lif_neuron/clk_100mhz_IBUF_BUFG
-    SLICE_X11Y39         FDCE                                         r  u_neuroquant_core/u_lif_neuron/o_v_mem_reg[0]/C
+                         net (fo=590, routed)         1.562     4.500    u_neuroquant_core/u_lif_neuron/clk_100mhz_IBUF_BUFG
+    SLICE_X10Y43         FDCE                                         r  u_neuroquant_core/u_lif_neuron/o_v_mem_reg[1]/C
   -------------------------------------------------------------------    -------------------
-    SLICE_X11Y39         FDCE (Prop_fdce_C_Q)         0.456     4.954 r  u_neuroquant_core/u_lif_neuron/o_v_mem_reg[0]/Q
-                         net (fo=26, routed)          0.527     5.481    u_neuroquant_core/u_lif_neuron/Q[0]
-    SLICE_X11Y40         CARRY4 (Prop_carry4_S[0]_CO[3])
-                                                      0.656     6.137 r  u_neuroquant_core/u_lif_neuron/mult_decay__65_carry/CO[3]
-                         net (fo=1, routed)           0.000     6.137    u_neuroquant_core/u_lif_neuron/mult_decay__65_carry_n_0
-    SLICE_X11Y41         CARRY4 (Prop_carry4_CI_CO[3])
-                                                      0.114     6.251 r  u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__0/CO[3]
-                         net (fo=1, routed)           0.000     6.251    u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__0_n_0
-    SLICE_X11Y42         CARRY4 (Prop_carry4_CI_CO[3])
-                                                      0.114     6.365 r  u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__1/CO[3]
-                         net (fo=1, routed)           0.000     6.365    u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__1_n_0
-    SLICE_X11Y43         CARRY4 (Prop_carry4_CI_CO[3])
-                                                      0.114     6.479 r  u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__2/CO[3]
-                         net (fo=1, routed)           0.000     6.479    u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__2_n_0
-    SLICE_X11Y44         CARRY4 (Prop_carry4_CI_CO[3])
-                                                      0.114     6.593 r  u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__3/CO[3]
-                         net (fo=1, routed)           0.000     6.593    u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__3_n_0
-    SLICE_X11Y45         CARRY4 (Prop_carry4_CI_CO[3])
-                                                      0.114     6.707 r  u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__4/CO[3]
-                         net (fo=1, routed)           0.000     6.707    u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__4_n_0
-    SLICE_X11Y46         CARRY4 (Prop_carry4_CI_CO[3])
-                                                      0.114     6.821 r  u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__5/CO[3]
-                         net (fo=1, routed)           0.000     6.821    u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__5_n_0
-    SLICE_X11Y47         CARRY4 (Prop_carry4_CI_O[0])
-                                                      0.222     7.043 r  u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__6/O[0]
-                         net (fo=3, routed)           0.627     7.670    u_neuroquant_core/u_lif_neuron/mult_decay__65_carry__6_n_7
-    SLICE_X13Y47         LUT3 (Prop_lut3_I1_O)        0.299     7.969 r  u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__6_i_4/O
-                         net (fo=1, routed)           0.765     8.733    u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__6_i_4_n_0
-    SLICE_X10Y47         CARRY4 (Prop_carry4_DI[0]_CO[3])
-                                                      0.550     9.283 r  u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__6/CO[3]
-                         net (fo=1, routed)           0.000     9.283    u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__6_n_0
-    SLICE_X10Y48         CARRY4 (Prop_carry4_CI_O[1])
-                                                      0.323     9.606 r  u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__7/O[1]
-                         net (fo=3, routed)           0.684    10.290    u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__7_n_6
-    SLICE_X7Y48          LUT3 (Prop_lut3_I1_O)        0.306    10.596 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_i_11/O
-                         net (fo=2, routed)           0.496    11.093    u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_i_11_n_0
-    SLICE_X4Y48          LUT5 (Prop_lut5_I1_O)        0.124    11.217 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_i_3/O
-                         net (fo=2, routed)           0.304    11.521    u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_i_3_n_0
-    SLICE_X6Y48          LUT6 (Prop_lut6_I0_O)        0.124    11.645 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_i_7/O
-                         net (fo=1, routed)           0.000    11.645    u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_i_7_n_0
-    SLICE_X6Y48          CARRY4 (Prop_carry4_S[1]_CO[3])
-                                                      0.533    12.178 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6/CO[3]
-                         net (fo=1, routed)           0.000    12.178    u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_n_0
-    SLICE_X6Y49          CARRY4 (Prop_carry4_CI_O[1])
-                                                      0.323    12.501 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__7/O[1]
-                         net (fo=3, routed)           0.564    13.065    u_neuroquant_core/u_lif_neuron/v_decayed[27]
-    SLICE_X5Y49          LUT3 (Prop_lut3_I2_O)        0.306    13.371 r  u_neuroquant_core/u_lif_neuron/v_next__0_carry__5_i_7/O
-                         net (fo=1, routed)           0.000    13.371    u_neuroquant_core/u_lif_neuron/v_next__0_carry__5_i_7_n_0
-    SLICE_X5Y49          CARRY4 (Prop_carry4_S[1]_CO[3])
-                                                      0.550    13.921 r  u_neuroquant_core/u_lif_neuron/v_next__0_carry__5/CO[3]
-                         net (fo=1, routed)           0.001    13.921    u_neuroquant_core/u_lif_neuron/v_next__0_carry__5_n_0
-    SLICE_X5Y50          CARRY4 (Prop_carry4_CI_O[0])
-                                                      0.222    14.143 r  u_neuroquant_core/u_lif_neuron/v_next__0_carry__6/O[0]
-                         net (fo=2, routed)           0.736    14.880    u_neuroquant_core/u_lif_neuron/v_next[30]
-    SLICE_X4Y46          LUT2 (Prop_lut2_I0_O)        0.299    15.179 r  u_neuroquant_core/u_lif_neuron/o_spike0_carry__2_i_2/O
-                         net (fo=1, routed)           0.000    15.179    u_neuroquant_core/u_lif_neuron/o_spike0_carry__2_i_2_n_0
-    SLICE_X4Y46          CARRY4 (Prop_carry4_S[3]_CO[3])
-                                                      0.401    15.580 f  u_neuroquant_core/u_lif_neuron/o_spike0_carry__2/CO[3]
-                         net (fo=34, routed)          1.394    16.974    u_neuroquant_core/u_lif_neuron/o_spike0_carry__2_n_0
-    SLICE_X13Y42         LUT6 (Prop_lut6_I0_O)        0.124    17.098 r  u_neuroquant_core/u_lif_neuron/o_v_mem[6]_i_1/O
-                         net (fo=1, routed)           0.000    17.098    u_neuroquant_core/u_lif_neuron/p_0_in[6]
-    SLICE_X13Y42         FDCE                                         r  u_neuroquant_core/u_lif_neuron/o_v_mem_reg[6]/D
+    SLICE_X10Y43         FDCE (Prop_fdce_C_Q)         0.518     5.018 f  u_neuroquant_core/u_lif_neuron/o_v_mem_reg[1]/Q
+                         net (fo=22, routed)          0.585     5.603    u_neuroquant_core/u_lif_neuron/Q[1]
+    SLICE_X8Y43          LUT1 (Prop_lut1_I0_O)        0.124     5.727 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry_i_3/O
+                         net (fo=1, routed)           0.000     5.727    u_neuroquant_core/u_lif_neuron/mult_decay_carry_i_3_n_0
+    SLICE_X8Y43          CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533     6.260 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry/CO[3]
+                         net (fo=1, routed)           0.000     6.260    u_neuroquant_core/u_lif_neuron/mult_decay_carry_n_0
+    SLICE_X8Y44          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     6.377 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry__0/CO[3]
+                         net (fo=1, routed)           0.000     6.377    u_neuroquant_core/u_lif_neuron/mult_decay_carry__0_n_0
+    SLICE_X8Y45          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     6.494 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry__1/CO[3]
+                         net (fo=1, routed)           0.000     6.494    u_neuroquant_core/u_lif_neuron/mult_decay_carry__1_n_0
+    SLICE_X8Y46          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     6.611 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry__2/CO[3]
+                         net (fo=1, routed)           0.000     6.611    u_neuroquant_core/u_lif_neuron/mult_decay_carry__2_n_0
+    SLICE_X8Y47          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     6.728 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry__3/CO[3]
+                         net (fo=1, routed)           0.000     6.728    u_neuroquant_core/u_lif_neuron/mult_decay_carry__3_n_0
+    SLICE_X8Y48          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     6.845 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry__4/CO[3]
+                         net (fo=1, routed)           0.000     6.845    u_neuroquant_core/u_lif_neuron/mult_decay_carry__4_n_0
+    SLICE_X8Y49          CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     6.962 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry__5/CO[3]
+                         net (fo=1, routed)           0.001     6.962    u_neuroquant_core/u_lif_neuron/mult_decay_carry__5_n_0
+    SLICE_X8Y50          CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.323     7.285 r  u_neuroquant_core/u_lif_neuron/mult_decay_carry__6/O[1]
+                         net (fo=3, routed)           0.514     7.799    u_neuroquant_core/u_lif_neuron/mult_decay_carry__6_n_6
+    SLICE_X8Y52          LUT3 (Prop_lut3_I2_O)        0.306     8.105 r  u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__5_i_3/O
+                         net (fo=1, routed)           0.633     8.738    u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__5_i_3_n_0
+    SLICE_X10Y50         CARRY4 (Prop_carry4_DI[1]_CO[3])
+                                                      0.520     9.258 r  u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__5/CO[3]
+                         net (fo=1, routed)           0.000     9.258    u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__5_n_0
+    SLICE_X10Y51         CARRY4 (Prop_carry4_CI_CO[3])
+                                                      0.117     9.375 r  u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__6/CO[3]
+                         net (fo=1, routed)           0.000     9.375    u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__6_n_0
+    SLICE_X10Y52         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.219     9.594 r  u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__7/O[0]
+                         net (fo=3, routed)           0.741    10.335    u_neuroquant_core/u_lif_neuron/mult_decay__327_carry__7_n_7
+    SLICE_X10Y57         LUT3 (Prop_lut3_I1_O)        0.295    10.630 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__5_i_13/O
+                         net (fo=3, routed)           0.310    10.940    u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__5_i_13_n_0
+    SLICE_X11Y57         LUT5 (Prop_lut5_I1_O)        0.124    11.064 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_i_4/O
+                         net (fo=1, routed)           0.783    11.847    u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_i_4_n_0
+    SLICE_X7Y52          CARRY4 (Prop_carry4_DI[0]_CO[3])
+                                                      0.526    12.373 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6/CO[3]
+                         net (fo=1, routed)           0.000    12.373    u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__6_n_0
+    SLICE_X7Y53          CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334    12.707 r  u_neuroquant_core/u_lif_neuron/mult_decay__445_carry__7/O[1]
+                         net (fo=3, routed)           0.586    13.292    u_neuroquant_core/u_lif_neuron/v_decayed[27]
+    SLICE_X6Y53          LUT3 (Prop_lut3_I2_O)        0.303    13.595 r  u_neuroquant_core/u_lif_neuron/v_next__0_carry__5_i_7/O
+                         net (fo=1, routed)           0.000    13.595    u_neuroquant_core/u_lif_neuron/v_next__0_carry__5_i_7_n_0
+    SLICE_X6Y53          CARRY4 (Prop_carry4_S[1]_CO[3])
+                                                      0.533    14.128 r  u_neuroquant_core/u_lif_neuron/v_next__0_carry__5/CO[3]
+                         net (fo=1, routed)           0.000    14.128    u_neuroquant_core/u_lif_neuron/v_next__0_carry__5_n_0
+    SLICE_X6Y54          CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.219    14.347 r  u_neuroquant_core/u_lif_neuron/v_next__0_carry__6/O[0]
+                         net (fo=2, routed)           0.599    14.947    u_neuroquant_core/u_lif_neuron/v_next[30]
+    SLICE_X5Y53          LUT2 (Prop_lut2_I0_O)        0.295    15.242 r  u_neuroquant_core/u_lif_neuron/o_spike0_carry__2_i_2/O
+                         net (fo=1, routed)           0.000    15.242    u_neuroquant_core/u_lif_neuron/o_spike0_carry__2_i_2_n_0
+    SLICE_X5Y53          CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.401    15.643 f  u_neuroquant_core/u_lif_neuron/o_spike0_carry__2/CO[3]
+                         net (fo=34, routed)          1.448    17.091    u_neuroquant_core/u_lif_neuron/o_spike0_carry__2_n_0
+    SLICE_X13Y45         LUT6 (Prop_lut6_I0_O)        0.124    17.215 r  u_neuroquant_core/u_lif_neuron/o_v_mem[6]_i_1/O
+                         net (fo=1, routed)           0.000    17.215    u_neuroquant_core/u_lif_neuron/p_0_in[6]
+    SLICE_X13Y45         FDCE                                         r  u_neuroquant_core/u_lif_neuron/o_v_mem_reg[6]/D
   -------------------------------------------------------------------    -------------------
 
                          (clock sys_clk_pin rise edge)
@@ -303,16 +307,16 @@ Slack (VIOLATED) :        -2.644ns  (required time - arrival time)
     R2                   IBUF (Prop_ibuf_I_O)         0.839    10.839 r  clk_100mhz_IBUF_inst/O
                          net (fo=1, routed)           1.859    12.698    clk_100mhz_IBUF
     BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.091    12.789 r  clk_100mhz_IBUF_BUFG_inst/O
-                         net (fo=596, routed)         1.441    14.231    u_neuroquant_core/u_lif_neuron/clk_100mhz_IBUF_BUFG
-    SLICE_X13Y42         FDCE                                         r  u_neuroquant_core/u_lif_neuron/o_v_mem_reg[6]/C
-                         clock pessimism              0.228    14.459    
-                         clock uncertainty           -0.035    14.423    
-    SLICE_X13Y42         FDCE (Setup_fdce_C_D)        0.031    14.454    u_neuroquant_core/u_lif_neuron/o_v_mem_reg[6]
+                         net (fo=590, routed)         1.442    14.232    u_neuroquant_core/u_lif_neuron/clk_100mhz_IBUF_BUFG
+    SLICE_X13Y45         FDCE                                         r  u_neuroquant_core/u_lif_neuron/o_v_mem_reg[6]/C
+                         clock pessimism              0.228    14.460    
+                         clock uncertainty           -0.035    14.424    
+    SLICE_X13Y45         FDCE (Setup_fdce_C_D)        0.031    14.455    u_neuroquant_core/u_lif_neuron/o_v_mem_reg[6]
   -------------------------------------------------------------------
-                         required time                         14.454    
-                         arrival time                         -17.098    
+                         required time                         14.455    
+                         arrival time                         -17.215    
   -------------------------------------------------------------------
-                         slack                                 -2.644    
+                         slack                                 -2.760    
 
 
 
@@ -320,20 +324,20 @@ Slack (VIOLATED) :        -2.644ns  (required time - arrival time)
 
 Min Delay Paths
 --------------------------------------------------------------------------------------
-Slack (MET) :             0.065ns  (arrival time - required time)
-  Source:                 u_uart_rx/beat_accumulator_reg[21]/C
+Slack (MET) :             0.070ns  (arrival time - required time)
+  Source:                 u_uart_rx/m_axis_tdata_reg[63]/C
                             (rising edge-triggered cell FDCE clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
-  Destination:            u_uart_rx/beat_accumulator_reg[37]_srl2_u_uart_rx_beat_accumulator_reg_c_0/D
-                            (rising edge-triggered cell SRL16E clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_neuroquant_core/u_itch_parser/curr_type_reg[7]/D
+                            (rising edge-triggered cell FDCE clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
   Path Group:             sys_clk_pin
   Path Type:              Hold (Min at Fast Process Corner)
   Requirement:            0.000ns  (sys_clk_pin rise@0.000ns - sys_clk_pin rise@0.000ns)
-  Data Path Delay:        0.263ns  (logic 0.141ns (53.571%)  route 0.122ns (46.429%))
+  Data Path Delay:        0.369ns  (logic 0.128ns (34.719%)  route 0.241ns (65.281%))
   Logic Levels:           0  
-  Clock Path Skew:        0.015ns (DCD - SCD - CPR)
-    Destination Clock Delay (DCD):    1.919ns
-    Source Clock Delay      (SCD):    1.563ns
-    Clock Pessimism Removal (CPR):    0.340ns
+  Clock Path Skew:        0.274ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.923ns
+    Source Clock Delay      (SCD):    1.562ns
+    Clock Pessimism Removal (CPR):    0.086ns
 
     Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
   -------------------------------------------------------------------    -------------------
@@ -344,12 +348,12 @@ Slack (MET) :             0.065ns  (arrival time - required time)
     R2                   IBUF (Prop_ibuf_I_O)         0.345     0.345 r  clk_100mhz_IBUF_inst/O
                          net (fo=1, routed)           0.630     0.975    clk_100mhz_IBUF
     BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.026     1.001 r  clk_100mhz_IBUF_BUFG_inst/O
-                         net (fo=596, routed)         0.563     1.563    u_uart_rx/clk_100mhz_IBUF_BUFG
-    SLICE_X23Y47         FDCE                                         r  u_uart_rx/beat_accumulator_reg[21]/C
+                         net (fo=590, routed)         0.562     1.562    u_uart_rx/clk_100mhz_IBUF_BUFG
+    SLICE_X31Y50         FDCE                                         r  u_uart_rx/m_axis_tdata_reg[63]/C
   -------------------------------------------------------------------    -------------------
-    SLICE_X23Y47         FDCE (Prop_fdce_C_Q)         0.141     1.704 r  u_uart_rx/beat_accumulator_reg[21]/Q
-                         net (fo=2, routed)           0.122     1.826    u_uart_rx/beat_accumulator__0[21]
-    SLICE_X22Y46         SRL16E                                       r  u_uart_rx/beat_accumulator_reg[37]_srl2_u_uart_rx_beat_accumulator_reg_c_0/D
+    SLICE_X31Y50         FDCE (Prop_fdce_C_Q)         0.128     1.690 r  u_uart_rx/m_axis_tdata_reg[63]/Q
+                         net (fo=2, routed)           0.241     1.931    u_neuroquant_core/u_itch_parser/curr_type_reg[7]_0[39]
+    SLICE_X31Y49         FDCE                                         r  u_neuroquant_core/u_itch_parser/curr_type_reg[7]/D
   -------------------------------------------------------------------    -------------------
 
                          (clock sys_clk_pin rise edge)
@@ -359,16 +363,15 @@ Slack (MET) :             0.065ns  (arrival time - required time)
     R2                   IBUF (Prop_ibuf_I_O)         0.375     0.375 r  clk_100mhz_IBUF_inst/O
                          net (fo=1, routed)           0.683     1.058    clk_100mhz_IBUF
     BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.029     1.087 r  clk_100mhz_IBUF_BUFG_inst/O
-                         net (fo=596, routed)         0.832     1.919    u_uart_rx/clk_100mhz_IBUF_BUFG
-    SLICE_X22Y46         SRL16E                                       r  u_uart_rx/beat_accumulator_reg[37]_srl2_u_uart_rx_beat_accumulator_reg_c_0/CLK
-                         clock pessimism             -0.340     1.578    
-    SLICE_X22Y46         SRL16E (Hold_srl16e_CLK_D)
-                                                      0.183     1.761    u_uart_rx/beat_accumulator_reg[37]_srl2_u_uart_rx_beat_accumulator_reg_c_0
+                         net (fo=590, routed)         0.836     1.923    u_neuroquant_core/u_itch_parser/clk_100mhz_IBUF_BUFG
+    SLICE_X31Y49         FDCE                                         r  u_neuroquant_core/u_itch_parser/curr_type_reg[7]/C
+                         clock pessimism             -0.086     1.836    
+    SLICE_X31Y49         FDCE (Hold_fdce_C_D)         0.025     1.861    u_neuroquant_core/u_itch_parser/curr_type_reg[7]
   -------------------------------------------------------------------
-                         required time                         -1.761    
-                         arrival time                           1.826    
+                         required time                         -1.861    
+                         arrival time                           1.931    
   -------------------------------------------------------------------
-                         slack                                  0.065    
+                         slack                                  0.070    
 
 
 
@@ -383,8 +386,138 @@ Sources:            { clk_100mhz }
 
 Check Type        Corner  Lib Pin     Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location       Pin
 Min Period        n/a     BUFG/I      n/a            2.155         10.000      7.845      BUFGCTRL_X0Y0  clk_100mhz_IBUF_BUFG_inst/I
-Low Pulse Width   Slow    SRL16E/CLK  n/a            0.980         5.000       4.020      SLICE_X18Y47   u_uart_rx/beat_accumulator_reg[32]_srl2_u_uart_rx_beat_accumulator_reg_c_0/CLK
-High Pulse Width  Slow    SRL16E/CLK  n/a            0.980         5.000       4.020      SLICE_X18Y47   u_uart_rx/beat_accumulator_reg[32]_srl2_u_uart_rx_beat_accumulator_reg_c_0/CLK
+Low Pulse Width   Slow    SRL16E/CLK  n/a            0.980         5.000       4.020      SLICE_X32Y52   u_uart_rx/beat_accumulator_reg[32]_srl2_u_uart_rx_beat_accumulator_reg_c_0/CLK
+High Pulse Width  Slow    SRL16E/CLK  n/a            0.980         5.000       4.020      SLICE_X32Y52   u_uart_rx/beat_accumulator_reg[32]_srl2_u_uart_rx_beat_accumulator_reg_c_0/CLK
+
+
+
+---------------------------------------------------------------------------------------------------
+Path Group:  **async_default**
+From Clock:  sys_clk_pin
+  To Clock:  sys_clk_pin
+
+Setup :            0  Failing Endpoints,  Worst Slack        2.028ns,  Total Violation        0.000ns
+Hold  :            0  Failing Endpoints,  Worst Slack        0.575ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             2.028ns  (required time - arrival time)
+  Source:                 por_rst_n_reg/C
+                            (rising edge-triggered cell FDRE clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_uart_rx/baud_counter_reg[13]/CLR
+                            (recovery check against rising-edge clock sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             **async_default**
+  Path Type:              Recovery (Max at Slow Process Corner)
+  Requirement:            10.000ns  (sys_clk_pin rise@10.000ns - sys_clk_pin rise@0.000ns)
+  Data Path Delay:        7.331ns  (logic 0.580ns (7.912%)  route 6.751ns (92.088%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        -0.201ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    4.220ns = ( 14.220 - 10.000 ) 
+    Source Clock Delay      (SCD):    4.569ns
+    Clock Pessimism Removal (CPR):    0.148ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock sys_clk_pin rise edge)
+                                                      0.000     0.000 r  
+    R2                                                0.000     0.000 r  clk_100mhz (IN)
+                         net (fo=0)                   0.000     0.000    clk_100mhz
+    R2                   IBUF (Prop_ibuf_I_O)         0.880     0.880 r  clk_100mhz_IBUF_inst/O
+                         net (fo=1, routed)           1.962     2.841    clk_100mhz_IBUF
+    BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.096     2.937 r  clk_100mhz_IBUF_BUFG_inst/O
+                         net (fo=590, routed)         1.631     4.569    clk_100mhz_IBUF_BUFG
+    SLICE_X0Y48          FDRE                                         r  por_rst_n_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X0Y48          FDRE (Prop_fdre_C_Q)         0.456     5.025 r  por_rst_n_reg/Q
+                         net (fo=4, routed)           0.378     5.403    u_uart_rx/por_rst_n
+    SLICE_X0Y48          LUT3 (Prop_lut3_I0_O)        0.124     5.527 f  u_uart_rx/FSM_sequential_uart_state[1]_i_2/O
+                         net (fo=483, routed)         6.373    11.900    u_uart_rx/por_rst_n_reg
+    SLICE_X25Y59         FDCE                                         f  u_uart_rx/baud_counter_reg[13]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock sys_clk_pin rise edge)
+                                                     10.000    10.000 r  
+    R2                                                0.000    10.000 r  clk_100mhz (IN)
+                         net (fo=0)                   0.000    10.000    clk_100mhz
+    R2                   IBUF (Prop_ibuf_I_O)         0.839    10.839 r  clk_100mhz_IBUF_inst/O
+                         net (fo=1, routed)           1.859    12.698    clk_100mhz_IBUF
+    BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.091    12.789 r  clk_100mhz_IBUF_BUFG_inst/O
+                         net (fo=590, routed)         1.431    14.220    u_uart_rx/clk_100mhz_IBUF_BUFG
+    SLICE_X25Y59         FDCE                                         r  u_uart_rx/baud_counter_reg[13]/C
+                         clock pessimism              0.148    14.368    
+                         clock uncertainty           -0.035    14.333    
+    SLICE_X25Y59         FDCE (Recov_fdce_C_CLR)     -0.405    13.928    u_uart_rx/baud_counter_reg[13]
+  -------------------------------------------------------------------
+                         required time                         13.928    
+                         arrival time                         -11.900    
+  -------------------------------------------------------------------
+                         slack                                  2.028    
+
+
+
+
+
+Min Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             0.575ns  (arrival time - required time)
+  Source:                 por_rst_n_reg/C
+                            (rising edge-triggered cell FDRE clocked by sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            self_test_counter_reg[14]/CLR
+                            (removal check against rising-edge clock sys_clk_pin  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             **async_default**
+  Path Type:              Removal (Min at Fast Process Corner)
+  Requirement:            0.000ns  (sys_clk_pin rise@0.000ns - sys_clk_pin rise@0.000ns)
+  Data Path Delay:        0.777ns  (logic 0.186ns (23.943%)  route 0.591ns (76.057%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.269ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.948ns
+    Source Clock Delay      (SCD):    1.592ns
+    Clock Pessimism Removal (CPR):    0.086ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock sys_clk_pin rise edge)
+                                                      0.000     0.000 r  
+    R2                                                0.000     0.000 r  clk_100mhz (IN)
+                         net (fo=0)                   0.000     0.000    clk_100mhz
+    R2                   IBUF (Prop_ibuf_I_O)         0.345     0.345 r  clk_100mhz_IBUF_inst/O
+                         net (fo=1, routed)           0.630     0.975    clk_100mhz_IBUF
+    BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.026     1.001 r  clk_100mhz_IBUF_BUFG_inst/O
+                         net (fo=590, routed)         0.592     1.592    clk_100mhz_IBUF_BUFG
+    SLICE_X0Y48          FDRE                                         r  por_rst_n_reg/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X0Y48          FDRE (Prop_fdre_C_Q)         0.141     1.733 r  por_rst_n_reg/Q
+                         net (fo=4, routed)           0.147     1.880    u_uart_rx/por_rst_n
+    SLICE_X0Y48          LUT3 (Prop_lut3_I0_O)        0.045     1.925 f  u_uart_rx/FSM_sequential_uart_state[1]_i_2/O
+                         net (fo=483, routed)         0.444     2.369    u_uart_rx_n_0
+    SLICE_X2Y52          FDCE                                         f  self_test_counter_reg[14]/CLR
+  -------------------------------------------------------------------    -------------------
+
+                         (clock sys_clk_pin rise edge)
+                                                      0.000     0.000 r  
+    R2                                                0.000     0.000 r  clk_100mhz (IN)
+                         net (fo=0)                   0.000     0.000    clk_100mhz
+    R2                   IBUF (Prop_ibuf_I_O)         0.375     0.375 r  clk_100mhz_IBUF_inst/O
+                         net (fo=1, routed)           0.683     1.058    clk_100mhz_IBUF
+    BUFGCTRL_X0Y0        BUFG (Prop_bufg_I_O)         0.029     1.087 r  clk_100mhz_IBUF_BUFG_inst/O
+                         net (fo=590, routed)         0.860     1.948    clk_100mhz_IBUF_BUFG
+    SLICE_X2Y52          FDCE                                         r  self_test_counter_reg[14]/C
+                         clock pessimism             -0.086     1.861    
+    SLICE_X2Y52          FDCE (Remov_fdce_C_CLR)     -0.067     1.794    self_test_counter_reg[14]
+  -------------------------------------------------------------------
+                         required time                         -1.794    
+                         arrival time                           2.369    
+  -------------------------------------------------------------------
+                         slack                                  0.575    
+
+
 
 
 
