@@ -45,7 +45,8 @@ module tb_uart_bridge;
     // Instantiate Unit Under Test (UUT)
     neuroquant_arty_s7_top #(
         .CLK_FREQ_HZ (100_000_000),
-        .BAUD_RATE   (921_600)
+        .BAUD_RATE   (921_600),
+        .POST_ENABLE (0)
     ) uut (
         .clk_100mhz       (clk),
         .btn_rst_n        (rst_n),

@@ -15,7 +15,8 @@
 
 module neuroquant_arty_s7_top #(
     parameter CLK_FREQ_HZ = 100_000_000,
-    parameter BAUD_RATE   = 115_200
+    parameter BAUD_RATE   = 115_200,
+    parameter POST_ENABLE = 1
 )(
     // Master Oscillator: 100 MHz onboard clock (Pin R2 on Arty S7)
     input  wire                   clk_100mhz,
@@ -264,10 +265,10 @@ module neuroquant_arty_s7_top #(
     always @(posedge clk_100mhz or negedge btn_rst_n) begin
         if (!btn_rst_n) begin
             post_cnt     <= 28'd0;
-            post_active  <= 1'b1;
+            post_active  <= (POST_ENABLE != 0);
         end else if (btn3_clear) begin
             post_cnt     <= 28'd0;
-            post_active  <= 1'b1;
+            post_active  <= (POST_ENABLE != 0);
         end else if (post_active) begin
             if (post_cnt < 28'd150_000_000) begin
                 post_cnt <= post_cnt + 1'b1;
@@ -357,7 +358,7 @@ module neuroquant_arty_s7_top #(
     assign led0_ready    = post_active ? post_led0 : (core_ready & heartbeat_pulse);
 
     // Silkscreen LD3 (User LED 1, Pin F13): RX Frame Ingest Pulse (Sharp 30ms blink on packet)
-    assign led1_rx_sync  = post_active ? post_led1 : (stretch_sync > 0);
+    assign led1_rx_sync  = post_active ? post_led1 : (rx_frame_sync | (stretch_sync > 0));
 
     // Silkscreen LD4 (User LED 2, Pin E13): Neuromorphic LIF Spike Fired (70ms strobe)
     assign led2_spike    = post_active ? post_led2 : (stretch_spike > 0);
