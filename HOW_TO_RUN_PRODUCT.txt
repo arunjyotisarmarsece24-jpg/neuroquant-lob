@@ -1,0 +1,62 @@
+================================================================================
+NEUROQUANT-LOB: ENTERPRISE QUANTITATIVE TRADING & PHYSICAL FPGA ACCELERATOR
+================================================================================
+Principal Architect: Arunjyoti Sarma
+Department of Electronics Engineering, Indian Institute of Technology (BHU), Varanasi
+Target Hardware: AMD Spartan-7 XC7S25 (Digilent Arty S7-25) + Arduino Nano Sidecar
+Web Platform: http://localhost:5000 (Port 5000)
+================================================================================
+
+[QUICKSTART: 1-CLICK LAUNCH]
+--------------------------------------------------------------------------------
+To open the entire project (Software Website + Physical FPGA Hardware Suite):
+
+  👉 Double-click or run:
+     LAUNCH_PRODUCT_AND_WEB.bat
+
+  This single script will:
+  1. Auto-detect physical hardware on COM9 (FPGA) and COM8 (Arduino Nano).
+  2. Verify the Flask web server on port 5000 (starts it automatically if not running).
+  3. Open http://localhost:5000 in your default web browser.
+  4. Automatically bridge live NASDAQ ITCH 5.0 packets between Arduino and FPGA.
+
+--------------------------------------------------------------------------------
+[PHYSICAL HARDWARE PINOUT]
+--------------------------------------------------------------------------------
+Connect 3 jumper wires between Arduino Nano and Digilent Arty S7-25:
+  1. Arduino TX1 (Pin D1)  --->  Arty S7 Shield IO0 (Pin L13)  [FPGA RX Ingress]
+  2. Arduino RX0 (Pin D0)  <---  Arty S7 Shield IO1 (Pin N13)  [FPGA TX Telemetry]
+  3. Arduino GND           <--->  Arty S7 GND                  [Common Ground]
+
+--------------------------------------------------------------------------------
+[PHYSICAL LED DIAGNOSTIC INDICATORS]
+--------------------------------------------------------------------------------
+  - LD2 (Yellow):       1.0 Hz Double-Blink Heartbeat (Proves 100MHz PLL Active)
+  - LD3 (Yellow Pulse): Packet Ingress Strobe (Sharp 30ms pulse on ITCH frame)
+  - LD4 (Yellow Pulse): Neuromorphic LIF Action Potential Spike Strobe
+  - LD5 (Yellow Pulse): Pre-Trade Gate Approved Trade Clearance Strobe
+  - LD0 (RGB LED):       Calm Green = Ready | Blinding 4Hz Flashing Red = Risk Breach
+  - LD1 (RGB LED):       Electric Blue = LIF Spike | Green = Clearance
+  - BTN3 (Push Button):  Press anytime to run a 1.5s Knight Rider LED diagnostic sweep!
+
+--------------------------------------------------------------------------------
+[WEB PLATFORM NAVIGATION FOR SUPERVISOR DEMO]
+--------------------------------------------------------------------------------
+Open http://localhost:5000:
+  - Tab [FPGA RTL]:      Live Physical Hardware Monitor, LED Mirror, Order Injector
+  - Tab [L2 Book]:       Real-Time Level-2 Depth Ladder & Microstructure
+  - Tab [Oscilloscope]:  Neuromorphic Membrane Voltage Waveforms & Spike Rasters
+  - Tab [OFI Core]:      Multi-Level Order Flow Imbalance & Hawkes Processes
+  - Tab [DeepLOB]:       Microstructure Inception CNN Price Trend Prediction
+  - Tab [Almgren-Chriss]:Institutional Optimal Execution & Inventory Liquidation
+  - Dossier Link:        http://localhost:5000/dossier
+  - Visual Gallery:      http://localhost:5000/gallery (18 High-Res Figures)
+
+--------------------------------------------------------------------------------
+[STANDALONE TERMINAL RUNNERS (OPTIONAL)]
+--------------------------------------------------------------------------------
+  - Interactive Terminal Suite: python hardware\interactive_hardware_suite.py
+  - Automated 3-Phase Test:     python hardware\run_live_hardware_product.py
+  - Re-flash FPGA SRAM via JTAG: vivado -mode batch -notrace -source hardware/program_fpga.tcl
+  - Launch Vivado GUI:           vivado -mode gui -source hardware/open_vivado_gui.tcl
+================================================================================
