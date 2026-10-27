@@ -888,7 +888,7 @@ function refreshHILStatus() {
       hilActive = !!data.hil_active;
       if (pill) {
         if (data.fpga_connected) {
-          pill.innerText = `● HIL ONLINE (COM9: FPGA | COM5: Nano)`;
+          pill.innerText = `● HIL ONLINE (${data.fpga_port || 'COM9'}: FPGA | ${data.nano_port || 'COM8'}: Nano)`;
           pill.style.color = 'var(--accent-green)';
           pill.style.borderColor = 'var(--accent-green)';
         } else {

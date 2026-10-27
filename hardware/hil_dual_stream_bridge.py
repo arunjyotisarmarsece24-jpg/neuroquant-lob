@@ -311,7 +311,11 @@ def get_hil_bridge() -> HILDualStreamBridge:
     global _GLOBAL_HIL_BRIDGE
     with _GLOBAL_HIL_LOCK:
         if _GLOBAL_HIL_BRIDGE is None:
-            _GLOBAL_HIL_BRIDGE = HILDualStreamBridge(fpga_port="COM9", nano_port="COM5", baud_rate=115200)
+            _GLOBAL_HIL_BRIDGE = HILDualStreamBridge(fpga_port="COM9", nano_port="COM8", baud_rate=115200)
+            try:
+                _GLOBAL_HIL_BRIDGE.start_background_forwarder()
+            except Exception:
+                pass
         return _GLOBAL_HIL_BRIDGE
 
 
