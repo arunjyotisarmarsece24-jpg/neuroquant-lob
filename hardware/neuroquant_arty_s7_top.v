@@ -197,7 +197,7 @@ module neuroquant_arty_s7_top #(
     end
 
     wire tx_trigger;
-    assign tx_trigger = core_trade_out_valid | core_risk_violated | btn1_stress;
+    assign tx_trigger = core_trade_out_valid | core_risk_violated | btn1_stress | (s_axis_tvalid & s_axis_tlast) | (self_test_pulse & sw_bypass_parser);
 
     wire uart_tx_serial;
     uart_tx_telemetry #(

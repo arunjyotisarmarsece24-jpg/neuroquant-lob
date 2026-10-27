@@ -24,6 +24,7 @@ from typing import Dict, Any, Optional, List
 
 try:
     import serial
+    import serial.tools.list_ports
 except ImportError:
     serial = None
 
@@ -56,9 +57,8 @@ class HILDualStreamBridge:
         self.baud_rate = baud_rate
 
         # Auto-detect physical hardware serial ports if available
-        if serial:
+        if serial is not None:
             try:
-                import serial.tools.list_ports
                 for p in serial.tools.list_ports.comports():
                     if "0403:6010" in p.hwid or "FTDI" in p.description:
                         self.fpga_port = p.device

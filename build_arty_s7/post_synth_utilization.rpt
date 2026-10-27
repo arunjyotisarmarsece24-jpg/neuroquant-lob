@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2024.2 (win64) Build 5239630 Fri Nov 08 22:35:27 MST 2024
-| Date         : Mon Oct 26 14:41:32 2026
+| Date         : Tue Oct 27 12:17:04 2026
 | Host         : Admin running 64-bit major release  (build 9200)
 | Command      : report_utilization -file ./build_arty_s7/post_synth_utilization.rpt
 | Design       : neuroquant_arty_s7_top
@@ -31,8 +31,8 @@ Table of Contents
 +----------------------------+------+-------+------------+-----------+-------+
 |          Site Type         | Used | Fixed | Prohibited | Available | Util% |
 +----------------------------+------+-------+------------+-----------+-------+
-| Slice LUTs*                |  842 |     0 |          0 |     14600 |  5.77 |
-|   LUT as Logic             |  834 |     0 |          0 |     14600 |  5.71 |
+| Slice LUTs*                |  844 |     0 |          0 |     14600 |  5.78 |
+|   LUT as Logic             |  836 |     0 |          0 |     14600 |  5.73 |
 |   LUT as Memory            |    8 |     0 |          0 |      5000 |  0.16 |
 |     LUT as Distributed RAM |    0 |     0 |            |           |       |
 |     LUT as Shift Register  |    8 |     0 |            |           |       |
@@ -154,11 +154,11 @@ Warning! For any ECO changes, please run place_design if there are unplaced inst
 +----------+------+---------------------+
 | FDCE     |  408 |        Flop & Latch |
 | LUT3     |  244 |                 LUT |
-| LUT2     |  232 |                 LUT |
-| LUT6     |  194 |                 LUT |
+| LUT2     |  234 |                 LUT |
+| LUT6     |  196 |                 LUT |
 | LUT4     |  158 |                 LUT |
 | CARRY4   |  137 |          CarryLogic |
-| LUT5     |  130 |                 LUT |
+| LUT5     |  129 |                 LUT |
 | LUT1     |   92 |                 LUT |
 | FDRE     |   77 |        Flop & Latch |
 | FDPE     |   18 |        Flop & Latch |
