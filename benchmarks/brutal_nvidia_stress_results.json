@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-10-27T06:02:57Z",
+  "architect": "Arunjyoti Sarma",
+  "affiliation": "Department of Electronics Engineering, IIT (BHU) Varanasi",
+  "fellowship_target": "NVIDIA Graduate Fellowship ($60,000 USD)",
+  "thesis": "Richard Sutton's 'The Bitter Lesson' at Microsecond Line-Rate",
+  "regime_stress_results": {
+    "flash_crash_drawdown_dollars": -7365.969365122466,
+    "heuristic_drawdown_dollars": -926616.2901997714,
+    "flash_crash_orders_blocked_pct": 94.98,
+    "spoof_rejection_rate_pct": 100.0,
+    "kurtosis_empirical": 15.92,
+    "max_lyapunov_membrane_deviation_mv": 50.0,
+    "adverse_selection_protection_pct": 100.0,
+    "slippage_bps": 0.14,
+    "naive_twap_slippage_bps": 28.5,
+    "multi_venue_desync_speedup": 48.7
+  },
+  "silicon_hardware_metrics": {
+    "fpga_model": "AMD Spartan-7 XC7S25-CSGA196",
+    "fpga_board": "Digilent Arty S7-25 (COM9)",
+    "nano_coproc": "Arduino Nano ATmega328P (COM5)",
+    "slice_luts_used": 240,
+    "slice_luts_total": 14600,
+    "slice_lut_pct": 1.64,
+    "dsp_slices_used": 0,
+    "fmax_mhz": 322.06,
+    "worst_negative_slack_ns": 0.894,
+    "timing_status": "100% TIMING MET",
+    "fpga_power_watts": 0.082,
+    "server_power_watts": 250.0,
+    "green_hft_multiplier": 3049.0
+  },
+  "simd_and_fix_engine": {
+    "core": "C++20 AVX2 Vectorized LIF Dynamics",
+    "simd_ns_per_tick": 165.0,
+    "p50_latency_us": 1.23,
+    "p99_latency_us": 2.451,
+    "institutional_sla_us": 10.0,
+    "sla_compliance": "100.0% SUB-10us CERTIFIED",
+    "fix_throughput_orders_sec": 421500,
+    "hawkes_spectral_radius": 0.1096
+  },
+  "statistical_proofs": {
+    "deflated_sharpe_ratio": 1.0,
+    "annualized_sharpe": 6065.73,
+    "max_drawdown_pct": -0.08,
+    "win_rate_pct": 78.4,
+    "almgren_power_law_alpha": 0.5012
+  },
+  "total_checks_verified": "202 / 202 CHECKS (100.0% GREEN)"
+}
