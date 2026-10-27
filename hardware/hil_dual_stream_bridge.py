@@ -55,6 +55,18 @@ class HILDualStreamBridge:
         self.nano_port = nano_port
         self.baud_rate = baud_rate
 
+        # Auto-detect physical hardware serial ports if available
+        if serial:
+            try:
+                import serial.tools.list_ports
+                for p in serial.tools.list_ports.comports():
+                    if "0403:6010" in p.hwid or "FTDI" in p.description:
+                        self.fpga_port = p.device
+                    elif "1A86:7523" in p.hwid or "CH340" in p.description or "Arduino" in p.description:
+                        self.nano_port = p.device
+            except Exception:
+                pass
+
         self._lock = threading.Lock()
         self._running = False
         self._thread: Optional[threading.Thread] = None
