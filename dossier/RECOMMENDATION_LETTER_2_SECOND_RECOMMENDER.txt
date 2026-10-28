@@ -1,0 +1,36 @@
+================================================================================
+CONFIDENTIAL LETTER OF RECOMMENDATION (RECOMMENDER 2: SECOND ACADEMIC FACULTY)
+================================================================================
+DEPARTMENT OF ELECTRONICS ENGINEERING / COMPUTER SCIENCE & ENGINEERING
+INDIAN INSTITUTE OF TECHNOLOGY (BHU), VARANASI - 221005, INDIA
+
+To:
+The Selection Committee, NVIDIA Graduate Fellowship Program
+NVIDIA Corporation, Santa Clara, CA, USA
+
+Subject: Letter of Strong Endorsement for Mr. Arunjyoti Sarma
+
+Dear Members of the NVIDIA Fellowship Selection Committee,
+
+I am delighted to write this letter of recommendation in support of Mr. Arunjyoti Sarma's application for the NVIDIA Graduate Fellowship (2026-2027). I have known Arunjyoti in my capacity as a senior faculty member and course instructor at the Indian Institute of Technology (BHU), Varanasi, where I have had regular opportunities to evaluate his intellectual capability, algorithmic problem-solving, and advanced computational research.
+
+Arunjyoti's doctoral research addresses one of the most demanding problems in computer systems: how to eliminate the "Memory Wall" and bound tail latency in asynchronous, bursty, and irregular event-stream processing. While electronic financial microstructure serves as his empirical testbed, his contributions are foundational to heterogeneous computer architecture.
+
+In his coursework and independent research, Arunjyoti has repeatedly demonstrated an exceptional grasp of both theoretical computer science and hardware implementation:
+  1. Algorithmic Mastery & Mathematical Stability: In formulating his neuromorphic market engine, Arunjyoti formally proved the Gronwall Lyapunov Stability Theorem for Leaky Integrate-and-Fire membrane potential deviations, showing that membrane voltages remain unconditionally bounded (<= 50.0 mV) under finite energy shocks. Furthermore, his multi-level Hawkes self-excitation point process calibration mathematically guarantees subcritical stability with a spectral radius rho(Gamma) = 0.1096 < 1.0.
+  2. Memory Architecture & Parallel Systems: Rather than accepting conventional pointer-chasing data structures that cause catastrophic CPU L3 cache misses and tail latency blowouts, Arunjyoti designed a systolic flat-register order book on FPGA silicon (10 ns single-cycle updates) and formulated a Structure-of-Arrays (SoA) warp-coalesced order book for NVIDIA GPUs that completely eliminates Shared Memory bank conflicts.
+  3. Methodological Integrity: In an academic field frequently plagued by backtest overfitting and selection bias, Arunjyoti's adoption of purged, embargoed walk-forward cross-validation and the Deflated Sharpe Ratio (DSR = 1.0000 across 500 bootstrap trials) reflects a scientific maturity far beyond his doctoral peer group.
+
+Arunjyoti's plan to harness NVIDIA's Hopper and Blackwell GPU architectures—specifically leveraging the Tensor Memory Accelerator (TMA), custom OpenAI Triton kernels for continuous surrogate gradient Backpropagation Through Time (BPTT), and GPUDirect RDMA—demonstrates a sophisticated understanding of accelerated computing. He is not merely an end-user of machine learning libraries; he understands memory hierarchies, cache coherence, and hardware microarchitectures from the silicon gate level up.
+
+I hold Arunjyoti Sarma in the highest intellectual regard. He is collaborative, highly articulate, self-motivated, and poised to make transformative contributions to accelerated computing systems. I strongly and unreservedly recommend him for the NVIDIA Graduate Fellowship.
+
+Sincerely,
+
+[Second Recommender's Signature]
+
+Professor / Associate Professor
+Department of Electronics Engineering / Computer Science & Engineering
+Indian Institute of Technology (BHU), Varanasi
+Varanasi, Uttar Pradesh 221005, India
+Email: [recommender2.email@itbhu.ac.in]

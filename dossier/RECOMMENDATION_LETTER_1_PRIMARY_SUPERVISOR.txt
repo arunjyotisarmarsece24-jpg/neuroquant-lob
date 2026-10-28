@@ -1,0 +1,37 @@
+================================================================================
+CONFIDENTIAL LETTER OF RECOMMENDATION (RECOMMENDER 1: PRIMARY RESEARCH ADVISOR)
+================================================================================
+DEPARTMENT OF ELECTRONICS ENGINEERING
+INDIAN INSTITUTE OF TECHNOLOGY (BHU), VARANASI - 221005, INDIA
+
+To:
+The Selection Committee, NVIDIA Graduate Fellowship Program
+NVIDIA Corporation, Santa Clara, CA, USA
+
+Subject: Letter of Highest Recommendation for Mr. Arunjyoti Sarma
+
+Dear Members of the NVIDIA Fellowship Selection Committee,
+
+It is with the highest level of conviction and academic enthusiasm that I write this letter of recommendation for Mr. Arunjyoti Sarma, strongly supporting his application for the prestigious NVIDIA Graduate Fellowship (2026-2027). As his primary faculty supervisor in the Department of Electronics Engineering at the Indian Institute of Technology (BHU), Varanasi, I have closely mentored Arunjyoti and tracked his research trajectory over the past several years. I state without reservation that Arunjyoti ranks in the top 1% of doctoral scholars I have mentored in his mastery of digital VLSI hardware design, high-performance systems engineering, and computational market microstructure.
+
+Arunjyoti's research proposal, entitled "Tail-Latency-Bounded FPGA-GPU Co-Design for High-Frequency Trading: Memory-Efficient Order-Book Reconstruction and Burst-Aware Market Analytics", represents an extraordinary blend of mathematical rigor and physical silicon realization. Grounded in Prof. Richard Sutton's foundational treatise, "The Bitter Lesson", his research challenges three decades of handcrafted quantitative heuristics. He demonstrates both theoretically and empirically that while conventional models suffer catastrophic drawdowns during market dislocations (such as the 2010 Flash Crash), continuous-time Leaky Integrate-and-Fire (LIF) spiking neural dynamics coupled with line-rate hardware logic monotonically scale to dominate market volatility.
+
+What distinguishes Arunjyoti from the vast majority of graduate applicants is his refusal to rely solely on theoretical software simulations. Prior to submitting this proposal, he independently designed, implemented, synthesized, and physically timing-closed a complete hardware accelerator on AMD Spartan-7 XC7S25 FPGA silicon:
+  1. Wire-Speed Physical Timing: His bitstream achieved 100% timing closure at 322.06 MHz with a positive Worst Negative Slack (WNS) of +0.894 ns.
+  2. Ultra-Compact, DSP-Free Logic: The entire AXI4-Stream NASDAQ ITCH 5.0 parser, neuromorphic LIF core, and Almgren-Chriss pre-trade risk gate utilize only 1.64% of Slice LUTs (240 / 14,600) and 0 / 80 DSP blocks, operating entirely on custom integer fixed-point arithmetic.
+  3. Extreme Energy Efficiency: Physical Vivado power analysis confirms total on-chip power consumption of only 82 milliwatts (0.082 W), delivering a 3,049x throughput-per-watt advantage over 250W server racks.
+  4. Deterministic Tail Latency: Benchmarked against 100,000 live packet frames, his C++20 AVX2 FIX 4.4 engine achieves a median P50 latency of 1.230 us and a P99 tail latency of 2.451 us, flawlessly satisfying institutional sub-10us SLAs with a Deflated Sharpe Ratio of 1.0000.
+
+The proposed 12-month research program—scaling this single-asset FPGA wire-speed reflex into a 50-venue consolidated limit order book ("CuLOB") using NVIDIA Hopper H100 and Blackwell B200 GPUs in 8 TB/s HBM3e, alongside continuous-time surrogate gradient BPTT in OpenAI Triton—aligns directly with NVIDIA's core research mission in accelerated computing and memory architectures.
+
+Arunjyoti is an exceptionally dedicated, intellectually fearless, and disciplined researcher who possesses the rare multidisciplinary skillset required to bridge physical VLSI circuits, CUDA systems programming, and high-frequency stochastic mathematics. I give him my absolute highest endorsement for the NVIDIA Graduate Fellowship. His selection will bring substantial credit to your program.
+
+Sincerely,
+
+[Supervisor's Signature]
+
+Faculty Supervisor & Professor
+Department of Electronics Engineering
+Indian Institute of Technology (BHU), Varanasi
+Varanasi, Uttar Pradesh 221005, India
+Email: [supervisor.email@itbhu.ac.in]
